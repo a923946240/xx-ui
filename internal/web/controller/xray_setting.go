@@ -118,6 +118,9 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 		"outboundTestUrl":   outboundTestUrl,
 		"geodataSources":    service.StandardGeodataSources(),
 	}
+	if tags, err := (&service.ExternalOutboundService{}).Tags(); err == nil {
+		xrayResponse["externalOutboundTags"] = tags
+	}
 
 	// Surface subscription outbounds (and their tags) so the frontend can:
 	// - show them as read-only items in the Outbounds tab

@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "工作台",
+    "system": "系统",
+    "totalTraffic": "流量总览",
+    "resources": "服务器资源",
+    "exitConfiguration": "出口配置",
+    "nativeOutbounds": "原生出站",
+    "clientStatus": "客户端状态",
+    "selectExit": "选择出口",
+    "forwarding": "转发模式",
+    "trafficSplit": "流量分布",
+    "collectedTraffic": "当前系统累计计数",
+    "serverResources": "CPU · 内存 · 存储"
+  },
   "username": "用户名",
   "password": "密码",
   "login": "登录",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Xray 更新",
       "xraySwitchClickDesk": "请谨慎选择，因为较旧版本可能与当前配置不兼容",
       "updatePanel": "更新面板",
-      "panelUpdateDesc": "这将把 3X-UI 更新到最新版本并重启面板服务。",
+      "panelUpdateDesc": "这将把 xx-ui 更新到最新版本并重启面板服务。",
       "currentPanelVersion": "当前面板版本",
       "latestPanelVersion": "最新面板版本",
       "panelUpToDate": "面板已是最新",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "这将把 Xray 版本更改为 #version#。",
       "xraySwitchVersionPopover": "Xray 更新成功",
       "panelUpdateDialog": "您确定要更新面板吗？",
-      "panelUpdateDialogDesc": "这将把 3X-UI 更新到 #version# 并重启面板服务。",
+      "panelUpdateDialogDesc": "这将把 xx-ui 更新到 #version# 并重启面板服务。",
       "panelUpdateStartedPopover": "已开始更新面板",
       "panelUpdateFailedTitle": "面板更新失败",
       "panelUpdateFailedDesc": "更新未成功完成。请检查服务器日志，或在命令行运行「x-ui update」。",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "跨入站使用主机页面中的排序。此设置决定服务器输出顺序；客户端应用仍可能自行排序。"
     },
     "xray": {
+      "external": {
+        "title": "外部隧道出口",
+        "add": "添加出口",
+        "edit": "编辑",
+        "save": "保存出口",
+        "delete": "删除",
+        "deleteConfirm": "确认删除这个未被引用的出口？",
+        "templateSaveHint": "手动 Xray 配置修改需点击保存；外部隧道出口的修改立即保存。",
+        "helpText": "本机 Linux 最终出口，首版仅支持 TCP。出口配置立即保存，随后可在路由中选择对应标签。请先在面板服务器安装官方客户端程序。",
+        "pending": "请先保存或放弃尚未保存的 Xray 修改，再编辑外部出口。",
+        "empty": "尚未配置外部隧道出口。",
+        "enabled": "启用",
+        "logs": "日志",
+        "noLogs": "暂无客户端输出。",
+        "probe": "测试 HTTPS",
+        "reachable": "隧道可用",
+        "failed": "测试失败",
+        "protocol": "协议",
+        "tag": "出站标签",
+        "remark": "名称",
+        "host": "服务器",
+        "port": "端口",
+        "username": "用户名",
+        "password": "密码",
+        "serverName": "TLS 服务器名称",
+        "transport": "传输方式",
+        "retainPassword": "留空则保留已保存的密码。",
+        "required": "此项必填。",
+        "invalidTag": "使用 1–64 个字母、数字、点、下划线或短横线，并以字母或数字开头。",
+        "mieruTcp": "首版 mieru 集成使用 TCP 传输。",
+        "states": {
+          "starting": "正在启动",
+          "running": "客户端运行中",
+          "disabled": "已停用",
+          "stopped": "已停止",
+          "missing-binary": "未安装客户端",
+          "backoff": "等待重试",
+          "unsupported-platform": "需要 Linux",
+          "listener-error": "本机监听失败"
+        }
+      },
       "importRules": "导入规则",
       "exportRules": "导出规则",
       "importOutbounds": "导入出站",
@@ -1967,6 +2022,9 @@
         "wrongKind": "该字段的数据库类型不匹配：{tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "备用出站（自动切换）",
+        "failoverHint": "主出站探测失败后，新连接使用备用出站。主出站恢复后，新连接自动切回。已有连接保持原路由。",
+        "failoverConflict": "请选择两个不同的出站，并清空负载均衡器。",
         "sourceIps": "源 IP",
         "sourcePort": "源端口",
         "vlessRoute": "VLESS 路由",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "3x-ui Discord 通知测试",
+      "title": "xx-ui Discord 通知测试",
       "body": "这是一条测试通知，确认 Discord 通知已正确配置。"
     },
-    "footer": "3x-ui 面板",
+    "footer": "xx-ui 面板",
     "fields": {
       "panelVersion": "面板版本",
       "xrayCore": "Xray 核心",
@@ -2790,13 +2848,13 @@
       "loginFailed": "登录失败"
     },
     "report": {
-      "title": "📊 3x-ui 状态报告",
+      "title": "📊 xx-ui 状态报告",
       "summary": "**{{ .Host }}** 的服务器与代理定期状态报告",
-      "footer": "3x-ui 定时报告 • 计划：{{ .RunTime }}"
+      "footer": "xx-ui 定时报告 • 计划：{{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 3x-ui Discord 机器人命令",
-      "helpDescription": "用于监控和管理 3x-ui 服务器的可用命令：",
+      "helpTitle": "🤖 xx-ui Discord 机器人命令",
+      "helpDescription": "用于监控和管理 xx-ui 服务器的可用命令：",
       "helpStatus": "显示系统负载、内存、CPU、连接数和在线用户",
       "helpReport": "生成完整状态报告（如已配置则附带数据库备份）",
       "helpBackup": "立即发送数据库备份文件",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "列出所有已配置的入站及其端口和客户端统计",
       "helpRestart": "重启 Xray 核心",
       "helpHelp": "显示此可用命令列表",
-      "statusTitle": "⚡ 3x-ui 服务器状态",
+      "statusTitle": "⚡ xx-ui 服务器状态",
       "statusDescription": "**{{ .Host }}** 的当前运行指标",
       "backupTitle": "🗄️ 数据库备份",
-      "backupDescription": "3x-ui 备份生成于 `{{ .Time }}`",
+      "backupDescription": "xx-ui 备份生成于 `{{ .Time }}`",
       "backupUnavailable": "❌ 备份服务不可用",
       "backupFailed": "❌ 读取数据库备份失败：{{ .Error }}",
       "usageHint": "⚠️ 用法：`!usage <email>` 或 `/usage <email>`",

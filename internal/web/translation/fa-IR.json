@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "نام‌کاربری",
   "password": "رمزعبور",
   "login": "ورود",
@@ -152,7 +166,7 @@
       "xrayUpdates": "به‌روزرسانی‌های Xray",
       "xraySwitchClickDesk": "لطفا بادقت انتخاب کنید. درصورت انتخاب نسخه قدیمی‌تر، امکان ناهماهنگی با پیکربندی فعلی وجود دارد",
       "updatePanel": "به‌روزرسانی پنل",
-      "panelUpdateDesc": "این عملیات 3X-UI را به آخرین نسخه به‌روزرسانی می‌کند و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
+      "panelUpdateDesc": "این عملیات xx-ui را به آخرین نسخه به‌روزرسانی می‌کند و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
       "currentPanelVersion": "نسخه فعلی پنل",
       "latestPanelVersion": "آخرین نسخه پنل",
       "panelUpToDate": "پنل به‌روز است",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "این کار نسخه Xray را به #version# تغییر می‌دهد.",
       "xraySwitchVersionPopover": "Xray با موفقیت به‌روز شد",
       "panelUpdateDialog": "آیا مطمئن هستید که می‌خواهید پنل را به‌روزرسانی کنید؟",
-      "panelUpdateDialogDesc": "این 3X-UI را به نسخه #version# به‌روزرسانی کرده و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
+      "panelUpdateDialogDesc": "این xx-ui را به نسخه #version# به‌روزرسانی کرده و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
       "panelUpdateStartedPopover": "به‌روزرسانی پنل آغاز شد",
       "panelUpdateFailedTitle": "به‌روزرسانی پنل ناموفق بود",
       "panelUpdateFailedDesc": "به‌روزرسانی با موفقیت به پایان نرسید. گزارش‌های سرور را بررسی کنید یا دستور «x-ui update» را از خط فرمان اجرا کنید.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "ترتیب میزبان‌ها در صفحهٔ میزبان‌ها، میان همهٔ ورودی‌ها اعمال می‌شود. این تنظیم ترتیب خروجی سرور را تعیین می‌کند؛ برنامهٔ کلاینت ممکن است ترتیب دیگری اعمال کند."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "save": "ذخیره",
       "restartSuccess": "Xray با موفقیت راه‌اندازی مجدد شد",
       "stopSuccess": "Xray با موفقیت متوقف شد",
@@ -1967,6 +2022,9 @@
         "wrongKind": "نوع پایگاه داده برای این فیلد نادرست است: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "خروجی پشتیبان",
+        "failoverHint": "اگر بررسی سلامت خروجی اصلی ناموفق باشد، اتصال‌های جدید از خروجی پشتیبان استفاده می‌کنند. پس از بازیابی، اتصال‌های جدید به خروجی اصلی برمی‌گردند. مسیر اتصال‌های فعلی تغییر نمی‌کند.",
+        "failoverConflict": "دو خروجی متفاوت انتخاب کنید و انتخاب توازن‌گر بار را پاک کنید.",
         "sourceIps": "IPهای مبدا",
         "sourcePort": "پورت مبدا",
         "vlessRoute": "مسیر VLESS",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "آزمایش اعلان دیسکورد 3x-ui",
+      "title": "آزمایش اعلان دیسکورد xx-ui",
       "body": "این یک اعلان آزمایشی است که تأیید می‌کند اعلان‌های دیسکورد به‌درستی پیکربندی شده‌اند."
     },
-    "footer": "پنل 3x-ui",
+    "footer": "پنل xx-ui",
     "fields": {
       "panelVersion": "نسخه پنل",
       "xrayCore": "هسته Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "ورود ناموفق"
     },
     "report": {
-      "title": "📊 گزارش وضعیت 3x-ui",
+      "title": "📊 گزارش وضعیت xx-ui",
       "summary": "گزارش دوره‌ای وضعیت سرور و پراکسی برای **{{ .Host }}**",
-      "footer": "گزارش زمان‌بندی‌شده 3x-ui • زمان‌بندی: {{ .RunTime }}"
+      "footer": "گزارش زمان‌بندی‌شده xx-ui • زمان‌بندی: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 دستورات ربات دیسکورد 3x-ui",
-      "helpDescription": "دستورات موجود برای پایش و مدیریت سرور 3x-ui:",
+      "helpTitle": "🤖 دستورات ربات دیسکورد xx-ui",
+      "helpDescription": "دستورات موجود برای پایش و مدیریت سرور xx-ui:",
       "helpStatus": "نمایش بار سیستم، رم، پردازنده، اتصالات و کاربران آنلاین",
       "helpReport": "ایجاد گزارش کامل وضعیت (همراه پشتیبان پایگاه داده در صورت فعال بودن)",
       "helpBackup": "ارسال فوری فایل پشتیبان پایگاه داده",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "فهرست همه ورودی‌های پیکربندی‌شده همراه پورت‌ها و آمار کاربران",
       "helpRestart": "راه‌اندازی مجدد هسته Xray",
       "helpHelp": "نمایش همین فهرست دستورات",
-      "statusTitle": "⚡ وضعیت سرور 3x-ui",
+      "statusTitle": "⚡ وضعیت سرور xx-ui",
       "statusDescription": "شاخص‌های عملکرد فعلی **{{ .Host }}**",
       "backupTitle": "🗄️ پشتیبان پایگاه داده",
-      "backupDescription": "آرشیو پشتیبان 3x-ui ایجادشده در `{{ .Time }}`",
+      "backupDescription": "آرشیو پشتیبان xx-ui ایجادشده در `{{ .Time }}`",
       "backupUnavailable": "❌ سرویس پشتیبان‌گیری در دسترس نیست",
       "backupFailed": "❌ خواندن پشتیبان پایگاه داده ناموفق بود: {{ .Error }}",
       "usageHint": "⚠️ نحوه استفاده: `!usage <email>` یا `/usage <email>`",

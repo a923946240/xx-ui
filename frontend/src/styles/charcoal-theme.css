@@ -1,0 +1,199 @@
+/* Shared charcoal surface; light and ultra-dark retain their own palettes. */
+.panel-atmosphere {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.panel-atmosphere canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0.65;
+}
+html:not([data-theme='ultra-dark']) body.dark {
+  background: #171717;
+}
+html:not([data-theme='ultra-dark']) body.dark .panel-atmosphere {
+  background:
+    radial-gradient(ellipse at 6% 0%, #25344035, transparent 42%),
+    radial-gradient(ellipse at 95% 80%, #23332e24, transparent 48%);
+}
+html:not([data-theme='ultra-dark']) body.dark #app > .ant-layout,
+html:not([data-theme='ultra-dark']) body.dark .ant-layout:has(> .ant-sidebar) {
+  --bg-page: transparent;
+  --bg-card: #262626;
+  background: transparent;
+  position: relative;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-layout:has(> .ant-sidebar) > .content-shell {
+  background: transparent;
+  min-width: 0;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-layout:has(> .ant-sidebar) .ant-card {
+  background: #262626f7;
+  border: 1px solid #373737;
+  border-radius: 14px;
+  box-shadow:
+    0 8px 24px #0002,
+    inset 0 1px 0 #ffffff03;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-layout:has(> .ant-sidebar) .ant-card:hover {
+  box-shadow:
+    0 8px 24px #0002,
+    inset 0 1px 0 #ffffff03;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-sidebar > .ant-layout-sider {
+  background: #262626e8;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid #ffffff09;
+  border-radius: 0 16px 16px 0;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-sidebar .ant-menu {
+  background: transparent;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-sidebar .ant-menu-item-selected,
+html:not([data-theme='ultra-dark']) body.dark .drawer-menu .ant-menu-item-selected {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff20,
+    0 3px 10px #0001;
+}
+html:not([data-theme='ultra-dark']) body.dark .ant-drawer-content,
+html:not([data-theme='ultra-dark']) body.dark .ant-drawer-body {
+  background: #262626;
+}
+.sidebar-section-label {
+  color: var(--ant-color-text-secondary, #999);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 18px 23px 9px;
+  flex-shrink: 0;
+}
+.sidebar-section-system {
+  border-top: 1px solid #80808025;
+  margin: 10px 16px 0;
+  padding-left: 7px;
+}
+.ant-sidebar .sider-brand {
+  min-height: 96px;
+  height: 96px;
+  align-items: flex-start;
+  padding: 23px 22px 12px;
+  position: relative;
+  border-bottom: 0;
+}
+.ant-sidebar .brand-text {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+.ant-sidebar .brand-actions {
+  position: absolute;
+  left: 18px;
+  bottom: 7px;
+  gap: 6px;
+}
+.ant-sidebar .ant-layout-sider-collapsed .sider-brand {
+  padding: 23px 0;
+  align-items: center;
+}
+.ant-sidebar .sider-nav .ant-menu-item,
+.ant-sidebar .sider-nav .ant-menu-submenu-title,
+.ant-sidebar .sider-utility .ant-menu-item,
+.ant-sidebar .sider-utility .ant-menu-submenu-title {
+  height: 42px;
+  line-height: 42px;
+  margin-block: 5px;
+  border-radius: 8px;
+}
+.ant-sidebar .ant-menu-item .anticon,
+.ant-sidebar .ant-menu-submenu-title .anticon {
+  font-size: 18px;
+}
+.ant-sidebar .sidebar-command-trigger {
+  margin-top: 8px;
+  background: #8080800a;
+}
+.sidebar-scroll,
+.drawer-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar-scroll .sider-nav {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
+}
+.sidebar-scroll .sider-utility {
+  border-top: 0;
+}
+.ant-layout .content-area {
+  padding: 22px;
+}
+.panel-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.panel-page-heading h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.panel-page-heading p {
+  margin: 5px 0 0;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+.panel-eyebrow {
+  color: var(--ant-color-text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+@media (max-width: 768px) {
+  .ant-layout .content-area {
+    padding: 68px 12px 20px;
+  }
+  .panel-page-heading {
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .panel-page-heading h1 {
+    font-size: 22px;
+  }
+  .sidebar-section-label {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel-atmosphere canvas {
+    display: none;
+  }
+}
+
+.panel-caption {
+  display: block;
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+  margin: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.panel-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ant-color-success);
+  margin-right: 7px;
+}

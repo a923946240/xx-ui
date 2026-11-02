@@ -274,7 +274,7 @@ func (g *GatewayClient) connectAndListen(ctx context.Context) error {
 		Intents: discordIntents,
 		Properties: IdentifyProperties{
 			OS:      "linux",
-			Browser: "3x-ui",
+			Browser: "xx-ui",
 			Device:  "3x-ui",
 		},
 	}

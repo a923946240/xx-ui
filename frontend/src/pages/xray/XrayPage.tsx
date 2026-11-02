@@ -29,6 +29,7 @@ import { BasicsTab } from './basics';
 import { propagateOutboundTagRename } from './basics/helpers';
 import { RoutingTab } from './routing';
 import { OutboundsTab } from './outbounds';
+import ExternalOutbounds from './outbounds/ExternalOutbounds';
 import { BalancersTab } from './balancers';
 import {
   cleanupOrphanedBalancerLoopbacks,
@@ -235,26 +236,30 @@ export default function XrayPage() {
         );
       case 'outbound':
         return (
-          <OutboundsTab
-            templateSettings={templateSettings}
-            setTemplateSettings={setTemplateSettings}
-            outboundsTraffic={outboundsTraffic}
-            outboundTestStates={outboundTestStates}
-            subscriptionTestStates={subscriptionTestStates}
-            testingAll={testingAll}
-            inboundTags={inboundTags}
-            subscriptionOutbounds={subscriptionOutbounds}
-            subscriptionOutboundTags={subscriptionOutboundTags}
-            isMobile={isMobile}
-            onResetTraffic={resetOutboundsTraffic}
-            onTest={onTestOutbound}
-            onTestSubscription={onTestSubscription}
-            onTestAll={testAllOutbounds}
-            onShowWarp={() => setWarpOpen(true)}
-            onShowNord={() => setNordOpen(true)}
-            onShowPia={() => setPiaOpen(true)}
-            onRefreshXrayData={fetchAll}
-          />
+          <ExternalOutbounds disabled={!saveDisabled}>
+            <Card className="native-outbounds-card" title={t('appearance.nativeOutbounds')}>
+              <OutboundsTab
+                templateSettings={templateSettings}
+                setTemplateSettings={setTemplateSettings}
+                outboundsTraffic={outboundsTraffic}
+                outboundTestStates={outboundTestStates}
+                subscriptionTestStates={subscriptionTestStates}
+                testingAll={testingAll}
+                inboundTags={inboundTags}
+                subscriptionOutbounds={subscriptionOutbounds}
+                subscriptionOutboundTags={subscriptionOutboundTags}
+                isMobile={isMobile}
+                onResetTraffic={resetOutboundsTraffic}
+                onTest={onTestOutbound}
+                onTestSubscription={onTestSubscription}
+                onTestAll={testAllOutbounds}
+                onShowWarp={() => setWarpOpen(true)}
+                onShowNord={() => setNordOpen(true)}
+                onShowPia={() => setPiaOpen(true)}
+                onRefreshXrayData={fetchAll}
+              />
+            </Card>
+          </ExternalOutbounds>
         );
       case 'balancer':
         return (
@@ -337,6 +342,20 @@ export default function XrayPage() {
                     </Button>
                   }
                 />
+              ) : activeSection === 'outbound' ? (
+                <>
+                  <header className="panel-page-heading">
+                    <div>
+                      <h1>{t('menu.outbounds')}</h1>
+                      <p>{t('pages.xray.external.templateSaveHint')}</p>
+                    </div>
+                    <Button type="primary" disabled={saveDisabled} onClick={onSaveAll}>
+                      {t('pages.xray.save')}
+                    </Button>
+                  </header>
+                  {sectionBody}
+                  <FloatButton.BackTop target={scrollTarget} visibilityHeight={200} />
+                </>
               ) : (
                 <Row gutter={[isMobile ? 8 : 16, isMobile ? 0 : 12]}>
                   <Col span={24}>
@@ -351,7 +370,15 @@ export default function XrayPage() {
                         </Col>
                         <Col xs={24} sm={10} className="header-info">
                           <FloatButton.BackTop target={scrollTarget} visibilityHeight={200} />
-                          <Alert type="warning" showIcon title={t('pages.settings.infoDesc')} />
+                          <Alert
+                            type="warning"
+                            showIcon
+                            title={t(
+                              activeSection === 'outbound'
+                                ? 'pages.xray.external.templateSaveHint'
+                                : 'pages.settings.infoDesc',
+                            )}
+                          />
                         </Col>
                       </Row>
                     </Card>

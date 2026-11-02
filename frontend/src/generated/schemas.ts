@@ -2501,6 +2501,162 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ExternalOutboundInput": {
+    "properties": {
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "host": {
+        "example": "proxy.example.com",
+        "type": "string"
+      },
+      "id": {
+        "example": 0,
+        "type": "integer"
+      },
+      "password": {
+        "example": "replace-me",
+        "type": "string"
+      },
+      "port": {
+        "example": 443,
+        "type": "integer"
+      },
+      "protocol": {
+        "example": "naive",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Remote exit",
+        "type": "string"
+      },
+      "serverName": {
+        "example": "proxy.example.com",
+        "type": "string"
+      },
+      "tag": {
+        "example": "naive-exit",
+        "type": "string"
+      },
+      "transport": {
+        "example": "tcp",
+        "type": "string"
+      },
+      "username": {
+        "example": "user",
+        "type": "string"
+      }
+    },
+    "required": [
+      "enable",
+      "host",
+      "id",
+      "port",
+      "protocol",
+      "remark",
+      "serverName",
+      "tag",
+      "transport",
+      "username"
+    ],
+    "type": "object"
+  },
+  "ExternalOutboundProbe": {
+    "properties": {
+      "delay": {
+        "example": 120,
+        "format": "int64",
+        "type": "integer"
+      },
+      "httpStatus": {
+        "example": 204,
+        "type": "integer"
+      },
+      "success": {
+        "example": true,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "delay",
+      "httpStatus",
+      "success"
+    ],
+    "type": "object"
+  },
+  "ExternalOutboundView": {
+    "properties": {
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "host": {
+        "example": "proxy.example.com",
+        "type": "string"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "logs": {
+        "example": "Client started",
+        "type": "string"
+      },
+      "passwordSet": {
+        "example": true,
+        "type": "boolean"
+      },
+      "port": {
+        "example": 443,
+        "type": "integer"
+      },
+      "protocol": {
+        "example": "naive",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Remote exit",
+        "type": "string"
+      },
+      "serverName": {
+        "example": "proxy.example.com",
+        "type": "string"
+      },
+      "state": {
+        "example": "running",
+        "type": "string"
+      },
+      "tag": {
+        "example": "naive-exit",
+        "type": "string"
+      },
+      "transport": {
+        "example": "tcp",
+        "type": "string"
+      },
+      "username": {
+        "example": "user",
+        "type": "string"
+      }
+    },
+    "required": [
+      "enable",
+      "host",
+      "id",
+      "logs",
+      "passwordSet",
+      "port",
+      "protocol",
+      "remark",
+      "serverName",
+      "state",
+      "tag",
+      "transport",
+      "username"
+    ],
+    "type": "object"
+  },
   "FallbackParentInfo": {
     "description": "FallbackParentInfo carries everything the frontend needs to rewrite a\nchild inbound's client link: where to connect (the master's address\nand port) and which path matched on the master's fallbacks array.\nThe frontend already has the master inbound in its dbInbounds list,\nso we only ship identifiers + the match path here.",
     "properties": {
@@ -3595,7 +3751,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "Node": {
-    "description": "Node represents a remote 3x-ui panel registered with the central panel.\nThe central panel polls each node's existing /panel/api/server/status\nendpoint over HTTP using the per-node ApiToken to populate the runtime\nstatus fields below.",
+    "description": "Node represents a remote xx-ui panel registered with the central panel.\nThe central panel polls each node's existing /panel/api/server/status\nendpoint over HTTP using the per-node ApiToken to populate the runtime\nstatus fields below.",
     "properties": {
       "activeCount": {
         "example": 23,
@@ -4618,7 +4774,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "Setting": {
-    "description": "Setting stores key-value configuration settings for the 3x-ui panel.",
+    "description": "Setting stores key-value configuration settings for the xx-ui panel.",
     "properties": {
       "id": {
         "type": "integer"
@@ -4930,7 +5086,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "User": {
-    "description": "User represents a user account in the 3x-ui panel.",
+    "description": "User represents a user account in the xx-ui panel.",
     "properties": {
       "id": {
         "type": "integer"

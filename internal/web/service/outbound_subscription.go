@@ -209,6 +209,8 @@ func (s *OutboundSubscriptionService) Create(remark, rawURL, tagPrefix, userAgen
 
 // Update updates editable fields.
 func (s *OutboundSubscriptionService) Update(id int, remark, rawURL, tagPrefix, userAgent string, enabled bool, updateInterval int, allowPrivate, prepend, allowInsecure bool) error {
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
 	sub, err := s.Get(id)
 	if err != nil {
 		return err
@@ -456,6 +458,13 @@ func (s *OutboundSubscriptionService) fetchAndStore(sub *model.OutboundSubscript
 
 	// Persist the outbounds (as compact JSON array)
 	obsJSON, _ := json.Marshal(kept)
+
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
+	if err := checkExternalTemplateTags(string(`{"outbounds":`) + string(obsJSON) + `}`); err != nil {
+		s.recordError(sub, err)
+		return nil, err
+	}
 
 	sub.LastFetchedOutbounds = string(obsJSON)
 	sub.LinkIdentities = string(identJSON)

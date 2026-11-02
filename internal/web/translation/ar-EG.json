@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "اسم المستخدم",
   "password": "الباسورد",
   "login": "تسجيل الدخول",
@@ -152,7 +166,7 @@
       "xrayUpdates": "تحديثات Xray",
       "xraySwitchClickDesk": "اختار بحذر، النسخ القديمة ممكن ما تتوافقش مع الإعدادات الحالية.",
       "updatePanel": "تحديث البانل",
-      "panelUpdateDesc": "ده هيحدث 3X-UI لآخر إصدار وهيعيد تشغيل خدمة البانل.",
+      "panelUpdateDesc": "ده هيحدث xx-ui لآخر إصدار وهيعيد تشغيل خدمة البانل.",
       "currentPanelVersion": "إصدار البانل الحالي",
       "latestPanelVersion": "أحدث إصدار للبانل",
       "panelUpToDate": "البانل محدث لآخر إصدار",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "سيؤدي هذا إلى تغيير إصدار Xray إلى #version#.",
       "xraySwitchVersionPopover": "تم تحديث Xray بنجاح",
       "panelUpdateDialog": "هل فعلاً عايز تحدث البانل؟",
-      "panelUpdateDialogDesc": "ده هيحدث 3X-UI للإصدار #version# وهيعيد تشغيل البانل.",
+      "panelUpdateDialogDesc": "ده هيحدث xx-ui للإصدار #version# وهيعيد تشغيل البانل.",
       "panelUpdateStartedPopover": "بدأ تحديث البانل",
       "panelUpdateFailedTitle": "فشل تحديث البانل",
       "panelUpdateFailedDesc": "لم يكتمل التحديث بنجاح. تحقق من سجلات الخادم، أو نفّذ الأمر «x-ui update» من سطر الأوامر.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "يتبع ترتيب المضيفين صفحة المضيفين عبر جميع الاتصالات الواردة. يحدد هذا ترتيب مخرجات الخادم؛ وقد تطبق تطبيقات العميل ترتيبًا آخر."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "save": "احفظ",
       "restartSuccess": "تم إعادة تشغيل Xray بنجاح",
       "stopSuccess": "تم إيقاف Xray بنجاح",
@@ -1967,6 +2022,9 @@
         "wrongKind": "نوع قاعدة البيانات غير مناسب لهذا الحقل: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "المخرج الاحتياطي",
+        "failoverHint": "تستخدم الاتصالات الجديدة المخرج الاحتياطي عند فشل فحص المخرج الأساسي. وتعود إلى المخرج الأساسي عند تعافيه. تحتفظ الاتصالات الحالية بمسارها.",
+        "failoverConflict": "اختر مخرجين مختلفين وأزل محدد موازن التحميل.",
         "sourceIps": "IPs المصدر",
         "sourcePort": "منفذ المصدر",
         "vlessRoute": "مسار VLESS",
@@ -2545,7 +2603,7 @@
       "report": "🕰 التقارير المجدولة: {{ .RunTime }}\r\n",
       "datetime": "⏰ التاريخ والوقت: {{ .DateTime }}\r\n",
       "hostname": "💻 المضيف: {{ .Hostname }}\r\n",
-      "version": "🚀 نسخة 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 نسخة xx-ui: {{ .Version }}\r\n",
       "xrayVersion": "📡 نسخة Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "اختبار إشعارات Discord في 3x-ui",
+      "title": "اختبار إشعارات Discord في xx-ui",
       "body": "هذا إشعار تجريبي يؤكد أن إشعارات Discord مُعدّة بشكل صحيح."
     },
-    "footer": "لوحة 3x-ui",
+    "footer": "لوحة xx-ui",
     "fields": {
       "panelVersion": "إصدار اللوحة",
       "xrayCore": "نواة Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "فشل تسجيل الدخول"
     },
     "report": {
-      "title": "📊 تقرير حالة 3x-ui",
+      "title": "📊 تقرير حالة xx-ui",
       "summary": "تقرير دوري عن حالة الخادم والوكيل لـ **{{ .Host }}**",
-      "footer": "تقرير 3x-ui المجدول • الجدول: {{ .RunTime }}"
+      "footer": "تقرير xx-ui المجدول • الجدول: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 أوامر بوت Discord في 3x-ui",
-      "helpDescription": "الأوامر المتاحة لمراقبة خادم 3x-ui وإدارته:",
+      "helpTitle": "🤖 أوامر بوت Discord في xx-ui",
+      "helpDescription": "الأوامر المتاحة لمراقبة خادم xx-ui وإدارته:",
       "helpStatus": "عرض حمل النظام والذاكرة والمعالج والاتصالات والمستخدمين المتصلين",
       "helpReport": "إنشاء تقرير حالة كامل (مع نسخة احتياطية لقاعدة البيانات إن كانت مفعّلة)",
       "helpBackup": "إرسال ملف النسخة الاحتياطية لقاعدة البيانات فورًا",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "عرض كل الواردات المُعدّة مع المنافذ وإحصاءات العملاء",
       "helpRestart": "إعادة تشغيل نواة Xray",
       "helpHelp": "عرض قائمة الأوامر المتاحة هذه",
-      "statusTitle": "⚡ حالة خادم 3x-ui",
+      "statusTitle": "⚡ حالة خادم xx-ui",
       "statusDescription": "مقاييس التشغيل الحالية لـ **{{ .Host }}**",
       "backupTitle": "🗄️ نسخة احتياطية لقاعدة البيانات",
-      "backupDescription": "أرشيف النسخة الاحتياطية لـ 3x-ui أُنشئ في `{{ .Time }}`",
+      "backupDescription": "أرشيف النسخة الاحتياطية لـ xx-ui أُنشئ في `{{ .Time }}`",
       "backupUnavailable": "❌ خدمة النسخ الاحتياطي غير متاحة",
       "backupFailed": "❌ تعذّرت قراءة النسخة الاحتياطية لقاعدة البيانات: {{ .Error }}",
       "usageHint": "⚠️ الاستخدام: `!usage <email>` أو `/usage <email>`",

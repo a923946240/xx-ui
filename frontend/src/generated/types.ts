@@ -582,6 +582,42 @@ export interface ClientsSummary {
   total: number;
 }
 
+export interface ExternalOutboundInput {
+  enable: boolean;
+  host: string;
+  id: number;
+  password?: string;
+  port: number;
+  protocol: string;
+  remark: string;
+  serverName: string;
+  tag: string;
+  transport: string;
+  username: string;
+}
+
+export interface ExternalOutboundProbe {
+  delay: number;
+  httpStatus: number;
+  success: boolean;
+}
+
+export interface ExternalOutboundView {
+  enable: boolean;
+  host: string;
+  id: number;
+  logs: string;
+  passwordSet: boolean;
+  port: number;
+  protocol: string;
+  remark: string;
+  serverName: string;
+  state: string;
+  tag: string;
+  transport: string;
+  username: string;
+}
+
 export interface FallbackParentInfo {
   masterId: number;
   path?: string;

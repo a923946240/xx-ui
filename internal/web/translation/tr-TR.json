@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Kullanıcı Adı",
   "password": "Şifre",
   "login": "Giriş Yap",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Xray Güncellemeleri",
       "xraySwitchClickDesk": "Dikkatli seçin, eski sürümler mevcut yapılandırmalarla uyumlu olmayabilir.",
       "updatePanel": "Paneli Güncelle",
-      "panelUpdateDesc": "Bu işlem 3X-UI'yi en son sürüme güncelleyecek ve panel servisini yeniden başlatacaktır.",
+      "panelUpdateDesc": "Bu işlem xx-ui'yi en son sürüme güncelleyecek ve panel servisini yeniden başlatacaktır.",
       "currentPanelVersion": "Mevcut panel sürümü",
       "latestPanelVersion": "Panelin en son sürümü",
       "panelUpToDate": "Panel güncel",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Bu işlem Xray sürümünü #version# olarak değiştirecektir.",
       "xraySwitchVersionPopover": "Xray başarıyla güncellendi",
       "panelUpdateDialog": "Gerçekten paneli güncellemek istiyor musunuz?",
-      "panelUpdateDialogDesc": "Bu işlem 3X-UI'yi #version# sürümüne güncelleyecek ve panel servisini yeniden başlatacaktır.",
+      "panelUpdateDialogDesc": "Bu işlem xx-ui'yi #version# sürümüne güncelleyecek ve panel servisini yeniden başlatacaktır.",
       "panelUpdateStartedPopover": "Panel güncellemesi başlatıldı",
       "panelUpdateFailedTitle": "Panel güncellemesi başarısız oldu",
       "panelUpdateFailedDesc": "Güncelleme başarıyla tamamlanamadı. Sunucu günlüklerini kontrol edin veya komut satırından 'x-ui update' çalıştırın.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "Farklı gelen bağlantılarda Ana Bilgisayarlar sayfasının sırasını izler. Sunucunun çıktı sırasını belirler; istemci uygulamaları kendi sıralamalarını uygulayabilir."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "save": "Kaydet",
       "restartSuccess": "Xray başarıyla yeniden başlatıldı.",
       "stopSuccess": "Xray başarıyla durduruldu.",
@@ -1967,6 +2022,9 @@
         "wrongKind": "Bu alan için yanlış veritabanı türü: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Yedek çıkış",
+        "failoverHint": "Birincil çıkışın sağlık denetimi başarısız olursa yeni bağlantılar yedek çıkışı kullanır. Birincil çıkış düzeldiğinde yeni bağlantılar ona döner. Mevcut bağlantılar önceki rotayı kullanır.",
+        "failoverConflict": "İki farklı çıkış seçin ve yük dengeleyici seçimini kaldırın.",
         "sourceIps": "Kaynak IP'ler",
         "sourcePort": "Kaynak Port",
         "vlessRoute": "VLESS Rotası",
@@ -2545,7 +2603,7 @@
       "report": "🕰 Planlanmış Raporlar: {{ .RunTime }}\r\n",
       "datetime": "⏰ Tarih ve Saat: {{ .DateTime }}\r\n",
       "hostname": "💻 Sunucu: {{ .Hostname }}",
-      "version": "🚀 3X-UI Sürümü: {{ .Version }}\r\n",
+      "version": "🚀 xx-ui Sürümü: {{ .Version }}\r\n",
       "xrayVersion": "📡 Xray Sürümü: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "3x-ui Discord Bildirim Testi",
+      "title": "xx-ui Discord Bildirim Testi",
       "body": "Bu, Discord bildirimlerinin doğru yapılandırıldığını doğrulayan bir test bildirimidir."
     },
-    "footer": "3x-ui Paneli",
+    "footer": "xx-ui Paneli",
     "fields": {
       "panelVersion": "Panel Sürümü",
       "xrayCore": "Xray Çekirdeği",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Giriş Başarısız"
     },
     "report": {
-      "title": "📊 3x-ui Durum Raporu",
+      "title": "📊 xx-ui Durum Raporu",
       "summary": "**{{ .Host }}** için periyodik sunucu ve proxy durum raporu",
-      "footer": "3x-ui Zamanlanmış Rapor • Zamanlama: {{ .RunTime }}"
+      "footer": "xx-ui Zamanlanmış Rapor • Zamanlama: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 3x-ui Discord Bot Komutları",
-      "helpDescription": "3x-ui sunucusunu izlemek ve yönetmek için kullanılabilir komutlar:",
+      "helpTitle": "🤖 xx-ui Discord Bot Komutları",
+      "helpDescription": "xx-ui sunucusunu izlemek ve yönetmek için kullanılabilir komutlar:",
       "helpStatus": "Sistem yükünü, RAM'i, CPU'yu, bağlantıları ve çevrimiçi kullanıcıları gösterir",
       "helpReport": "Tam durum raporu oluşturur (yapılandırıldıysa veritabanı yedeğiyle)",
       "helpBackup": "Veritabanı yedek dosyasını hemen gönderir",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Yapılandırılmış tüm gelen bağlantıları portları ve istemci istatistikleriyle listeler",
       "helpRestart": "Xray çekirdeğini yeniden başlatır",
       "helpHelp": "Bu komut listesini gösterir",
-      "statusTitle": "⚡ 3x-ui Sunucu Durumu",
+      "statusTitle": "⚡ xx-ui Sunucu Durumu",
       "statusDescription": "**{{ .Host }}** için güncel çalışma metrikleri",
       "backupTitle": "🗄️ Veritabanı Yedeği",
-      "backupDescription": "`{{ .Time }}` tarihinde oluşturulan 3x-ui yedek arşivi",
+      "backupDescription": "`{{ .Time }}` tarihinde oluşturulan xx-ui yedek arşivi",
       "backupUnavailable": "❌ Yedekleme hizmeti kullanılamıyor",
       "backupFailed": "❌ Veritabanı yedeği okunamadı: {{ .Error }}",
       "usageHint": "⚠️ Kullanım: `!usage <email>` veya `/usage <email>`",

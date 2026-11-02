@@ -11,6 +11,7 @@ interface ConnectionsCardProps {
   udp: number[];
   labels: string[];
   isMobile: boolean;
+  compact?: boolean;
 }
 
 export default function ConnectionsCard({
@@ -19,10 +20,11 @@ export default function ConnectionsCard({
   udp,
   labels,
   isMobile,
+  compact = false,
 }: ConnectionsCardProps) {
   const { t } = useTranslation();
   const { token } = theme.useToken();
-  const accent = token.colorPrimary;
+  const accent = token.colorWarning;
   const udpColor = token.colorTextTertiary;
 
   const referenceLines = useMemo(
@@ -61,7 +63,7 @@ export default function ConnectionsCard({
           data={tcp}
           data2={udp}
           labels={labels}
-          height={isMobile ? 120 : 170}
+          height={compact ? 72 : isMobile ? 120 : 170}
           strokeWidth={1.5}
           fillOpacity={0.24}
           showTooltip

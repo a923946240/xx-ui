@@ -8,10 +8,10 @@
     "#1": {
       "0409": {
         "identity": {
-          "name": "3x-ui",
+          "name": "xx-ui",
           "version": ""
         },
-        "description": "3X-UI web panel for Xray-core",
+        "description": "xx-ui web panel for Xray-core",
         "minimum-os": "win7",
         "execution-level": "as invoker",
         "ui-access": false,
@@ -38,13 +38,13 @@
         },
         "info": {
           "0409": {
-            "CompanyName": "MHSanaei",
-            "FileDescription": "3X-UI web panel for Xray-core",
+            "CompanyName": "a923946240",
+            "FileDescription": "xx-ui web panel for Xray-core",
             "FileVersion": "",
-            "InternalName": "3x-ui",
-            "LegalCopyright": "3X-UI contributors, licensed under GPL-3.0",
+            "InternalName": "xx-ui",
+            "LegalCopyright": "xx-ui and 3X-UI contributors, licensed under GPL-3.0",
             "OriginalFilename": "3x-ui.exe",
-            "ProductName": "3X-UI",
+            "ProductName": "xx-ui",
             "ProductVersion": ""
           }
         }

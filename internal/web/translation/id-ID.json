@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Nama Pengguna",
   "password": "Kata Sandi",
   "login": "Masuk",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Pembaruan Xray",
       "xraySwitchClickDesk": "Pilih dengan hati-hati, karena versi yang lebih lama mungkin tidak kompatibel dengan konfigurasi saat ini.",
       "updatePanel": "Perbarui Panel",
-      "panelUpdateDesc": "Ini akan memperbarui 3X-UI ke rilis terbaru dan me-restart layanan panel.",
+      "panelUpdateDesc": "Ini akan memperbarui xx-ui ke rilis terbaru dan me-restart layanan panel.",
       "currentPanelVersion": "Versi panel saat ini",
       "latestPanelVersion": "Versi panel terbaru",
       "panelUpToDate": "Panel sudah terbaru",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Ini akan mengubah versi Xray ke #version#.",
       "xraySwitchVersionPopover": "Xray berhasil diperbarui",
       "panelUpdateDialog": "Apakah Anda benar-benar ingin memperbarui panel?",
-      "panelUpdateDialogDesc": "Ini akan memperbarui 3X-UI ke #version# dan me-restart layanan panel.",
+      "panelUpdateDialogDesc": "Ini akan memperbarui xx-ui ke #version# dan me-restart layanan panel.",
       "panelUpdateStartedPopover": "Pembaruan panel dimulai",
       "panelUpdateFailedTitle": "Pembaruan panel gagal",
       "panelUpdateFailedDesc": "Pembaruan tidak selesai dengan sukses. Periksa log server, atau jalankan 'x-ui update' dari baris perintah.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "Mengikuti urutan di halaman Host untuk semua inbound. Ini menentukan urutan keluaran server; aplikasi klien dapat menerapkan urutan sendiri."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "save": "Simpan",
       "restartSuccess": "Xray berhasil diluncurkan ulang",
       "stopSuccess": "Xray telah berhasil dihentikan",
@@ -1967,6 +2022,9 @@
         "wrongKind": "Jenis basis data salah untuk kolom ini: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Outbound cadangan",
+        "failoverHint": "Koneksi baru memakai cadangan jika pemeriksaan outbound utama gagal. Koneksi baru kembali ke outbound utama setelah pulih. Koneksi yang sudah ada tetap memakai rute semula.",
+        "failoverConflict": "Pilih dua outbound berbeda dan kosongkan penyeimbang beban.",
         "sourceIps": "IP sumber",
         "sourcePort": "Port sumber",
         "vlessRoute": "Rute VLESS",
@@ -2545,7 +2603,7 @@
       "report": "🕰 Laporan Terjadwal: {{ .RunTime }}\r\n",
       "datetime": "⏰ Tanggal & Waktu: {{ .DateTime }}\r\n",
       "hostname": "💻 Host: {{ .Hostname }}\r\n",
-      "version": "🚀 Versi 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Versi xx-ui: {{ .Version }}\r\n",
       "xrayVersion": "📡 Versi Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "Uji Notifikasi Discord 3x-ui",
+      "title": "Uji Notifikasi Discord xx-ui",
       "body": "Ini adalah notifikasi uji yang memastikan notifikasi Discord telah dikonfigurasi dengan benar."
     },
-    "footer": "Panel 3x-ui",
+    "footer": "Panel xx-ui",
     "fields": {
       "panelVersion": "Versi Panel",
       "xrayCore": "Inti Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Login Gagal"
     },
     "report": {
-      "title": "📊 Laporan Status 3x-ui",
+      "title": "📊 Laporan Status xx-ui",
       "summary": "Laporan berkala status server dan proxy untuk **{{ .Host }}**",
-      "footer": "Laporan Terjadwal 3x-ui • Jadwal: {{ .RunTime }}"
+      "footer": "Laporan Terjadwal xx-ui • Jadwal: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Perintah Bot Discord 3x-ui",
-      "helpDescription": "Perintah yang tersedia untuk memantau dan mengelola server 3x-ui:",
+      "helpTitle": "🤖 Perintah Bot Discord xx-ui",
+      "helpDescription": "Perintah yang tersedia untuk memantau dan mengelola server xx-ui:",
       "helpStatus": "Tampilkan beban sistem, RAM, CPU, koneksi, dan pengguna online",
       "helpReport": "Buat laporan status lengkap (dengan cadangan DB jika dikonfigurasi)",
       "helpBackup": "Kirim file cadangan database sekarang juga",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Daftar semua inbound yang dikonfigurasi beserta port dan statistik klien",
       "helpRestart": "Mulai ulang inti Xray",
       "helpHelp": "Tampilkan daftar perintah ini",
-      "statusTitle": "⚡ Status Server 3x-ui",
+      "statusTitle": "⚡ Status Server xx-ui",
       "statusDescription": "Metrik operasional terkini untuk **{{ .Host }}**",
       "backupTitle": "🗄️ Cadangan Database",
-      "backupDescription": "Arsip cadangan 3x-ui dibuat pada `{{ .Time }}`",
+      "backupDescription": "Arsip cadangan xx-ui dibuat pada `{{ .Time }}`",
       "backupUnavailable": "❌ Layanan cadangan tidak tersedia",
       "backupFailed": "❌ Gagal membaca cadangan database: {{ .Error }}",
       "usageHint": "⚠️ Penggunaan: `!usage <email>` atau `/usage <email>`",

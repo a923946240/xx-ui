@@ -158,7 +158,10 @@ export function useXraySetting(): UseXraySettingResult {
     () => config?.subscriptionOutbounds || [],
     [config],
   );
-  const subscriptionOutboundTags = useMemo(() => config?.subscriptionOutboundTags || [], [config]);
+  const subscriptionOutboundTags = useMemo(
+    () => [...(config?.subscriptionOutboundTags ?? []), ...(config?.externalOutboundTags ?? [])],
+    [config],
+  );
   const [outboundTestStates, setOutboundTestStates] = useState<Record<number, OutboundTestState>>(
     {},
   );

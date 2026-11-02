@@ -19,6 +19,31 @@ function dialerProxyOf(tt: XraySettingsValue, tag: string): string | undefined {
 }
 
 describe('outbound deletion', () => {
+  it.each([
+    [0, 'B'],
+    [1, 'A'],
+  ] as const)('retains the surviving exit when deleting failover member %s', (index, survivor) => {
+    const tt = tpl({
+      outbounds: [{ tag: 'A' }, { tag: 'B' }],
+      routing: {
+        rules: [
+          {
+            type: 'field',
+            domain: ['domain:google.com'],
+            outboundTag: 'A',
+            fallbackOutboundTag: 'B',
+          },
+        ],
+      },
+    });
+    expect(planOutboundDeletion(tt, index).rules).toEqual([
+      { index: 0, label: '#1', fate: 'modified', keeps: survivor },
+    ]);
+    applyOutboundDeletion(tt, index);
+    expect(tt.routing!.rules).toEqual([
+      { type: 'field', domain: ['domain:google.com'], outboundTag: survivor },
+    ]);
+  });
   it('drops a rule whose only destination was the deleted outbound', () => {
     const tt = tpl({
       outbounds: [{ tag: 'proxy-us' }],

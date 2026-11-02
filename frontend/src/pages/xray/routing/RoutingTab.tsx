@@ -82,6 +82,7 @@ export default function RoutingTab({
           }
           r.comment = rule.comment || undefined;
           r.outboundTag = rule.outboundTag;
+          r.fallbackOutboundTag = rule.fallbackOutboundTag;
           r.balancerTag = rule.balancerTag;
           return r;
         })
@@ -139,14 +140,11 @@ export default function RoutingTab({
     for (const ob of templateSettings?.outbounds || []) {
       if (ob?.tag) out.add(ob.tag);
     }
-    for (const tag of clientReverseTags || []) {
-      if (tag) out.add(tag);
-    }
     for (const tag of subscriptionOutboundTags || []) {
       if (tag) out.add(tag);
     }
     return [...out];
-  }, [templateSettings?.outbounds, clientReverseTags, subscriptionOutboundTags]);
+  }, [templateSettings?.outbounds, subscriptionOutboundTags]);
 
   const balancerTagOptions = useMemo(() => {
     const out: string[] = [''];
@@ -422,6 +420,7 @@ export default function RoutingTab({
         rule={editingRule}
         inboundTags={inboundTagOptions}
         outboundTags={outboundTagOptions}
+        clientReverseTags={clientReverseTags}
         balancerTags={balancerTagOptions}
         onClose={() => setRuleModalOpen(false)}
         onConfirm={onRuleConfirm}

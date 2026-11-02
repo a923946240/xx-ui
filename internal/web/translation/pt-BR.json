@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Nome de Usuário",
   "password": "Senha",
   "login": "Entrar",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Atualizações do Xray",
       "xraySwitchClickDesk": "Escolha com cuidado, pois versões mais antigas podem não ser compatíveis com as configurações atuais.",
       "updatePanel": "Atualizar painel",
-      "panelUpdateDesc": "Isso atualizará o 3X-UI para a versão mais recente e reiniciará o serviço do painel.",
+      "panelUpdateDesc": "Isso atualizará o xx-ui para a versão mais recente e reiniciará o serviço do painel.",
       "currentPanelVersion": "Versão atual do painel",
       "latestPanelVersion": "Última versão do painel",
       "panelUpToDate": "O painel está atualizado",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Isso mudará a versão do Xray para #version#.",
       "xraySwitchVersionPopover": "Xray atualizado com sucesso",
       "panelUpdateDialog": "Deseja realmente atualizar o painel?",
-      "panelUpdateDialogDesc": "Isso atualizará o 3X-UI para #version# e reiniciará o serviço do painel.",
+      "panelUpdateDialogDesc": "Isso atualizará o xx-ui para #version# e reiniciará o serviço do painel.",
       "panelUpdateStartedPopover": "Atualização do painel iniciada",
       "panelUpdateFailedTitle": "Falha ao atualizar o painel",
       "panelUpdateFailedDesc": "A atualização não foi concluída com sucesso. Verifique os logs do servidor ou execute 'x-ui update' na linha de comando.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "Segue a ordem da página de hosts entre diferentes entradas. Define a ordem emitida pelo servidor; os aplicativos clientes podem aplicar sua própria ordenação."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "importRules": "Importar regras",
       "exportRules": "Exportar regras",
       "importOutbounds": "Importar saídas",
@@ -1967,6 +2022,9 @@
         "wrongKind": "Tipo de base incorreto para este campo: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Saída de reserva",
+        "failoverHint": "Novas conexões usam a reserva quando a verificação da saída principal falha. Após a recuperação, novas conexões voltam à principal. As conexões existentes mantêm sua rota.",
+        "failoverConflict": "Escolha duas saídas diferentes e remova a seleção do balanceador.",
         "sourceIps": "IPs de origem",
         "sourcePort": "Porta de origem",
         "vlessRoute": "Rota VLESS",
@@ -2545,7 +2603,7 @@
       "report": "🕰 Relatórios agendados: {{ .RunTime }}\r\n",
       "datetime": "⏰ Data&Hora: {{ .DateTime }}\r\n",
       "hostname": "💻 Host: {{ .Hostname }}\r\n",
-      "version": "🚀 Versão 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Versão xx-ui: {{ .Version }}\r\n",
       "xrayVersion": "📡 Versão Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "Teste de notificação do Discord do 3x-ui",
+      "title": "Teste de notificação do Discord do xx-ui",
       "body": "Esta é uma notificação de teste confirmando que as notificações do Discord estão configuradas corretamente."
     },
-    "footer": "Painel 3x-ui",
+    "footer": "Painel xx-ui",
     "fields": {
       "panelVersion": "Versão do painel",
       "xrayCore": "Núcleo Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Falha no login"
     },
     "report": {
-      "title": "📊 Relatório de status do 3x-ui",
+      "title": "📊 Relatório de status do xx-ui",
       "summary": "Relatório periódico de status do servidor e do proxy de **{{ .Host }}**",
-      "footer": "Relatório agendado do 3x-ui • Agendamento: {{ .RunTime }}"
+      "footer": "Relatório agendado do xx-ui • Agendamento: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Comandos do bot do Discord do 3x-ui",
-      "helpDescription": "Comandos disponíveis para monitorar e gerenciar o servidor 3x-ui:",
+      "helpTitle": "🤖 Comandos do bot do Discord do xx-ui",
+      "helpDescription": "Comandos disponíveis para monitorar e gerenciar o servidor xx-ui:",
       "helpStatus": "Exibe carga do sistema, RAM, CPU, conexões e usuários online",
       "helpReport": "Gera um relatório de status completo (com backup do BD, se configurado)",
       "helpBackup": "Envia imediatamente o arquivo de backup do banco de dados",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Lista todas as entradas configuradas com portas e estatísticas de clientes",
       "helpRestart": "Reinicia o núcleo Xray",
       "helpHelp": "Exibe esta lista de comandos disponíveis",
-      "statusTitle": "⚡ Status do servidor 3x-ui",
+      "statusTitle": "⚡ Status do servidor xx-ui",
       "statusDescription": "Métricas operacionais atuais de **{{ .Host }}**",
       "backupTitle": "🗄️ Backup do banco de dados",
-      "backupDescription": "Arquivo de backup do 3x-ui gerado em `{{ .Time }}`",
+      "backupDescription": "Arquivo de backup do xx-ui gerado em `{{ .Time }}`",
       "backupUnavailable": "❌ Serviço de backup indisponível",
       "backupFailed": "❌ Falha ao ler o backup do banco de dados: {{ .Error }}",
       "usageHint": "⚠️ Uso: `!usage <email>` ou `/usage <email>`",

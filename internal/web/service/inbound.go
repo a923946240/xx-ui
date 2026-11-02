@@ -12,6 +12,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -1276,6 +1277,12 @@ func (s *InboundService) normalizeMtprotoXrayPort(inbound *model.Inbound, oldSet
 // then saves the inbound to the database and optionally adds it to the running Xray instance.
 // Returns the created inbound, whether Xray needs restart, and any error.
 func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, bool, error) {
+	externalConfigMu.Lock()
+	unlockExternal := sync.OnceFunc(externalConfigMu.Unlock)
+	defer unlockExternal()
+	if err := validateInboundEgress(inbound); err != nil {
+		return inbound, false, err
+	}
 	defer InvalidateSubData()
 	inbound.Id = 0
 	if err := normalizeTuicSettings(inbound); err != nil {
@@ -1587,6 +1594,7 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 	if err != nil {
 		return inbound, false, err
 	}
+	unlockExternal()
 	if postCommitApply != nil {
 		postCommitApply()
 	}
@@ -1967,6 +1975,12 @@ func (s *InboundService) validateUpdatedInboundClients(inbound, existing *model.
 }
 
 func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, bool, error) {
+	externalConfigMu.Lock()
+	unlockExternal := sync.OnceFunc(externalConfigMu.Unlock)
+	defer unlockExternal()
+	if err := validateInboundEgress(inbound); err != nil {
+		return inbound, false, err
+	}
 	defer InvalidateSubData()
 	legacyShareAddr := legacyMtprotoShareAddr(inbound)
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
@@ -2306,6 +2320,7 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 	if txErr != nil {
 		return inbound, false, txErr
 	}
+	unlockExternal()
 	if postCommitApply != nil {
 		postCommitApply()
 	}

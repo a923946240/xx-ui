@@ -616,6 +616,45 @@ export const ClientsSummarySchema = z.object({
 });
 export type ClientsSummary = z.infer<typeof ClientsSummarySchema>;
 
+export const ExternalOutboundInputSchema = z.object({
+  enable: z.boolean(),
+  host: z.string(),
+  id: z.number().int(),
+  password: z.string().optional(),
+  port: z.number().int(),
+  protocol: z.string(),
+  remark: z.string(),
+  serverName: z.string(),
+  tag: z.string(),
+  transport: z.string(),
+  username: z.string(),
+});
+export type ExternalOutboundInput = z.infer<typeof ExternalOutboundInputSchema>;
+
+export const ExternalOutboundProbeSchema = z.object({
+  delay: z.number().int(),
+  httpStatus: z.number().int(),
+  success: z.boolean(),
+});
+export type ExternalOutboundProbe = z.infer<typeof ExternalOutboundProbeSchema>;
+
+export const ExternalOutboundViewSchema = z.object({
+  enable: z.boolean(),
+  host: z.string(),
+  id: z.number().int(),
+  logs: z.string(),
+  passwordSet: z.boolean(),
+  port: z.number().int(),
+  protocol: z.string(),
+  remark: z.string(),
+  serverName: z.string(),
+  state: z.string(),
+  tag: z.string(),
+  transport: z.string(),
+  username: z.string(),
+});
+export type ExternalOutboundView = z.infer<typeof ExternalOutboundViewSchema>;
+
 export const FallbackParentInfoSchema = z.object({
   masterId: z.number().int(),
   path: z.string().optional(),

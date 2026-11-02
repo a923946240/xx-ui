@@ -628,6 +628,39 @@ export const EXAMPLES: Record<string, unknown> = {
     "onlineCount": 1,
     "total": 2000
   },
+  "ExternalOutboundInput": {
+    "enable": true,
+    "host": "proxy.example.com",
+    "id": 0,
+    "password": "replace-me",
+    "port": 443,
+    "protocol": "naive",
+    "remark": "Remote exit",
+    "serverName": "proxy.example.com",
+    "tag": "naive-exit",
+    "transport": "tcp",
+    "username": "user"
+  },
+  "ExternalOutboundProbe": {
+    "delay": 120,
+    "httpStatus": 204,
+    "success": true
+  },
+  "ExternalOutboundView": {
+    "enable": true,
+    "host": "proxy.example.com",
+    "id": 1,
+    "logs": "Client started",
+    "passwordSet": true,
+    "port": 443,
+    "protocol": "naive",
+    "remark": "Remote exit",
+    "serverName": "proxy.example.com",
+    "state": "running",
+    "tag": "naive-exit",
+    "transport": "tcp",
+    "username": "user"
+  },
   "FallbackParentInfo": {
     "masterId": 0,
     "path": ""

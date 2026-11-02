@@ -14,5 +14,6 @@ export interface RuleRow {
   protocol?: string;
   attrs?: string;
   outboundTag?: string;
+  fallbackOutboundTag?: string;
   balancerTag?: string;
 }

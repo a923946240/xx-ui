@@ -32,6 +32,7 @@ export const RuleObjectSchema = z.object({
   process: z.array(z.string()).optional(),
   localOS: z.array(z.string()).optional(),
   outboundTag: z.string().optional(),
+  fallbackOutboundTag: z.string().optional(),
   balancerTag: z.string().optional(),
   ruleTag: z.string().optional(),
   webhook: RuleWebhookSchema.optional(),

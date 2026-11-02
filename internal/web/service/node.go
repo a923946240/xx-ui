@@ -449,6 +449,11 @@ func (s *NodeService) normalize(n *model.Node) error {
 }
 
 func (s *NodeService) Create(n *model.Node) error {
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
+	if err := validateEgressTarget(n.OutboundTag); err != nil {
+		return err
+	}
 	if err := s.normalize(n); err != nil {
 		return err
 	}
@@ -508,6 +513,11 @@ func nodeSelectionGrew(existing, in *model.Node) bool {
 }
 
 func (s *NodeService) Update(id int, in *model.Node) error {
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
+	if err := validateEgressTarget(in.OutboundTag); err != nil {
+		return err
+	}
 	if err := s.normalize(in); err != nil {
 		return err
 	}
@@ -564,6 +574,11 @@ func (s *NodeService) Update(id int, in *model.Node) error {
 
 func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error {
 	if err := req.validateCredentials(false); err != nil {
+		return err
+	}
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
+	if err := validateEgressTarget(req.OutboundTag); err != nil {
 		return err
 	}
 	in := req.toNode()

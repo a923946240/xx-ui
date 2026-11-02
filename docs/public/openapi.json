@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "3X-UI Panel API",
+    "title": "xx-ui Panel API",
     "version": "3.x",
-    "description": "Programmatic interface to a 3X-UI panel. Authenticate either by logging in (cookie) or with a scoped API token from Settings → Security → API Token (Bearer). Token access is limited by its admin, monitor, node-sync, or node-admin scope; treat admin tokens like the panel password."
+    "description": "Programmatic interface to an xx-ui panel. Authenticate either by logging in (cookie) or with a scoped API token from Settings → Security → API Token (Bearer). Token access is limited by its admin, monitor, node-sync, or node-admin scope; treat admin tokens like the panel password."
   },
   "servers": [
     {
@@ -2527,6 +2527,162 @@
         ],
         "type": "object"
       },
+      "ExternalOutboundInput": {
+        "properties": {
+          "enable": {
+            "example": true,
+            "type": "boolean"
+          },
+          "host": {
+            "example": "proxy.example.com",
+            "type": "string"
+          },
+          "id": {
+            "example": 0,
+            "type": "integer"
+          },
+          "password": {
+            "example": "replace-me",
+            "type": "string"
+          },
+          "port": {
+            "example": 443,
+            "type": "integer"
+          },
+          "protocol": {
+            "example": "naive",
+            "type": "string"
+          },
+          "remark": {
+            "example": "Remote exit",
+            "type": "string"
+          },
+          "serverName": {
+            "example": "proxy.example.com",
+            "type": "string"
+          },
+          "tag": {
+            "example": "naive-exit",
+            "type": "string"
+          },
+          "transport": {
+            "example": "tcp",
+            "type": "string"
+          },
+          "username": {
+            "example": "user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enable",
+          "host",
+          "id",
+          "port",
+          "protocol",
+          "remark",
+          "serverName",
+          "tag",
+          "transport",
+          "username"
+        ],
+        "type": "object"
+      },
+      "ExternalOutboundProbe": {
+        "properties": {
+          "delay": {
+            "example": 120,
+            "format": "int64",
+            "type": "integer"
+          },
+          "httpStatus": {
+            "example": 204,
+            "type": "integer"
+          },
+          "success": {
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "delay",
+          "httpStatus",
+          "success"
+        ],
+        "type": "object"
+      },
+      "ExternalOutboundView": {
+        "properties": {
+          "enable": {
+            "example": true,
+            "type": "boolean"
+          },
+          "host": {
+            "example": "proxy.example.com",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "type": "integer"
+          },
+          "logs": {
+            "example": "Client started",
+            "type": "string"
+          },
+          "passwordSet": {
+            "example": true,
+            "type": "boolean"
+          },
+          "port": {
+            "example": 443,
+            "type": "integer"
+          },
+          "protocol": {
+            "example": "naive",
+            "type": "string"
+          },
+          "remark": {
+            "example": "Remote exit",
+            "type": "string"
+          },
+          "serverName": {
+            "example": "proxy.example.com",
+            "type": "string"
+          },
+          "state": {
+            "example": "running",
+            "type": "string"
+          },
+          "tag": {
+            "example": "naive-exit",
+            "type": "string"
+          },
+          "transport": {
+            "example": "tcp",
+            "type": "string"
+          },
+          "username": {
+            "example": "user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enable",
+          "host",
+          "id",
+          "logs",
+          "passwordSet",
+          "port",
+          "protocol",
+          "remark",
+          "serverName",
+          "state",
+          "tag",
+          "transport",
+          "username"
+        ],
+        "type": "object"
+      },
       "FallbackParentInfo": {
         "description": "FallbackParentInfo carries everything the frontend needs to rewrite a\nchild inbound's client link: where to connect (the master's address\nand port) and which path matched on the master's fallbacks array.\nThe frontend already has the master inbound in its dbInbounds list,\nso we only ship identifiers + the match path here.",
         "properties": {
@@ -3621,7 +3777,7 @@
         "type": "object"
       },
       "Node": {
-        "description": "Node represents a remote 3x-ui panel registered with the central panel.\nThe central panel polls each node's existing /panel/api/server/status\nendpoint over HTTP using the per-node ApiToken to populate the runtime\nstatus fields below.",
+        "description": "Node represents a remote xx-ui panel registered with the central panel.\nThe central panel polls each node's existing /panel/api/server/status\nendpoint over HTTP using the per-node ApiToken to populate the runtime\nstatus fields below.",
         "properties": {
           "activeCount": {
             "example": 23,
@@ -4644,7 +4800,7 @@
         "type": "object"
       },
       "Setting": {
-        "description": "Setting stores key-value configuration settings for the 3x-ui panel.",
+        "description": "Setting stores key-value configuration settings for the xx-ui panel.",
         "properties": {
           "id": {
             "type": "integer"
@@ -4956,7 +5112,7 @@
         "type": "object"
       },
       "User": {
-        "description": "User represents a user account in the 3x-ui panel.",
+        "description": "User represents a user account in the xx-ui panel.",
         "properties": {
           "id": {
             "type": "integer"
@@ -5019,6 +5175,10 @@
   ],
   "tags": [
     {
+      "name": "External Outbounds",
+      "description": "Linux-local NaiveProxy, mieru and TrustTunnel final exits. Passwords are write-only. Only TCP CONNECT is supported by the managed gate."
+    },
+    {
       "name": "Authentication",
       "description": "Two authentication modes are supported. UI sessions use a cookie set by the login endpoint. Programmatic clients (bots, scripts, remote panels) authenticate with a Bearer token taken from Settings → Security → API Token. Both work for every endpoint under /panel/api/*."
     },
@@ -5036,7 +5196,7 @@
     },
     {
       "name": "Nodes",
-      "description": "Manage remote 3x-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes."
+      "description": "Manage remote xx-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes."
     },
     {
       "name": "Hosts",
@@ -5072,6 +5232,213 @@
     }
   ],
   "paths": {
+    "/panel/api/external-outbounds/list": {
+      "get": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "List external exits, credential presence, client state and sanitized logs.",
+        "operationId": "get_panel_api_external_outbounds_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ExternalOutboundView"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "enable": true,
+                      "host": "proxy.example.com",
+                      "id": 1,
+                      "logs": "Client started",
+                      "passwordSet": true,
+                      "port": 443,
+                      "protocol": "naive",
+                      "remark": "Remote exit",
+                      "serverName": "proxy.example.com",
+                      "state": "running",
+                      "tag": "naive-exit",
+                      "transport": "tcp",
+                      "username": "user"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/external-outbounds/save": {
+      "post": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "Create or update an exit. ID zero creates; blank password retains the existing secret. Tags are immutable. Enable false blocks traffic assigned to the tag.",
+        "operationId": "post_panel_api_external_outbounds_save",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalOutboundInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ExternalOutboundView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enable": true,
+                    "host": "proxy.example.com",
+                    "id": 1,
+                    "logs": "Client started",
+                    "passwordSet": true,
+                    "port": 443,
+                    "protocol": "naive",
+                    "remark": "Remote exit",
+                    "serverName": "proxy.example.com",
+                    "state": "running",
+                    "tag": "naive-exit",
+                    "transport": "tcp",
+                    "username": "user"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/external-outbounds/del/{id}": {
+      "post": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "Delete an unreferenced external exit and stop its client. Referenced exits must have their routing changed first.",
+        "operationId": "post_panel_api_external_outbounds_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/external-outbounds/probe/{id}": {
+      "post": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "Make a real HTTPS request through the exit to the fixed connectivity endpoint. Does not fall back to direct.",
+        "operationId": "post_panel_api_external_outbounds_probe_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ExternalOutboundProbe"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "delay": 120,
+                    "httpStatus": 204,
+                    "success": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -6845,7 +7212,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Check whether a newer 3x-ui release is available on GitHub.",
+        "summary": "Check whether a newer xx-ui release is available on GitHub.",
         "operationId": "get_panel_api_server_getPanelUpdateInfo",
         "responses": {
           "200": {
@@ -13472,7 +13839,7 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Restart the entire 3x-ui process after a 3-second grace period. The connection drops immediately; the panel comes back online ~5-10 seconds later.",
+        "summary": "Restart the entire xx-ui process after a 3-second grace period. The connection drops immediately; the panel comes back online ~5-10 seconds later.",
         "operationId": "post_panel_api_setting_restartPanel",
         "responses": {
           "200": {

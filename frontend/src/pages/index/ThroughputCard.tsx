@@ -26,7 +26,7 @@ export default function ThroughputCard({
   const { t } = useTranslation();
   const { token } = theme.useToken();
   const accent = token.colorPrimary;
-  const downColor = token.colorTextTertiary;
+  const downColor = token.colorSuccess;
 
   const referenceLines = useMemo(
     () => [
@@ -64,7 +64,7 @@ export default function ThroughputCard({
           data={up}
           data2={down}
           labels={labels}
-          height={isMobile ? 140 : 186}
+          height={isMobile ? 130 : 140}
           strokeWidth={1.75}
           fillOpacity={0.24}
           showTooltip

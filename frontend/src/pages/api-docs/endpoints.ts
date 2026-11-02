@@ -198,6 +198,44 @@ const hwidStatusErrorResponses = {
 
 export const sections: readonly Section[] = [
   {
+    id: 'external-outbounds',
+    title: 'External Outbounds',
+    description:
+      'Linux-local NaiveProxy, mieru and TrustTunnel final exits. Passwords are write-only. Only TCP CONNECT is supported by the managed gate.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/external-outbounds/list',
+        summary: 'List external exits, credential presence, client state and sanitized logs.',
+        responseSchema: 'ExternalOutboundView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/external-outbounds/save',
+        summary:
+          'Create or update an exit. ID zero creates; blank password retains the existing secret. Tags are immutable. Enable false blocks traffic assigned to the tag.',
+        requestSchema: { $ref: '#/components/schemas/ExternalOutboundInput' },
+        responseSchema: 'ExternalOutboundView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/external-outbounds/del/:id',
+        summary:
+          'Delete an unreferenced external exit and stop its client. Referenced exits must have their routing changed first.',
+        params: [{ name: 'id', in: 'path', type: 'integer' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/external-outbounds/probe/:id',
+        summary:
+          'Make a real HTTPS request through the exit to the fixed connectivity endpoint. Does not fall back to direct.',
+        params: [{ name: 'id', in: 'path', type: 'integer' }],
+        responseSchema: 'ExternalOutboundProbe',
+      },
+    ],
+  },
+  {
     id: 'authentication',
     title: 'Authentication',
     description:
@@ -563,7 +601,7 @@ export const sections: readonly Section[] = [
       {
         method: 'GET',
         path: '/panel/api/server/getPanelUpdateInfo',
-        summary: 'Check whether a newer 3x-ui release is available on GitHub.',
+        summary: 'Check whether a newer xx-ui release is available on GitHub.',
       },
       {
         method: 'GET',
@@ -1697,7 +1735,7 @@ export const sections: readonly Section[] = [
     id: 'nodes',
     title: 'Nodes',
     description:
-      'Manage remote 3x-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes.',
+      'Manage remote xx-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes.',
     endpoints: [
       {
         method: 'GET',
@@ -2007,7 +2045,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/setting/restartPanel',
         summary:
-          'Restart the entire 3x-ui process after a 3-second grace period. The connection drops immediately; the panel comes back online ~5-10 seconds later.',
+          'Restart the entire xx-ui process after a 3-second grace period. The connection drops immediately; the panel comes back online ~5-10 seconds later.',
       },
       {
         method: 'POST',

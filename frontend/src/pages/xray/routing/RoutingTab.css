@@ -224,6 +224,16 @@
   flex-shrink: 0;
 }
 
+.flow-tag.flow-tag-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .rule-criteria {
   display: flex;
   flex-wrap: wrap;

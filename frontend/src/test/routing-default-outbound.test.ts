@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { XraySettingsValue } from '@/hooks/useXraySetting';
-import { getDefaultOutboundTag, setDefaultOutboundTag } from '@/pages/xray/basics/helpers';
+import {
+  getDefaultOutboundTag,
+  ruleGetter,
+  ruleSetter,
+  setDefaultOutboundTag,
+  syncOutbound,
+} from '@/pages/xray/basics/helpers';
 
 function tpl(
   outbounds: Array<{ tag?: string; protocol?: string; settings?: unknown }>,
@@ -54,5 +60,25 @@ describe('routing default outbound', () => {
     );
     setDefaultOutboundTag(tt, 'warp');
     expect(tt.outbounds!.map((o) => o?.tag)).toEqual(['warp', 'direct', 'blocked']);
+  });
+
+  it('keeps a primary/backup rule separate from basic routing presets', () => {
+    const managed = {
+      type: 'field' as const,
+      domain: ['domain:example.com'],
+      outboundTag: 'primary',
+      fallbackOutboundTag: 'direct',
+    };
+    const tt = tpl([
+      { tag: 'primary', protocol: 'socks' },
+      { tag: 'direct', protocol: 'freedom' },
+    ]);
+    tt.routing!.rules = [managed];
+    expect(ruleGetter(tt, 'primary', 'domain')).toEqual([]);
+    ruleSetter(tt, 'primary', 'domain', ['domain:example.org']);
+    ruleSetter(tt, 'primary', 'domain', []);
+    syncOutbound(tt, 'direct', { tag: 'direct', protocol: 'freedom' });
+    expect(tt.routing!.rules).toEqual([managed]);
+    expect(tt.outbounds!.map((o) => o?.tag)).toEqual(['primary', 'direct']);
   });
 });

@@ -27,6 +27,7 @@ export interface RoutingRule {
   protocol?: string[];
   attrs?: Record<string, string>;
   outboundTag?: string;
+  fallbackOutboundTag?: string;
   balancerTag?: string;
   [key: string]: unknown;
 }
@@ -36,6 +37,7 @@ interface RuleFormModalProps {
   rule: RoutingRule | null;
   inboundTags: string[];
   outboundTags: string[];
+  clientReverseTags?: string[];
   balancerTags: string[];
   onClose: () => void;
   onConfirm: (rule: Record<string, unknown>) => void;
@@ -56,6 +58,7 @@ const initialForm = (): RuleFormValues => ({
   protocol: [],
   attrs: [],
   outboundTag: '',
+  fallbackOutboundTag: '',
   balancerTag: '',
 });
 
@@ -75,6 +78,7 @@ export default function RuleFormModal({
   rule,
   inboundTags,
   outboundTags,
+  clientReverseTags = [],
   balancerTags,
   onClose,
   onConfirm,
@@ -119,6 +123,7 @@ export default function RuleFormModal({
         protocol: rule.protocol || [],
         attrs: rule.attrs ? Object.entries(rule.attrs) : [],
         outboundTag: rule.outboundTag || '',
+        fallbackOutboundTag: rule.fallbackOutboundTag || '',
         balancerTag: rule.balancerTag || '',
       });
     } else {
@@ -127,11 +132,30 @@ export default function RuleFormModal({
   }, [open, rule, methods]);
 
   const attrs = useWatch({ control: methods.control, name: 'attrs' }) ?? [];
+  const primary = useWatch({ control: methods.control, name: 'outboundTag' });
+  const fallback = useWatch({ control: methods.control, name: 'fallbackOutboundTag' });
+  const balancer = useWatch({ control: methods.control, name: 'balancerTag' });
+  const supportsBackup =
+    !!primary &&
+    outboundTags.includes(primary) &&
+    !isApiRule(rule ?? {}) &&
+    rule?.ruleTag !== 'xui-dns-allow';
 
   function submit() {
     const validated = RuleFormSchema.safeParse(methods.getValues());
     if (!validated.success) return;
     const v = validated.data;
+    if (
+      v.enabled &&
+      v.fallbackOutboundTag &&
+      (!supportsBackup ||
+        !outboundTags.includes(v.fallbackOutboundTag) ||
+        v.outboundTag === v.fallbackOutboundTag ||
+        v.balancerTag)
+    ) {
+      methods.setError('fallbackOutboundTag', { message: 'pages.xray.ruleForm.failoverConflict' });
+      return;
+    }
     const built: Record<string, unknown> = {
       type: 'field',
       enabled: v.enabled,
@@ -148,6 +172,7 @@ export default function RuleFormModal({
       protocol: v.protocol,
       attrs: Object.fromEntries(v.attrs.filter(([k]) => k)),
       outboundTag: v.outboundTag === '' ? undefined : v.outboundTag,
+      fallbackOutboundTag: v.fallbackOutboundTag || undefined,
       balancerTag: v.balancerTag === '' ? undefined : v.balancerTag,
     };
     const managedKeys = new Set(Object.keys(built));
@@ -326,8 +351,39 @@ export default function RuleFormModal({
             />
           </FormField>
 
-          <FormField name="outboundTag" label={t('pages.xray.ruleForm.outboundTag')}>
-            <Select options={outboundTags.map((tag) => ({ value: tag, label: tag || '(none)' }))} />
+          <FormField
+            name="outboundTag"
+            label={t('pages.xray.ruleForm.outboundTag')}
+            onAfterChange={(value) => {
+              if (!value || !outboundTags.includes(String(value)) || value === fallback) {
+                methods.setValue('fallbackOutboundTag', '');
+              }
+              methods.clearErrors('fallbackOutboundTag');
+            }}
+          >
+            <Select
+              options={[...new Set([...outboundTags, ...clientReverseTags])].map((tag) => ({
+                value: tag,
+                label: tag || '(none)',
+              }))}
+            />
+          </FormField>
+
+          <FormField
+            name="fallbackOutboundTag"
+            label={t('pages.xray.ruleForm.fallbackOutboundTag')}
+            extra={fallback ? t('pages.xray.ruleForm.failoverHint') : undefined}
+            onAfterChange={() => methods.clearErrors('fallbackOutboundTag')}
+          >
+            <Select
+              disabled={!fallback && (!supportsBackup || !!balancer)}
+              options={[
+                { value: '', label: t('none') },
+                ...(supportsBackup ? outboundTags : [])
+                  .filter((tag) => tag && tag !== primary)
+                  .map((tag) => ({ value: tag, label: tag })),
+              ]}
+            />
           </FormField>
 
           <FormField
@@ -335,7 +391,10 @@ export default function RuleFormModal({
             label={t('pages.xray.ruleForm.balancerTag')}
             tooltip={t('pages.xray.ruleForm.balancerTagTooltip')}
           >
-            <Select options={balancerTags.map((tag) => ({ value: tag, label: tag || '(none)' }))} />
+            <Select
+              disabled={!!fallback && !balancer}
+              options={balancerTags.map((tag) => ({ value: tag, label: tag || '(none)' }))}
+            />
           </FormField>
         </Form>
       </FormProvider>

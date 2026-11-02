@@ -57,6 +57,7 @@ export const XrayConfigPayloadSchema = z
     // balancers / routing rules.
     subscriptionOutbounds: z.array(z.unknown()).optional(),
     subscriptionOutboundTags: z.array(z.string()).optional(),
+    externalOutboundTags: z.array(z.string()).optional(),
     geodataSources: z.array(z.object({ url: z.string(), file: z.string() })).optional(),
   })
   .loose();
@@ -125,6 +126,7 @@ export const RuleFormSchema = z.object({
   protocol: z.array(z.string()),
   attrs: z.array(z.tuple([z.string(), z.string()])),
   outboundTag: z.string(),
+  fallbackOutboundTag: z.string(),
   balancerTag: z.string(),
 });
 

@@ -1,3 +1,5 @@
+> This page preserves the upstream 3x-ui translation. For **xx-ui** features and build instructions, see [English](README.md) or [简体中文](README.zh_CN.md). [Upstream 3x-ui v3.11.0](https://github.com/MHSanaei/3x-ui/tree/v3.11.0)
+
 [English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
 
 <p align="center">

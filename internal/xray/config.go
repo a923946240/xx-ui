@@ -25,6 +25,9 @@ type Config struct {
 	Metrics          json_util.RawMessage `json:"metrics"`
 	Geodata          json_util.RawMessage `json:"geodata,omitempty"`
 	Env              json_util.RawMessage `json:"env,omitempty"`
+	// FailoverPrimaries maps panel-generated loopback tags to the configured
+	// primary exit for the route tester. It is never sent to Xray.
+	FailoverPrimaries map[string]string `json:"-"`
 }
 
 // Equals compares two Config instances for deep equality.

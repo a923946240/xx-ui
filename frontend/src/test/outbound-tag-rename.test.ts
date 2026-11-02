@@ -29,6 +29,15 @@ function baseTemplate(): XraySettingsValue {
 }
 
 describe('propagateOutboundTagRename', () => {
+  it('updates a standby target without changing its primary', () => {
+    const t = baseTemplate();
+    t.routing!.rules![0]!.fallbackOutboundTag = 'direct';
+    propagateOutboundTagRename(t, 'direct', 'B');
+    expect(t.routing!.rules![0]).toMatchObject({
+      outboundTag: 'To-External-Proxy',
+      fallbackOutboundTag: 'B',
+    });
+  });
   it('updates routing rule outboundTag when outbound is renamed', () => {
     const t = baseTemplate();
     propagateOutboundTagRename(t, 'To-External-Proxy', 'external-vps');

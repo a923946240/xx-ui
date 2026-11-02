@@ -308,7 +308,10 @@ export function useRoutingColumns({
           record.outboundTag ? (
             <div className="target-row">
               <ExportOutlined className="target-icon" aria-hidden="true" />
-              <Tag color="green">{record.outboundTag}</Tag>
+              <Tag color="green">
+                {record.outboundTag}
+                {record.fallbackOutboundTag && ` → ${record.fallbackOutboundTag}`}
+              </Tag>
             </div>
           ) : (
             <span className="criterion-empty">—</span>

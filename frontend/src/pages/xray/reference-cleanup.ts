@@ -92,15 +92,24 @@ function classifyRule(
   rule: RuleObject,
   removedOutbounds: Set<string>,
   removedBalancers: Set<string>,
-): { losesOut: boolean; losesBal: boolean; keeps: string } | null {
+): {
+  losesOut: boolean;
+  losesBal: boolean;
+  losesFallback: boolean;
+  promote: string;
+  keeps: string;
+} | null {
   const out = typeof rule?.outboundTag === 'string' ? rule.outboundTag : '';
   const bal = typeof rule?.balancerTag === 'string' ? rule.balancerTag : '';
+  const fallback = typeof rule?.fallbackOutboundTag === 'string' ? rule.fallbackOutboundTag : '';
   const losesOut = out !== '' && removedOutbounds.has(out);
   const losesBal = bal !== '' && removedBalancers.has(bal);
-  if (!losesOut && !losesBal) return null;
+  const losesFallback = fallback !== '' && removedOutbounds.has(fallback);
+  if (!losesOut && !losesBal && !losesFallback) return null;
+  const promote = losesOut && !losesFallback ? fallback : '';
   const keptOut = out !== '' && !losesOut ? out : '';
   const keptBal = bal !== '' && !losesBal ? bal : '';
-  return { losesOut, losesBal, keeps: keptOut || keptBal };
+  return { losesOut, losesBal, losesFallback, promote, keeps: keptOut || promote || keptBal };
 }
 
 function ruleImpacts(
@@ -135,6 +144,8 @@ function applyCleanup(
         continue;
       }
       if (verdict.losesOut) delete rule.outboundTag;
+      if (verdict.losesOut || verdict.losesFallback) delete rule.fallbackOutboundTag;
+      if (verdict.promote) rule.outboundTag = verdict.promote;
       if (verdict.losesBal) delete rule.balancerTag;
       if (verdict.keeps) next.push(rule);
     }

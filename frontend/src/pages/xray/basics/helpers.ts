@@ -73,7 +73,8 @@ export function ruleGetter(
       rule &&
       Object.prototype.hasOwnProperty.call(rule, property) &&
       Object.prototype.hasOwnProperty.call(rule, 'outboundTag') &&
-      rule.outboundTag === outboundTag
+      rule.outboundTag === outboundTag &&
+      !rule.fallbackOutboundTag
     ) {
       const v = (rule as Record<string, unknown>)[property];
       if (Array.isArray(v)) out.push(...(v as string[]));
@@ -102,7 +103,8 @@ export function ruleSetter(
       rule &&
       Object.prototype.hasOwnProperty.call(rule, property) &&
       Object.prototype.hasOwnProperty.call(rule, 'outboundTag') &&
-      rule.outboundTag === outboundTag;
+      rule.outboundTag === outboundTag &&
+      !rule.fallbackOutboundTag;
     if (matches) {
       if (!inserted && data.length > 0) {
         (rule as Record<string, unknown>)[property] = data;
@@ -119,7 +121,7 @@ export function ruleSetter(
 export function syncOutbound(t: XraySettingsValue, tag: string, settings: Record<string, unknown>) {
   if (!t.outbounds || !t.routing) return;
   const rules = t.routing.rules || [];
-  const haveRules = rules.some((r) => r?.outboundTag === tag);
+  const haveRules = rules.some((r) => r?.outboundTag === tag || r?.fallbackOutboundTag === tag);
   const idx = t.outbounds.findIndex((o) => o?.tag === tag);
   if (!haveRules && idx > 0) t.outbounds.splice(idx, 1);
   if (haveRules && idx < 0) t.outbounds.push(settings as never);
@@ -158,6 +160,7 @@ export function propagateOutboundTagRename(
   if (Array.isArray(rules)) {
     for (const rule of rules) {
       if (rule?.outboundTag === oldTag) rule.outboundTag = newTag;
+      if (rule?.fallbackOutboundTag === oldTag) rule.fallbackOutboundTag = newTag;
     }
   }
 

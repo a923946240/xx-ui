@@ -25,6 +25,9 @@ export function useOutboundTags(opts?: { excludeBlackhole?: boolean }) {
       for (const t of data?.subscriptionOutboundTags ?? []) {
         if (t) tags.add(t);
       }
+      for (const t of data?.externalOutboundTags ?? []) {
+        if (t) tags.add(t);
+      }
       // Balancers are valid routing targets too — injectMtprotoEgress emits a
       // balancerTag rule when the chosen tag names a balancer.
       const balancers = (
@@ -61,6 +64,9 @@ export function useOutboundTagGroups(opts?: { excludeBlackhole?: boolean }) {
         outbounds.add(ob.tag);
       }
       for (const t of data?.subscriptionOutboundTags ?? []) {
+        if (t) outbounds.add(t);
+      }
+      for (const t of data?.externalOutboundTags ?? []) {
         if (t) outbounds.add(t);
       }
       const balancers: string[] = [];

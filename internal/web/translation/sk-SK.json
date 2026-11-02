@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Používateľské meno",
   "password": "Heslo",
   "login": "Prihlásiť sa",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Aktualizácie Xray",
       "xraySwitchClickDesk": "Verziu vyberajte opatrne. Staršie verzie nemusia podporovať aktuálnu konfiguráciu.",
       "updatePanel": "Aktualizovať panel",
-      "panelUpdateDesc": "Aktualizuje sa samotný 3X-UI na najnovšie vydanie a reštartuje sa služba panelu.",
+      "panelUpdateDesc": "Aktualizuje sa samotný xx-ui na najnovšie vydanie a reštartuje sa služba panelu.",
       "currentPanelVersion": "Aktuálna verzia panelu",
       "latestPanelVersion": "Najnovšia verzia panelu",
       "panelUpToDate": "Panel je aktuálny",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Verzia Xray sa zmení na #version#.",
       "xraySwitchVersionPopover": "Xray bol úspešne aktualizovaný",
       "panelUpdateDialog": "Naozaj chcete aktualizovať panel?",
-      "panelUpdateDialogDesc": "3X-UI sa aktualizuje na #version# a reštartuje sa služba panelu.",
+      "panelUpdateDialogDesc": "xx-ui sa aktualizuje na #version# a reštartuje sa služba panelu.",
       "panelUpdateStartedPopover": "Aktualizácia panelu sa začala",
       "panelUpdateFailedTitle": "Aktualizácia panelu zlyhala",
       "panelUpdateFailedDesc": "Aktualizácia sa nedokončila úspešne. Skontrolujte záznamy servera alebo spustite príkaz 'x-ui update'.",
@@ -1963,6 +1977,47 @@
       "subHostSortModeDesc": "Poradie hostiteľov sa riadi stránkou Hostitelia naprieč inboundmi. Určuje poradie, ktoré odosiela server; klientske aplikácie môžu použiť vlastné triedenie."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "save": "Uložiť",
       "restartSuccess": "Xray bol úspešne reštartovaný.",
       "stopSuccess": "Xray bol úspešne zastavený.",
@@ -2088,6 +2143,9 @@
         "wrongKind": "Nesprávny typ databázy pre toto pole: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Záložný výstup",
+        "failoverHint": "Ak kontrola hlavného výstupu zlyhá, nové spojenia použijú záložný výstup. Po obnovení sa nové spojenia vrátia na hlavný výstup. Existujúce spojenia si ponechajú pôvodnú trasu.",
+        "failoverConflict": "Vyberte dva rôzne výstupy a zrušte výber vyrovnávača záťaže.",
         "sourceIps": "Zdrojové IP adresy",
         "sourcePort": "Zdrojový port",
         "vlessRoute": "Trasa VLESS",
@@ -2545,7 +2603,7 @@
       "report": "🕰 Plánované správy: {{ .RunTime }}\r\n",
       "datetime": "⏰ Dátum a čas: {{ .DateTime }}\r\n",
       "hostname": "💻 Hostiteľ: {{ .Hostname }}\r\n",
-      "version": "🚀 Verzia 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Verzia xx-ui: {{ .Version }}\r\n",
       "xrayVersion": "📡 Verzia Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "Skúška upozornení Discordu v 3x-ui",
+      "title": "Skúška upozornení Discordu v xx-ui",
       "body": "Toto je skúšobné upozornenie na overenie správneho nastavenia upozornení Discordu."
     },
-    "footer": "Panel 3x-ui",
+    "footer": "Panel xx-ui",
     "fields": {
       "panelVersion": "Verzia panelu",
       "xrayCore": "Jadro Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Neúspešné prihlásenie"
     },
     "report": {
-      "title": "📊 Správa o stave 3x-ui",
+      "title": "📊 Správa o stave xx-ui",
       "summary": "Pravidelná správa o stave servera a proxy **{{ .Host }}**",
-      "footer": "Plánovaná správa 3x-ui • Plán: {{ .RunTime }}"
+      "footer": "Plánovaná správa xx-ui • Plán: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Príkazy Discord bota 3x-ui",
-      "helpDescription": "Dostupné príkazy na sledovanie a správu servera 3x-ui:",
+      "helpTitle": "🤖 Príkazy Discord bota xx-ui",
+      "helpDescription": "Dostupné príkazy na sledovanie a správu servera xx-ui:",
       "helpStatus": "Zobraziť záťaž systému, RAM, CPU, spojenia a pripojených používateľov",
       "helpReport": "Vytvoriť úplnú správu o stave, prípadne aj so zálohou databázy",
       "helpBackup": "Okamžite poslať súbor so zálohou databázy",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Zobraziť všetky nastavené vstupy s portmi a štatistikami klientov",
       "helpRestart": "Reštartovať jadro Xray",
       "helpHelp": "Zobraziť tento zoznam dostupných príkazov",
-      "statusTitle": "⚡ Stav servera 3x-ui",
+      "statusTitle": "⚡ Stav servera xx-ui",
       "statusDescription": "Aktuálne prevádzkové údaje pre **{{ .Host }}**",
       "backupTitle": "🗄️ Záloha databázy",
-      "backupDescription": "Záloha 3x-ui vytvorená o `{{ .Time }}`",
+      "backupDescription": "Záloha xx-ui vytvorená o `{{ .Time }}`",
       "backupUnavailable": "❌ Služba zálohovania nie je dostupná",
       "backupFailed": "❌ Nepodarilo sa načítať zálohu databázy: {{ .Error }}",
       "usageHint": "⚠️ Použitie: `!usage <email>` alebo `/usage <email>`",

@@ -426,6 +426,9 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	if prepend, appendList, err := subSvc.activeOutboundsSplit(); err == nil && (len(prepend) > 0 || len(appendList) > 0) {
 		mergeSubscriptionOutbounds(xrayConfig, prepend, appendList)
 	}
+	if err := (&ExternalOutboundService{}).Inject(xrayConfig); err != nil {
+		return nil, err
+	}
 
 	// Route opted-in local mtproto inbounds through the core's router. Each one
 	// gets a loopback SOCKS bridge — tagged with the inbound's own tag so it is
@@ -482,6 +485,9 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 
 	xrayConfig.RouterConfig = dropRefusedScript(xrayConfig.RouterConfig, "routing", routingScriptRefused)
 	xrayConfig.DNSConfig = dropRefusedScript(xrayConfig.DNSConfig, "dns", dnsScriptRefused)
+	if err := compileRouteFailover(xrayConfig); err != nil {
+		return nil, err
+	}
 	return xrayConfig, nil
 }
 
@@ -1470,7 +1476,16 @@ func (s *XrayService) TestRoute(req xray.RouteTestRequest) (*xray.RouteTestResul
 		return nil, err
 	}
 	defer s.xrayAPI.Close()
-	return s.xrayAPI.TestRoute(req)
+	result, err := s.xrayAPI.TestRoute(req)
+	if err != nil {
+		return nil, err
+	}
+	if cfg := process.GetConfig(); cfg != nil {
+		if primary, ok := cfg.FailoverPrimaries[result.OutboundTag]; ok {
+			result.OutboundTag = primary
+		}
+	}
+	return result, nil
 }
 
 // RestartXray reconciles the running Xray process with the current desired

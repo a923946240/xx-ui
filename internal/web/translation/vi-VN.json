@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Tên người dùng",
   "password": "Mật khẩu",
   "login": "Đăng nhập",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Cập nhật Xray",
       "xraySwitchClickDesk": "Hãy lựa chọn thận trọng, vì các phiên bản cũ có thể không tương thích với các cấu hình hiện tại.",
       "updatePanel": "Cập nhật Panel",
-      "panelUpdateDesc": "Điều này sẽ cập nhật 3X-UI lên bản phát hành mới nhất và khởi động lại dịch vụ panel.",
+      "panelUpdateDesc": "Điều này sẽ cập nhật xx-ui lên bản phát hành mới nhất và khởi động lại dịch vụ panel.",
       "currentPanelVersion": "Phiên bản panel hiện tại",
       "latestPanelVersion": "Phiên bản panel mới nhất",
       "panelUpToDate": "Panel đã được cập nhật",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Hành động này sẽ thay đổi phiên bản Xray thành #version#.",
       "xraySwitchVersionPopover": "Xray đã được cập nhật thành công",
       "panelUpdateDialog": "Bạn có chắc muốn cập nhật panel không?",
-      "panelUpdateDialogDesc": "Điều này sẽ cập nhật 3X-UI lên #version# và khởi động lại dịch vụ panel.",
+      "panelUpdateDialogDesc": "Điều này sẽ cập nhật xx-ui lên #version# và khởi động lại dịch vụ panel.",
       "panelUpdateStartedPopover": "Bắt đầu cập nhật panel",
       "panelUpdateFailedTitle": "Cập nhật panel thất bại",
       "panelUpdateFailedDesc": "Bản cập nhật không hoàn tất thành công. Hãy kiểm tra nhật ký máy chủ, hoặc chạy 'x-ui update' từ dòng lệnh.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "Theo thứ tự trên trang Máy chủ giữa các kết nối vào. Thiết lập này quyết định thứ tự do máy chủ xuất ra; ứng dụng khách có thể tự sắp xếp lại."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "importRules": "Nhập quy tắc",
       "exportRules": "Xuất quy tắc",
       "importOutbounds": "Nhập outbound",
@@ -1967,6 +2022,9 @@
         "wrongKind": "Sai loại cơ sở dữ liệu cho trường này: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Đầu ra dự phòng",
+        "failoverHint": "Kết nối mới dùng đầu ra dự phòng khi đầu ra chính không vượt qua kiểm tra. Khi đầu ra chính phục hồi, kết nối mới sẽ quay lại dùng nó. Các kết nối hiện có giữ nguyên tuyến.",
+        "failoverConflict": "Chọn hai đầu ra khác nhau và bỏ chọn bộ cân bằng tải.",
         "sourceIps": "IP nguồn",
         "sourcePort": "Cổng nguồn",
         "vlessRoute": "Đường VLESS",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "Kiểm tra thông báo Discord của 3x-ui",
+      "title": "Kiểm tra thông báo Discord của xx-ui",
       "body": "Đây là thông báo thử nghiệm xác nhận rằng thông báo Discord đã được cấu hình đúng."
     },
-    "footer": "Bảng điều khiển 3x-ui",
+    "footer": "Bảng điều khiển xx-ui",
     "fields": {
       "panelVersion": "Phiên bản bảng điều khiển",
       "xrayCore": "Lõi Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Đăng nhập thất bại"
     },
     "report": {
-      "title": "📊 Báo cáo trạng thái 3x-ui",
+      "title": "📊 Báo cáo trạng thái xx-ui",
       "summary": "Báo cáo định kỳ trạng thái máy chủ và proxy của **{{ .Host }}**",
-      "footer": "Báo cáo định kỳ 3x-ui • Lịch: {{ .RunTime }}"
+      "footer": "Báo cáo định kỳ xx-ui • Lịch: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Lệnh bot Discord của 3x-ui",
-      "helpDescription": "Các lệnh có sẵn để giám sát và quản lý máy chủ 3x-ui:",
+      "helpTitle": "🤖 Lệnh bot Discord của xx-ui",
+      "helpDescription": "Các lệnh có sẵn để giám sát và quản lý máy chủ xx-ui:",
       "helpStatus": "Hiển thị tải hệ thống, RAM, CPU, kết nối và người dùng trực tuyến",
       "helpReport": "Tạo báo cáo trạng thái đầy đủ (kèm bản sao lưu CSDL nếu được cấu hình)",
       "helpBackup": "Gửi ngay tệp sao lưu cơ sở dữ liệu",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Liệt kê tất cả inbound đã cấu hình kèm cổng và thống kê máy khách",
       "helpRestart": "Khởi động lại lõi Xray",
       "helpHelp": "Hiển thị danh sách lệnh này",
-      "statusTitle": "⚡ Trạng thái máy chủ 3x-ui",
+      "statusTitle": "⚡ Trạng thái máy chủ xx-ui",
       "statusDescription": "Chỉ số vận hành hiện tại của **{{ .Host }}**",
       "backupTitle": "🗄️ Sao lưu cơ sở dữ liệu",
-      "backupDescription": "Bản sao lưu 3x-ui được tạo lúc `{{ .Time }}`",
+      "backupDescription": "Bản sao lưu xx-ui được tạo lúc `{{ .Time }}`",
       "backupUnavailable": "❌ Dịch vụ sao lưu không khả dụng",
       "backupFailed": "❌ Không thể đọc bản sao lưu cơ sở dữ liệu: {{ .Error }}",
       "usageHint": "⚠️ Cách dùng: `!usage <email>` hoặc `/usage <email>`",

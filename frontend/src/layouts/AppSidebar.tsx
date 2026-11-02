@@ -41,8 +41,8 @@ const DONATE_URL = 'https://donate.sanaei.dev/';
 // The palette listens for Ctrl as well as Cmd, so the chip must not show a
 // Mac glyph to the Linux and Windows operators who are most of this panel's.
 const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘' : 'Ctrl';
-const DOCS_URL = 'https://docs.sanaei.dev/';
-const REPO_URL = 'https://github.com/MHSanaei/3x-ui';
+const REPO_URL = 'https://github.com/a923946240/xx-ui';
+const DOCS_URL = `${REPO_URL}/tree/main/docs`;
 const LOGOUT_KEY = '__logout__';
 const RAIL_WIDTH = 72;
 const SIDER_WIDTH = 220;
@@ -134,9 +134,9 @@ function ThemeCycleButton({
 
 function readSidebarPinned() {
   try {
-    return localStorage.getItem(SIDEBAR_PINNED_KEY) === 'true';
+    return localStorage.getItem(SIDEBAR_PINNED_KEY) !== 'false';
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -200,8 +200,18 @@ export default function AppSidebar() {
     [t],
   );
 
-  const navItems = useMemo(() => tabs.filter((tab) => tab.key !== LOGOUT_KEY), [tabs]);
-  const utilItems = useMemo(() => tabs.filter((tab) => tab.key === LOGOUT_KEY), [tabs]);
+  const systemKeys = useMemo(
+    () => new Set(['/settings', '/xray', '/api-docs', '/sponsors', LOGOUT_KEY]),
+    [],
+  );
+  const navItems = useMemo(
+    () => tabs.filter((tab) => !systemKeys.has(tab.key)),
+    [tabs, systemKeys],
+  );
+  const utilItems = useMemo(
+    () => tabs.filter((tab) => systemKeys.has(tab.key)),
+    [tabs, systemKeys],
+  );
 
   const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
     const children: NonNullable<MenuProps['items']> = [
@@ -367,7 +377,7 @@ export default function AppSidebar() {
       >
         <div className="sider-brand">
           <div className="brand-block">
-            <span className="brand-text">{railCollapsed ? '3X' : '3X-UI'}</span>
+            <span className="brand-text">{railCollapsed ? 'XX' : 'xx-ui'}</span>
           </div>
           {!railCollapsed && (
             <div className="brand-actions">
@@ -417,24 +427,36 @@ export default function AppSidebar() {
             </span>
           </button>
         </Tooltip>
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          openKeys={railCollapsed ? undefined : openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys as string[])}
-          className="sider-nav"
-          items={toMenuItems(navItems)}
-          onClick={onMenuClick}
-        />
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          className="sider-utility"
-          items={toMenuItems(utilItems)}
-          onClick={onMenuClick}
-        />
+        <div className="sidebar-scroll">
+          {!railCollapsed && (
+            <div className="sidebar-section-label">{t('appearance.workspace')}</div>
+          )}
+          <Menu
+            theme={currentTheme}
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            openKeys={railCollapsed ? undefined : openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys as string[])}
+            className="sider-nav"
+            items={toMenuItems(navItems)}
+            onClick={onMenuClick}
+          />
+          {!railCollapsed && (
+            <div className="sidebar-section-label sidebar-section-system">
+              {t('appearance.system')}
+            </div>
+          )}
+          <Menu
+            theme={currentTheme}
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            openKeys={railCollapsed ? undefined : openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys as string[])}
+            className="sider-utility"
+            items={toMenuItems(utilItems)}
+            onClick={onMenuClick}
+          />
+        </div>
         <div className="sider-footer">
           <VersionBadge version={panelVersion} collapsed={railCollapsed} />
         </div>
@@ -455,7 +477,7 @@ export default function AppSidebar() {
       >
         <div className="drawer-header">
           <div className="brand-block">
-            <span className="drawer-brand">3X-UI</span>
+            <span className="drawer-brand">xx-ui</span>
           </div>
           <div className="drawer-header-actions">
             <DocsButton ariaLabel={t('menu.docs') || 'Documentation'} />
@@ -496,30 +518,34 @@ export default function AppSidebar() {
             <span className="kbd-key">K</span>
           </span>
         </button>
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          openKeys={openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys as string[])}
-          className="drawer-menu drawer-nav"
-          items={toMenuItems(navItems)}
-          onClick={(info) => {
-            onMenuClick(info);
-            setDrawerOpen(false);
-          }}
-        />
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          className="drawer-menu drawer-utility"
-          items={toMenuItems(utilItems)}
-          onClick={(info) => {
-            onMenuClick(info);
-            setDrawerOpen(false);
-          }}
-        />
+        <div className="drawer-scroll">
+          <Menu
+            theme={currentTheme}
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            openKeys={openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys as string[])}
+            className="drawer-menu drawer-nav"
+            items={toMenuItems(navItems)}
+            onClick={(info) => {
+              onMenuClick(info);
+              setDrawerOpen(false);
+            }}
+          />
+          <Menu
+            theme={currentTheme}
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            openKeys={openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys as string[])}
+            className="drawer-menu drawer-utility"
+            items={toMenuItems(utilItems)}
+            onClick={(info) => {
+              onMenuClick(info);
+              setDrawerOpen(false);
+            }}
+          />
+        </div>
         <div className="drawer-footer">
           <VersionBadge version={panelVersion} />
         </div>

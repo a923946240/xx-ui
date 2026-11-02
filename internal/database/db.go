@@ -85,6 +85,7 @@ func allModels() []any {
 		&model.ClientGlobalTraffic{},
 		&model.NodePendingReset{},
 		&model.OutboundSubscription{},
+		&model.ExternalOutbound{},
 		&model.SubBalancer{},
 		&model.TuicTrafficReceipt{},
 	}

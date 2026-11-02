@@ -559,6 +559,11 @@ func (s *SettingService) GetPanelOutbound() (string, error) {
 }
 
 func (s *SettingService) SetPanelOutbound(tag string) error {
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
+	if err := validateEgressTarget(tag); err != nil {
+		return err
+	}
 	return s.setString("panelOutbound", tag)
 }
 

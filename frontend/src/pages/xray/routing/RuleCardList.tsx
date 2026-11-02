@@ -156,7 +156,14 @@ export default function RuleCardList({
                     ? t('pages.xray.balancer') || 'Balancer'
                     : t('pages.xray.Outbounds')}
                 </span>
-                {rule.outboundTag ? (
+                {rule.outboundTag && rule.fallbackOutboundTag ? (
+                  <Tag color="green" className="flow-tag flow-tag-pair">
+                    <span>
+                      <ExportOutlined aria-hidden="true" /> {rule.outboundTag}
+                    </span>{' '}
+                    <span>→ {rule.fallbackOutboundTag}</span>
+                  </Tag>
+                ) : rule.outboundTag ? (
                   <Tag color="green" className="flow-tag">
                     <ExportOutlined aria-hidden="true" /> {rule.outboundTag}
                   </Tag>

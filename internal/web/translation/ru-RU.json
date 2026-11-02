@@ -1,4 +1,18 @@
 {
+  "appearance": {
+    "workspace": "WORKSPACE",
+    "system": "SYSTEM",
+    "totalTraffic": "Total traffic",
+    "resources": "Server resources",
+    "exitConfiguration": "Exit configuration",
+    "nativeOutbounds": "Native outbounds",
+    "clientStatus": "Client status",
+    "selectExit": "Select exit",
+    "forwarding": "Forwarding",
+    "trafficSplit": "Traffic distribution",
+    "collectedTraffic": "Current system counters",
+    "serverResources": "CPU · Memory · Storage"
+  },
   "username": "Имя пользователя",
   "password": "Пароль",
   "login": "Войти",
@@ -152,7 +166,7 @@
       "xrayUpdates": "Обновления Xray",
       "xraySwitchClickDesk": "Важно: старые версии могут не поддерживать текущие настройки",
       "updatePanel": "Обновить панель",
-      "panelUpdateDesc": "Это обновит 3X-UI до последнего релиза и перезапустит сервис панели.",
+      "panelUpdateDesc": "Это обновит xx-ui до последнего релиза и перезапустит сервис панели.",
       "currentPanelVersion": "Текущая версия панели",
       "latestPanelVersion": "Последняя версия панели",
       "panelUpToDate": "Панель обновлена",
@@ -216,7 +230,7 @@
       "xraySwitchVersionDialogDesc": "Вы точно хотите сменить версию Xray?",
       "xraySwitchVersionPopover": "Xray успешно обновлён",
       "panelUpdateDialog": "Вы действительно хотите обновить панель?",
-      "panelUpdateDialogDesc": "Это обновит 3X-UI до версии #version# и перезапустит сервис панели.",
+      "panelUpdateDialogDesc": "Это обновит xx-ui до версии #version# и перезапустит сервис панели.",
       "panelUpdateStartedPopover": "Обновление панели началось",
       "panelUpdateFailedTitle": "Не удалось обновить панель",
       "panelUpdateFailedDesc": "Обновление не завершилось успешно. Проверьте журналы сервера или выполните 'x-ui update' в командной строке.",
@@ -1842,6 +1856,47 @@
       "subHostSortModeDesc": "Используется порядок со страницы хостов для всех входящих подключений. Настройка задаёт порядок выдачи сервером; клиентские приложения могут сортировать узлы самостоятельно."
     },
     "xray": {
+      "external": {
+        "title": "External tunnel exits",
+        "add": "Add exit",
+        "edit": "Edit",
+        "save": "Save exit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this unused exit?",
+        "templateSaveHint": "Save manual Xray configuration changes with the Save button; external tunnel exits are saved immediately.",
+        "helpText": "Linux-local final exits. TCP only. Save exits immediately; then select their tags in routing. Install the official client binaries on this panel server first.",
+        "pending": "Save or discard pending Xray changes before editing external exits.",
+        "empty": "No external tunnel exits configured.",
+        "enabled": "Enabled",
+        "logs": "Logs",
+        "noLogs": "No client output yet.",
+        "probe": "Test HTTPS",
+        "reachable": "Tunnel reachable",
+        "failed": "Probe failed",
+        "protocol": "Protocol",
+        "tag": "Outbound tag",
+        "remark": "Name",
+        "host": "Server",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "serverName": "TLS server name",
+        "transport": "Transport",
+        "retainPassword": "Leave blank to keep the stored password.",
+        "required": "This field is required.",
+        "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
+        "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "states": {
+          "starting": "Starting",
+          "running": "Client running",
+          "disabled": "Disabled",
+          "stopped": "Stopped",
+          "missing-binary": "Client not installed",
+          "backoff": "Waiting to retry",
+          "unsupported-platform": "Linux required",
+          "listener-error": "Local listener unavailable"
+        }
+      },
       "importRules": "Импорт правил",
       "exportRules": "Экспорт правил",
       "importOutbounds": "Импорт исходящих",
@@ -1967,6 +2022,9 @@
         "wrongKind": "База не того типа для этого поля: {tokens}"
       },
       "ruleForm": {
+        "fallbackOutboundTag": "Резервный выход",
+        "failoverHint": "При сбое проверки основного выхода новые соединения используют резервный. После восстановления основного выхода новые соединения возвращаются на него. Маршрут существующих соединений сохраняется.",
+        "failoverConflict": "Выберите два разных выхода и снимите выбор балансировщика.",
         "sourceIps": "IP источника",
         "sourcePort": "Порт источника",
         "vlessRoute": "VLESS route",
@@ -2752,10 +2810,10 @@
   },
   "discord": {
     "test": {
-      "title": "Тестовое уведомление Discord от 3x-ui",
+      "title": "Тестовое уведомление Discord от xx-ui",
       "body": "Это тестовое уведомление подтверждает, что уведомления Discord настроены правильно."
     },
-    "footer": "Панель 3x-ui",
+    "footer": "Панель xx-ui",
     "fields": {
       "panelVersion": "Версия панели",
       "xrayCore": "Ядро Xray",
@@ -2790,13 +2848,13 @@
       "loginFailed": "Неудачный вход"
     },
     "report": {
-      "title": "📊 Отчёт о состоянии 3x-ui",
+      "title": "📊 Отчёт о состоянии xx-ui",
       "summary": "Периодический отчёт о состоянии сервера и прокси для **{{ .Host }}**",
-      "footer": "Плановый отчёт 3x-ui • Расписание: {{ .RunTime }}"
+      "footer": "Плановый отчёт xx-ui • Расписание: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Команды Discord-бота 3x-ui",
-      "helpDescription": "Доступные команды для мониторинга и управления сервером 3x-ui:",
+      "helpTitle": "🤖 Команды Discord-бота xx-ui",
+      "helpDescription": "Доступные команды для мониторинга и управления сервером xx-ui:",
       "helpStatus": "Показать нагрузку системы, RAM, CPU, соединения и пользователей онлайн",
       "helpReport": "Сформировать полный отчёт о состоянии (с резервной копией БД, если включена)",
       "helpBackup": "Немедленно отправить файл резервной копии базы данных",
@@ -2804,10 +2862,10 @@
       "helpInbounds": "Список всех настроенных входящих подключений с портами и статистикой клиентов",
       "helpRestart": "Перезапустить ядро Xray",
       "helpHelp": "Показать этот список команд",
-      "statusTitle": "⚡ Состояние сервера 3x-ui",
+      "statusTitle": "⚡ Состояние сервера xx-ui",
       "statusDescription": "Текущие рабочие показатели **{{ .Host }}**",
       "backupTitle": "🗄️ Резервная копия базы данных",
-      "backupDescription": "Резервная копия 3x-ui создана `{{ .Time }}`",
+      "backupDescription": "Резервная копия xx-ui создана `{{ .Time }}`",
       "backupUnavailable": "❌ Служба резервного копирования недоступна",
       "backupFailed": "❌ Не удалось прочитать резервную копию базы данных: {{ .Error }}",
       "usageHint": "⚠️ Использование: `!usage <email>` или `/usage <email>`",

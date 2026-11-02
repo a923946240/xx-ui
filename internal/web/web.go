@@ -323,6 +323,14 @@ const (
 // startTask schedules background jobs (Xray checks, traffic jobs, cron
 // jobs) which the panel relies on for periodic maintenance and monitoring.
 func (s *Server) startTask(restartXray bool, loc *time.Location) {
+	if err := (&service.ExternalOutboundService{}).Reconcile(); err != nil {
+		logger.Warning("external outbound restore failed")
+	}
+	_, _ = s.cron.AddFunc("@every 10s", func() {
+		if err := (&service.ExternalOutboundService{}).Reconcile(); err != nil {
+			logger.Warning("external outbound reconcile failed")
+		}
+	})
 	if restartXray {
 		err := s.xrayService.RestartXray(true)
 		if err != nil {
@@ -716,7 +724,7 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 		if err := s.tgbotService.TestConnection(); err != nil {
 			return fmt.Errorf("telegram API test failed: %w", err)
 		}
-		s.tgbotService.SendMsgToTgbotAdmins("✅ Test message from 3x-ui")
+		s.tgbotService.SendMsgToTgbotAdmins("✅ Test message from xx-ui")
 		return nil
 	})
 
@@ -797,6 +805,7 @@ func (s *Server) stop(stopXray bool, stopTgBot bool) error {
 		<-s.cron.Stop().Done()
 	}
 	if stopXray {
+		service.StopExternalOutbounds()
 		tuic.GetManager().StopAll()
 		if err := job.NewTuicJob().FlushStoppedTraffic(); err != nil {
 			logger.Warning("persist final TUIC traffic on shutdown failed:", err)

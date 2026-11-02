@@ -26,12 +26,17 @@ const (
 )
 
 func (s *XraySettingService) SaveXraySetting(newXraySettings string) error {
+	externalConfigMu.Lock()
+	defer externalConfigMu.Unlock()
 	// The frontend round-trips the whole getXraySetting response back
 	// through the textarea, so if it has ever received a wrapped
 	// payload (see UnwrapXrayTemplateConfig) it sends that same wrapper
 	// back here. Strip it before validation/storage, otherwise we save
 	// garbage the next read can't recover from without this same call.
 	newXraySettings = UnwrapXrayTemplateConfig(newXraySettings)
+	if err := checkExternalTemplateTags(newXraySettings); err != nil {
+		return err
+	}
 	if err := s.CheckXrayConfig(newXraySettings); err != nil {
 		return err
 	}
@@ -44,6 +49,9 @@ func (s *XraySettingService) SaveXraySetting(newXraySettings string) error {
 	if spelled, changed, err := database.RewriteDNSOutboundQTypeZero(newXraySettings); err == nil && changed {
 		newXraySettings = spelled
 	}
+	if err := checkExternalTemplateTags(newXraySettings); err != nil {
+		return err
+	}
 	return s.saveSetting("xrayTemplateConfig", newXraySettings)
 }
 
@@ -54,6 +62,9 @@ func (s *XraySettingService) CheckXrayConfig(XrayTemplateConfig string) error {
 		return common.NewError("xray template config invalid:", err)
 	}
 	if err := checkTemplateLuaScripts(xrayConfig); err != nil {
+		return err
+	}
+	if err := validateRouteFailover(xrayConfig); err != nil {
 		return err
 	}
 	for _, inbound := range xrayConfig.InboundConfigs {

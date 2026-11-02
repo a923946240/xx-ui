@@ -1,24 +1,8 @@
-name: Release 3X-UI
+name: Build xx-ui artifacts
 
+# Build artifacts explicitly. Publishing a release requires a separate action.
 on:
   workflow_dispatch:
-  # Only main (dev channel) and version tags ship binaries; build any other
-  # branch on demand via workflow_dispatch.
-  push:
-    branches:
-      - main
-    tags:
-      - "v*.*.*"
-    paths:
-      - "**.go"
-      - "go.mod"
-      - "go.sum"
-      - "**.sh"
-      - "frontend/**"
-      - "x-ui.service.debian"
-      - "x-ui.service.arch"
-      - "x-ui.service.rhel"
-      - ".github/workflows/release.yml"
 
 jobs:
   build:
@@ -64,7 +48,7 @@ jobs:
           npm run build
         working-directory: frontend
 
-      - name: Build 3X-UI
+      - name: Build xx-ui
         run: |
           CURL_RETRY="--retry 5 --retry-all-errors --retry-delay 3"
           fetch() { wget -q --tries=5 --waitretry=10 --retry-on-http-error=429,500,502,503 "$@"; }
@@ -247,7 +231,7 @@ jobs:
             mingw-w64-x86_64-sqlite3
             mingw-w64-x86_64-pkg-config
 
-      - name: Build 3X-UI for Windows (CGO)
+      - name: Build xx-ui for Windows (CGO)
         shell: msys2 {0}
         run: |
           export PATH="/c/hostedtoolcache/windows/go/$(ls /c/hostedtoolcache/windows/go | sort -V | tail -n1)/x64/bin:$PATH"

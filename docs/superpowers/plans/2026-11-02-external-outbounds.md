@@ -38,10 +38,10 @@ Ant Design and TanStack Query. No new Go/npm dependency.
 `NewManager(stateDir, binaryDir string) *Manager` in Task 2.
 
 - [ ] Write protocol config/invalid input tests and gate tests for CONNECT,
-  authentication, UDP refusal and shutdown, with independently specified fixtures.
+      authentication, UDP refusal and shutdown, with independently specified fixtures.
 - [ ] Run `go test ./internal/externalproxy` and observe missing-feature failures.
 - [ ] Implement typed specs and the authenticated manager-owned gate, without
-  opening any public listener or using a direct target dial.
+      opening any public listener or using a direct target dial.
 - [ ] Run the package tests and race check.
 
 ### Task 2: Client lifecycle and pinned installation
@@ -53,11 +53,11 @@ Ant Design and TanStack Query. No new Go/npm dependency.
 `Manager.Status(tag string) Status`, `Manager.StopAll()`.
 
 - [ ] Add failing subprocess tests for retry, stop/disable, active-session closure,
-  missing executable, bounded/redacted logs and foreign backend listener refusal.
+      missing executable, bounded/redacted logs and foreign backend listener refusal.
 - [ ] Implement private configs, direct child execution, bounded exponential
-  retry and process ownership validation for Linux backend sockets.
+      retry and process ownership validation for Linux backend sockets.
 - [ ] Pin official binary URLs/checksums for amd64/arm64; install explicitly and
-  atomically with no system routing/firewall changes.
+      atomically with no system routing/firewall changes.
 - [ ] Run package/race tests and check official client config startup.
 
 ### Task 3: Durable service, authenticated API and Xray wiring
@@ -72,11 +72,11 @@ and adjacent tests. Modify both migration lists, `service/xray.go`,
 `Reconcile()`, `Probe(ctx,id)`. Requests separate from secret-free response views.
 
 - [ ] Write failing real-SQLite/API tests for saved config preservation,
-  password retention without exposure, tag collisions, reference deletion,
-  disabled blackhole injection and restricted-token rejection.
+      password retention without exposure, tag collisions, reference deletion,
+      disabled blackhole injection and restricted-token rejection.
 - [ ] Register the model in both migration lists and implement validation/CRUD.
 - [ ] Wire process restore/stop and runtime injection before routing validation;
-  surface managed tags through existing Xray config response selectors.
+      surface managed tags through existing Xray config response selectors.
 - [ ] Document every new route; generate schemas/OpenAPI/docs.
 - [ ] Run service/controller/database/API contract checks.
 
@@ -90,7 +90,7 @@ and adjacent tests. Modify both migration lists, `service/xray.go`,
 password; saved mutations invalidate Xray tag queries.
 
 - [ ] Write failing UI tests for adding/editing, secret-preserving updates,
-  disabled referenced exits, failed save feedback and bounded logs.
+      disabled referenced exits, failed save feedback and bounded logs.
 - [ ] Implement the existing AntD/RHF patterns and a locally scoped query.
 - [ ] Add English and Chinese labels plus matching locale keys elsewhere.
 - [ ] Run frontend tests, typecheck, lint/format and production build.
@@ -101,8 +101,8 @@ password; saved mutations invalidate Xray tag queries.
 TCP/DNS limitations, route example, validation record and rollback instructions.
 
 - [ ] Run full applicable Go/frontend tests, generation checks, builds and
-  `git diff --check`; distinguish environment skips from passes.
+      `git diff --check`; distinguish environment skips from passes.
 - [ ] Exercise the actual page, add/edit/disable an exit and inspect logs/console.
 - [ ] Run available real protocol fixtures; record unavailable integrations.
 - [ ] Request one independent whole-change review; fix substantive findings with
-  regression tests; deliver source and build artifacts with verification limits.
+      regression tests; deliver source and build artifacts with verification limits.

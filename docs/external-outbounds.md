@@ -9,11 +9,11 @@
 
 ## 支持范围
 
-| 出口 | 固定客户端版本 | 隧道传输 | 业务流量 |
-| --- | --- | --- | --- |
-| NaiveProxy | v154.0.8037.49-5 | HTTPS / QUIC | TCP CONNECT |
-| mieru | v3.39.0 | TCP | TCP CONNECT |
-| TrustTunnel | v1.1.11 | HTTP/2 / HTTP/3 | TCP CONNECT |
+| 出口        | 固定客户端版本   | 隧道传输        | 业务流量    |
+| ----------- | ---------------- | --------------- | ----------- |
+| NaiveProxy  | v154.0.8037.49-5 | HTTPS / QUIC    | TCP CONNECT |
+| mieru       | v3.39.0          | TCP             | TCP CONNECT |
+| TrustTunnel | v1.1.11          | HTTP/2 / HTTP/3 | TCP CONNECT |
 
 仅管理当前面板所在 Linux 主机的客户端。安装脚本支持 amd64、arm64；本次实际运行验证使用 amd64。这里的 QUIC/HTTP/3 是隧道传输方式，不代表支持客户端 UDP 流量。UDP ASSOCIATE 会被明确拒绝，QUIC 网站流量需由使用方允许回落到 TCP；本功能不替客户端改协议。
 

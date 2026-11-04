@@ -205,6 +205,28 @@ export const sections: readonly Section[] = [
     endpoints: [
       {
         method: 'GET',
+        path: '/panel/api/external-outbounds/clients',
+        summary:
+          'List installed NaiveProxy, mieru and TrustTunnel versions, known official stable releases and background operation states. Full admin tokens or authenticated UI sessions only.',
+        responseSchema: 'ExternalClientView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/external-outbounds/clients/check',
+        summary:
+          'Start an asynchronous official stable release check for naive, mieru or trusttunnel. Poll the client list for completion. Concurrent client operations are rejected.',
+        requestSchema: { $ref: '#/components/schemas/ExternalClientRequest' },
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/external-outbounds/clients/install',
+        summary:
+          'Install or update one official stable client after SHA-256, native ELF and version checks. Restarts only managed clients of that protocol while preserving SOCKS gates. Activation failure restores the previous executable; inspect the client list for the final state.',
+        requestSchema: { $ref: '#/components/schemas/ExternalClientRequest' },
+      },
+      {
+        method: 'GET',
         path: '/panel/api/external-outbounds/list',
         summary: 'List external exits, credential presence, client state and sanitized logs.',
         responseSchema: 'ExternalOutboundView',

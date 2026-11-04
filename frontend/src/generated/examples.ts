@@ -628,6 +628,21 @@ export const EXAMPLES: Record<string, unknown> = {
     "onlineCount": 1,
     "total": 2000
   },
+  "ExternalClientRequest": {
+    "protocol": "mieru"
+  },
+  "ExternalClientView": {
+    "error": "",
+    "installed": true,
+    "latestVersion": "v3.39.0",
+    "name": "mieru",
+    "protocol": "mieru",
+    "release": "v3.39.0",
+    "state": "idle",
+    "supported": true,
+    "updateAvailable": false,
+    "version": "3.39.0"
+  },
   "ExternalOutboundInput": {
     "enable": true,
     "host": "proxy.example.com",

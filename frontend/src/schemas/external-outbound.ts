@@ -48,3 +48,18 @@ export const ExternalOutboundProbeSchema = z.object({
 
 export type ExternalOutboundInput = z.infer<typeof ExternalOutboundInputSchema>;
 export type ExternalOutboundView = z.infer<typeof ExternalOutboundViewSchema>;
+
+export const ExternalClientSchema = z.object({
+  protocol: z.enum(['naive', 'mieru', 'trusttunnel']),
+  name: z.string(),
+  installed: z.boolean(),
+  version: z.string(),
+  release: z.string(),
+  latestVersion: z.string(),
+  updateAvailable: z.boolean(),
+  supported: z.boolean(),
+  state: z.string(),
+  error: z.string(),
+});
+export const ExternalClientListSchema = z.array(ExternalClientSchema);
+export type ExternalClient = z.infer<typeof ExternalClientSchema>;

@@ -22,6 +22,7 @@ type runner struct {
 	ctx                        context.Context
 	cancel                     context.CancelFunc
 	done                       chan struct{}
+	restart                    chan chan struct{}
 	logs                       *logBuffer
 	mu                         sync.Mutex
 	state, backend             string
@@ -184,6 +185,7 @@ func (r *runner) supervise() {
 	defer close(r.done)
 	delay := time.Second
 	for r.ctx.Err() == nil {
+		immediate := false
 		if !executableExists(r.binary) {
 			r.setState("missing-binary")
 		} else {
@@ -206,6 +208,16 @@ func (r *runner) supervise() {
 				running := true
 				for running {
 					select {
+					case acknowledged := <-r.restart:
+						r.setState("restarting")
+						stopChild(cmd)
+						<-exited
+						r.mu.Lock()
+						r.pid = 0
+						r.mu.Unlock()
+						close(acknowledged)
+						immediate = true
+						running = false
 					case <-r.ctx.Done():
 						stopChild(cmd)
 						<-exited
@@ -235,7 +247,15 @@ func (r *runner) supervise() {
 		r.mu.Lock()
 		r.pid = 0
 		r.mu.Unlock()
+		if immediate {
+			delay = time.Second
+			continue
+		}
 		select {
+		case acknowledged := <-r.restart:
+			close(acknowledged)
+			delay = time.Second
+			continue
 		case <-r.ctx.Done():
 			return
 		case <-time.After(delay):

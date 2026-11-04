@@ -2527,6 +2527,74 @@
         ],
         "type": "object"
       },
+      "ExternalClientRequest": {
+        "properties": {
+          "protocol": {
+            "example": "mieru",
+            "type": "string"
+          }
+        },
+        "required": [
+          "protocol"
+        ],
+        "type": "object"
+      },
+      "ExternalClientView": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "installed": {
+            "example": true,
+            "type": "boolean"
+          },
+          "latestVersion": {
+            "example": "v3.39.0",
+            "type": "string"
+          },
+          "name": {
+            "example": "mieru",
+            "type": "string"
+          },
+          "protocol": {
+            "example": "mieru",
+            "type": "string"
+          },
+          "release": {
+            "example": "v3.39.0",
+            "type": "string"
+          },
+          "state": {
+            "example": "idle",
+            "type": "string"
+          },
+          "supported": {
+            "example": true,
+            "type": "boolean"
+          },
+          "updateAvailable": {
+            "example": false,
+            "type": "boolean"
+          },
+          "version": {
+            "example": "3.39.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "installed",
+          "latestVersion",
+          "name",
+          "protocol",
+          "release",
+          "state",
+          "supported",
+          "updateAvailable",
+          "version"
+        ],
+        "type": "object"
+      },
       "ExternalOutboundInput": {
         "properties": {
           "enable": {
@@ -5232,6 +5300,138 @@
     }
   ],
   "paths": {
+    "/panel/api/external-outbounds/clients": {
+      "get": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "List installed NaiveProxy, mieru and TrustTunnel versions, known official stable releases and background operation states. Full admin tokens or authenticated UI sessions only.",
+        "operationId": "get_panel_api_external_outbounds_clients",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ExternalClientView"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "error": "",
+                      "installed": true,
+                      "latestVersion": "v3.39.0",
+                      "name": "mieru",
+                      "protocol": "mieru",
+                      "release": "v3.39.0",
+                      "state": "idle",
+                      "supported": true,
+                      "updateAvailable": false,
+                      "version": "3.39.0"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/external-outbounds/clients/check": {
+      "post": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "Start an asynchronous official stable release check for naive, mieru or trusttunnel. Poll the client list for completion. Concurrent client operations are rejected.",
+        "operationId": "post_panel_api_external_outbounds_clients_check",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalClientRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/external-outbounds/clients/install": {
+      "post": {
+        "tags": [
+          "External Outbounds"
+        ],
+        "summary": "Install or update one official stable client after SHA-256, native ELF and version checks. Restarts only managed clients of that protocol while preserving SOCKS gates. Activation failure restores the previous executable; inspect the client list for the final state.",
+        "operationId": "post_panel_api_external_outbounds_clients_install",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalClientRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/external-outbounds/list": {
       "get": {
         "tags": [

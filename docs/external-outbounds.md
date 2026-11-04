@@ -36,7 +36,11 @@
    # 也可把 all 换成 naive、mieru 或 trusttunnel。
    ```
 
-   网页当前没有客户端二进制安装或上传入口。Linux 构建包会附带 `scripts/install-external-clients.sh`；从源码手动部署时，不能只复制面板可执行文件，还应将这份脚本复制到面板安装目录下的 `scripts/` 中。面板在 `${XUI_BIN_FOLDER}/external-proxies` 中按固定文件名 `naive`、`mieru`、`trusttunnel` 查找客户端，其他名称的旧二进制不会自动被识别。
+   也可以在网页「出站 → 外部隧道出口 → 客户端程序管理」中查看当前版本、检查官方稳定版并安装或更新。Web 操作仅供管理员会话或完整 admin API token 使用；monitor、node-sync、node-admin token 无权安装客户端。后台下载会校验官方 SHA-256、ELF 架构和版本，原子替换后只重启本面板管理的对应协议客户端，保留 SOCKS gate；相关连接可能断开。启动失败时尝试恢复旧程序，错误会显示在页面中。独立于本管理器运行的其他服务不受它控制。
+
+   Web 下载沿用面板网络出站，环境变量 `XUI_EXTERNAL_CLIENT_PROXY` 可单独覆盖这些请求的代理。仅允许固定官方仓库及 HTTPS 发布资产，不接受任意下载 URL 或文件上传。一次只允许一个客户端操作。安装包上限 64 MiB，展开上限 128 MiB；官方发布缺少 SHA-256 摘要时拒绝安装。NaiveProxy 解压需要 `xz`，缺失时报告错误而不替换旧文件。
+
+   Linux 构建包仍附带 `scripts/install-external-clients.sh`，从源码手动部署时也应复制该脚本。面板在 `${XUI_BIN_FOLDER}/external-proxies` 中按固定文件名 `naive`、`mieru`、`trusttunnel` 查找客户端。
 
    脚本只从固定的官方 release 下载，逐一核对硬编码 SHA-256，再原子替换目标程序。需要 `curl`、`tar`、`sha256sum`、`xz`；面板进程需要执行这些程序的权限。保存网页表单不会触发下载。更新客户端后，停用并重新启用对应出口以替换正在运行的进程。
 

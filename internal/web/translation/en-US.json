@@ -1978,6 +1978,28 @@
     },
     "xray": {
       "external": {
+        "clients": {
+          "title": "Client software",
+          "helpText": "View installed versions and install official stable releases. Updates restart only this panel's clients of the selected protocol.",
+          "current": "Installed version",
+          "latest": "Official stable release",
+          "notInstalled": "Not installed",
+          "unknown": "Unknown version",
+          "install": "Install",
+          "update": "Update",
+          "check": "Check updates",
+          "confirmTitle": "Install or update {name}?",
+          "confirmDescription": "Existing connections through this protocol may disconnect. The previous executable is retained for rollback.",
+          "confirm": "Confirm",
+          "unsupported": "Requires Linux amd64 or arm64",
+          "loadFailed": "Could not load client versions",
+          "checking": "Checking release",
+          "downloading": "Downloading",
+          "verifying": "Verifying",
+          "installing": "Installing / restarting",
+          "failed": "Failed",
+          "installed": "Installed"
+        },
         "title": "External tunnel exits",
         "add": "Add exit",
         "edit": "Edit",

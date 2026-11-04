@@ -38,7 +38,11 @@ The resulting `xx-ui` executable includes the web interface. To run the proxy, p
 
 ### Install the external tunnel clients
 
-The web panel does not install or upload NaiveProxy, mieru, or TrustTunnel executables. Linux build artifacts include `scripts/install-external-clients.sh`. If you deploy only the compiled panel executable, copy that script into `scripts/` under the panel installation directory as well.
+Open **Outbounds → External tunnel exits → Client software** to view installed versions, check official stable releases, and install or update NaiveProxy, mieru, or TrustTunnel. Installation runs in the background with visible progress and errors. Updates verify the official archive SHA-256, the native ELF architecture, and its version before atomically replacing the executable. Only this panel's clients of that protocol restart; their existing connections may disconnect. The previous executable is kept for activation-failure rollback.
+
+The Web installer supports Linux amd64 and arm64, requires `xz` for NaiveProxy, and accepts only the fixed official GitHub repositories. It uses the configured panel outbound; `XUI_EXTERNAL_CLIENT_PROXY` can override the proxy for these downloads only. Current versions come from the executable, not its filename; a NaiveProxy release build suffix is available after a verified Web installation. Uploading arbitrary executables is not supported.
+
+For command-line installation, Linux build artifacts include `scripts/install-external-clients.sh`. If you deploy only the compiled panel executable, copy that script into `scripts/` under the panel installation directory as well.
 
 From the panel installation directory, run as a user who can write to the binary directory:
 

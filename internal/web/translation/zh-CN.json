@@ -1857,6 +1857,28 @@
     },
     "xray": {
       "external": {
+        "clients": {
+          "title": "客户端程序管理",
+          "helpText": "查看已安装版本，安装或更新至官方稳定版。更新只重启本面板管理的对应协议客户端。",
+          "current": "已安装版本",
+          "latest": "官方稳定版本",
+          "notInstalled": "未安装",
+          "unknown": "版本未知",
+          "install": "安装",
+          "update": "更新",
+          "check": "检查更新",
+          "confirmTitle": "安装或更新 {name}？",
+          "confirmDescription": "使用该协议的现有连接可能断开。系统会保留原程序，供失败时回退。",
+          "confirm": "确认",
+          "unsupported": "仅支持 Linux amd64 或 arm64",
+          "loadFailed": "无法读取客户端版本",
+          "checking": "检查版本中",
+          "downloading": "下载中",
+          "verifying": "校验中",
+          "installing": "安装／重启中",
+          "failed": "失败",
+          "installed": "已安装"
+        },
         "title": "外部隧道出口",
         "add": "添加出口",
         "edit": "编辑",

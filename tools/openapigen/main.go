@@ -117,6 +117,8 @@ func run(root, outDir string) error {
 				"ExternalOutboundInput",
 				"ExternalOutboundView",
 				"ExternalOutboundProbe",
+				"ExternalClientRequest",
+				"ExternalClientView",
 			),
 		},
 		{

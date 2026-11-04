@@ -8,6 +8,22 @@ _openapi:
     - ./public/openapi.json
   toc:
     - depth: 2
+      title: List installed NaiveProxy, mieru and TrustTunnel versions, known official
+        stable releases and background operation states. Full admin tokens or
+        authenticated UI sessions only.
+      url: '#list-installed-naiveproxy-mieru-and-trusttunnel-versions-known-official-stable-releases-and-background-operation-states-full-admin-tokens-or-authenticated-ui-sessions-only'
+    - depth: 2
+      title: Start an asynchronous official stable release check for naive, mieru or
+        trusttunnel. Poll the client list for completion. Concurrent client
+        operations are rejected.
+      url: '#start-an-asynchronous-official-stable-release-check-for-naive-mieru-or-trusttunnel-poll-the-client-list-for-completion-concurrent-client-operations-are-rejected'
+    - depth: 2
+      title: Install or update one official stable client after SHA-256, native ELF
+        and version checks. Restarts only managed clients of that protocol while
+        preserving SOCKS gates. Activation failure restores the previous
+        executable; inspect the client list for the final state.
+      url: '#install-or-update-one-official-stable-client-after-sha-256-native-elf-and-version-checks-restarts-only-managed-clients-of-that-protocol-while-preserving-socks-gates-activation-failure-restores-the-previous-executable-inspect-the-client-list-for-the-final-state'
+    - depth: 2
       title: List external exits, credential presence, client state and sanitized
         logs.
       url: '#list-external-exits-credential-presence-client-state-and-sanitized-logs'
@@ -26,6 +42,19 @@ _openapi:
       url: '#make-a-real-https-request-through-the-exit-to-the-fixed-connectivity-endpoint-does-not-fall-back-to-direct'
   structuredData:
     headings:
+      - content: List installed NaiveProxy, mieru and TrustTunnel versions, known
+          official stable releases and background operation states. Full admin
+          tokens or authenticated UI sessions only.
+        id: list-installed-naiveproxy-mieru-and-trusttunnel-versions-known-official-stable-releases-and-background-operation-states-full-admin-tokens-or-authenticated-ui-sessions-only
+      - content: Start an asynchronous official stable release check for naive, mieru or
+          trusttunnel. Poll the client list for completion. Concurrent client
+          operations are rejected.
+        id: start-an-asynchronous-official-stable-release-check-for-naive-mieru-or-trusttunnel-poll-the-client-list-for-completion-concurrent-client-operations-are-rejected
+      - content: Install or update one official stable client after SHA-256, native ELF
+          and version checks. Restarts only managed clients of that protocol
+          while preserving SOCKS gates. Activation failure restores the previous
+          executable; inspect the client list for the final state.
+        id: install-or-update-one-official-stable-client-after-sha-256-native-elf-and-version-checks-restarts-only-managed-clients-of-that-protocol-while-preserving-socks-gates-activation-failure-restores-the-previous-executable-inspect-the-client-list-for-the-final-state
       - content: List external exits, credential presence, client state and sanitized
           logs.
         id: list-external-exits-credential-presence-client-state-and-sanitized-logs
@@ -49,7 +78,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/external-outbounds/list","method":"get"},{"path":"/panel/api/external-outbounds/save","method":"post"},{"path":"/panel/api/external-outbounds/del/{id}","method":"post"},{"path":"/panel/api/external-outbounds/probe/{id}","method":"post"}]} showTitle />
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/external-outbounds/clients","method":"get"},{"path":"/panel/api/external-outbounds/clients/check","method":"post"},{"path":"/panel/api/external-outbounds/clients/install","method":"post"},{"path":"/panel/api/external-outbounds/list","method":"get"},{"path":"/panel/api/external-outbounds/save","method":"post"},{"path":"/panel/api/external-outbounds/del/{id}","method":"post"},{"path":"/panel/api/external-outbounds/probe/{id}","method":"post"}]} showTitle />
     </>
   );
 }

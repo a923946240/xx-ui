@@ -4,11 +4,32 @@ import {
   ExternalOutboundListSchema,
   ExternalOutboundViewSchema,
   ExternalOutboundProbeSchema,
+  ExternalClientListSchema,
 } from '@/schemas/external-outbound';
 import type { ExternalOutboundInput } from '@/schemas/external-outbound';
 
 const root = '/panel/api/external-outbounds';
 export const externalOutboundsKey = ['external-outbounds'] as const;
+export const externalClientsKey = ['external-clients'] as const;
+
+export async function listExternalClients() {
+  const msg = await HttpUtil.get(`${root}/clients`, undefined, { silent: true });
+  if (!msg.success) throw new Error(msg.msg || 'Could not read external client versions');
+  return ExternalClientListSchema.parse(msg.obj);
+}
+
+export async function manageExternalClient(input: { protocol: string; install: boolean }) {
+  const action = input.install ? 'install' : 'check';
+  const msg = await HttpUtil.post(
+    `${root}/clients/${action}`,
+    { protocol: input.protocol },
+    {
+      silent: true,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+  if (!msg.success) throw new Error(msg.msg || 'Could not start client operation');
+}
 
 export async function listExternalOutbounds() {
   const msg = await HttpUtil.get(`${root}/list`, undefined, { silent: true });

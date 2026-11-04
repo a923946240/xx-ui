@@ -38,7 +38,11 @@ go build -o xx-ui .
 
 ### 安装外部隧道客户端
 
-网页目前没有 NaiveProxy、mieru、TrustTunnel 二进制的安装或上传入口。Linux 构建包包含 `scripts/install-external-clients.sh`。如果只复制编译后的面板程序部署，也必须将该脚本复制到面板安装目录下的 `scripts/` 中。
+进入「出站 → 外部隧道出口 → 客户端程序管理」，可以查看已安装版本、检查官方稳定版本，并安装或更新 NaiveProxy、mieru、TrustTunnel。安装在后台进行，页面显示进度和失败原因。替换程序前会校验官方安装包 SHA-256、本机 ELF 架构和版本；仅重启本面板管理的对应协议客户端，相关现有连接可能断开。旧程序会保留，供启动失败时回退。
+
+Web 安装支持 Linux amd64、arm64；NaiveProxy 解压需要 `xz`。仅接受固定的官方 GitHub 仓库，默认沿用面板网络出站；`XUI_EXTERNAL_CLIENT_PROXY` 可以只为这些下载指定代理。当前版本来自程序自身输出，不根据文件名猜测；NaiveProxy 的发布构建后缀可在经过 Web 校验安装后识别。不提供任意可执行文件上传功能。
+
+也可以通过命令行安装。Linux 构建包包含 `scripts/install-external-clients.sh`。如果只复制编译后的面板程序部署，也应将该脚本复制到面板安装目录下的 `scripts/` 中。
 
 进入面板安装目录，以能够写入二进制目录的用户执行：
 

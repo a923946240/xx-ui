@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +22,33 @@ func NewExternalOutboundController(g *gin.RouterGroup) *ExternalOutboundControll
 	g.POST("/save", a.save)
 	g.POST("/del/:id", a.del)
 	g.POST("/probe/:id", a.probe)
+	g.GET("/clients", a.clients)
+	g.POST("/clients/check", a.checkClient)
+	g.POST("/clients/install", a.installClient)
 	return a
+}
+
+func (a *ExternalOutboundController) clients(c *gin.Context) {
+	jsonObj(c, a.exits.Clients(), nil)
+}
+
+func (a *ExternalOutboundController) checkClient(c *gin.Context)   { a.clientOperation(c, false) }
+func (a *ExternalOutboundController) installClient(c *gin.Context) { a.clientOperation(c, true) }
+
+func (a *ExternalOutboundController) clientOperation(c *gin.Context, install bool) {
+	var input service.ExternalClientRequest
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 2048)
+	decoder := json.NewDecoder(c.Request.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&input); err != nil {
+		jsonObj(c, nil, errors.New("invalid external client request"))
+		return
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		jsonObj(c, nil, errors.New("invalid external client request"))
+		return
+	}
+	jsonObj(c, nil, a.exits.StartClientOperation(input.Protocol, install))
 }
 
 func (a *ExternalOutboundController) list(c *gin.Context) {

@@ -2501,6 +2501,74 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ExternalClientRequest": {
+    "properties": {
+      "protocol": {
+        "example": "mieru",
+        "type": "string"
+      }
+    },
+    "required": [
+      "protocol"
+    ],
+    "type": "object"
+  },
+  "ExternalClientView": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "installed": {
+        "example": true,
+        "type": "boolean"
+      },
+      "latestVersion": {
+        "example": "v3.39.0",
+        "type": "string"
+      },
+      "name": {
+        "example": "mieru",
+        "type": "string"
+      },
+      "protocol": {
+        "example": "mieru",
+        "type": "string"
+      },
+      "release": {
+        "example": "v3.39.0",
+        "type": "string"
+      },
+      "state": {
+        "example": "idle",
+        "type": "string"
+      },
+      "supported": {
+        "example": true,
+        "type": "boolean"
+      },
+      "updateAvailable": {
+        "example": false,
+        "type": "boolean"
+      },
+      "version": {
+        "example": "3.39.0",
+        "type": "string"
+      }
+    },
+    "required": [
+      "error",
+      "installed",
+      "latestVersion",
+      "name",
+      "protocol",
+      "release",
+      "state",
+      "supported",
+      "updateAvailable",
+      "version"
+    ],
+    "type": "object"
+  },
   "ExternalOutboundInput": {
     "properties": {
       "enable": {

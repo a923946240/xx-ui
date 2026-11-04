@@ -36,6 +36,18 @@ go build -o xx-ui .
 
 生成的 `xx-ui` 可执行文件内含前端页面。要运行代理，请将 Xray 可执行文件及路由规则所需的地理数据文件放在 `bin/` 或 `XUI_BIN_FOLDER` 指定的目录下。Linux amd64 的核心文件名为 `xray-linux-amd64`。按需安装外部隧道客户端后，执行 `./xx-ui` 启动面板。[外部客户端安装脚本](scripts/install-external-clients.sh)
 
+### 安装外部隧道客户端
+
+网页目前没有 NaiveProxy、mieru、TrustTunnel 二进制的安装或上传入口。Linux 构建包包含 `scripts/install-external-clients.sh`。如果只复制编译后的面板程序部署，也必须将该脚本复制到面板安装目录下的 `scripts/` 中。
+
+进入面板安装目录，以能够写入二进制目录的用户执行：
+
+```sh
+bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-proxies" all
+```
+
+将 `all` 换为 `naive`、`mieru` 或 `trusttunnel` 可只安装一种客户端。脚本从官方发布地址下载固定版本并校验 SHA-256。面板会在该目录中查找文件名为 `naive`、`mieru`、`trusttunnel` 的可执行文件。安装文件不会自动创建出口，也不会重启面板。
+
 当前提供源码构建，原版安装器与部署示例保留为上游参考。私有仓库的发行包下载需要认证，面板的自动更新尚未配置这项认证。
 
 ## 上游与许可证

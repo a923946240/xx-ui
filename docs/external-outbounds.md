@@ -36,6 +36,8 @@
    # 也可把 all 换成 naive、mieru 或 trusttunnel。
    ```
 
+   网页当前没有客户端二进制安装或上传入口。Linux 构建包会附带 `scripts/install-external-clients.sh`；从源码手动部署时，不能只复制面板可执行文件，还应将这份脚本复制到面板安装目录下的 `scripts/` 中。面板在 `${XUI_BIN_FOLDER}/external-proxies` 中按固定文件名 `naive`、`mieru`、`trusttunnel` 查找客户端，其他名称的旧二进制不会自动被识别。
+
    脚本只从固定的官方 release 下载，逐一核对硬编码 SHA-256，再原子替换目标程序。需要 `curl`、`tar`、`sha256sum`、`xz`；面板进程需要执行这些程序的权限。保存网页表单不会触发下载。更新客户端后，停用并重新启用对应出口以替换正在运行的进程。
 
 3. 登录面板，在左侧 **出站** 页底部的 **外部隧道出口** 添加出口。填写协议、唯一标签、服务器、端口、用户名、密码；NaiveProxy/TrustTunnel 可填写 TLS 服务器名称。NaiveProxy 要覆盖 TLS 名称时，服务器地址需填写 IP。需要可验证的服务器证书；首版表单没有“不验证证书”或自定义 CA 选项。

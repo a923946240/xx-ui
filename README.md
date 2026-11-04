@@ -36,6 +36,18 @@ go build -o xx-ui .
 
 The resulting `xx-ui` executable includes the web interface. To run the proxy, place the Xray executable and the geodata used by your routing rules in `bin/` or the directory set by `XUI_BIN_FOLDER`. On Linux amd64 the core executable is named `xray-linux-amd64`. Install any external tunnel clients you plan to use, then start the panel with `./xx-ui`. [External client installer](scripts/install-external-clients.sh)
 
+### Install the external tunnel clients
+
+The web panel does not install or upload NaiveProxy, mieru, or TrustTunnel executables. Linux build artifacts include `scripts/install-external-clients.sh`. If you deploy only the compiled panel executable, copy that script into `scripts/` under the panel installation directory as well.
+
+From the panel installation directory, run as a user who can write to the binary directory:
+
+```sh
+bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-proxies" all
+```
+
+Replace `all` with `naive`, `mieru`, or `trusttunnel` to install one client. The script downloads pinned official releases and verifies their SHA-256 hashes. The panel looks for the executable names `naive`, `mieru`, and `trusttunnel` in that directory. Installing them does not create an exit or restart the panel.
+
 This repository currently provides source builds. The original installer and deployment examples are retained as upstream references. A private repository also requires authentication for release downloads, which the panel's updater has not been configured to provide.
 
 ## Credits and license

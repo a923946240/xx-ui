@@ -94,6 +94,7 @@ jobs:
           cp x-ui.service.arch x-ui/
           cp x-ui.service.rhel x-ui/
           cp x-ui.sh x-ui/
+          install -Dm755 scripts/install-external-clients.sh x-ui/scripts/install-external-clients.sh
           mv x-ui/xui-release x-ui/x-ui
           mkdir x-ui/bin
           cd x-ui/bin

@@ -51,7 +51,7 @@ func extractClientBinary(ctx context.Context, archive, name, protocol, dest stri
 	found := false
 	for {
 		header, e := reader.Next()
-		if e == io.EOF {
+		if errors.Is(e, io.EOF) {
 			break
 		}
 		if e != nil {

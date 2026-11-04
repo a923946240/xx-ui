@@ -33,8 +33,10 @@ var clientDefinitions = []clientDefinition{
 	{"trusttunnel", "TrustTunnel", "TrustTunnel/TrustTunnelClient"},
 }
 
-var clientVersionPattern = regexp.MustCompile(`\d+\.\d+\.\d+(?:\.\d+)?`)
-var clientTagPattern = regexp.MustCompile(`^v[0-9][A-Za-z0-9.+_-]{0,79}$`)
+var (
+	clientVersionPattern = regexp.MustCompile(`\d+\.\d+\.\d+(?:\.\d+)?`)
+	clientTagPattern     = regexp.MustCompile(`^v[0-9][A-Za-z0-9.+_-]{0,79}$`)
+)
 
 type clientRelease struct {
 	Tag        string `json:"tag_name"`
@@ -47,8 +49,10 @@ type clientRelease struct {
 	} `json:"assets"`
 }
 
-type clientAsset struct{ tag, name, url, digest string }
-type installedClient struct{ Tag, SHA256 string }
+type (
+	clientAsset     struct{ tag, name, url, digest string }
+	installedClient struct{ Tag, SHA256 string }
+)
 
 type ClientInstaller struct {
 	mu          sync.Mutex

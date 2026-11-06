@@ -10,13 +10,16 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 // These are public test keys, deliberately containing '+', '/', and '='.
-const shadowrocketServerKey = "+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/s="
-const shadowrocketClientKey = "7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+8="
+const (
+	shadowrocketServerKey = "+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/s="
+	shadowrocketClientKey = "7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+8="
+)
 
 // A subscription refresh must preserve the literal SS2022 key chain in
 // Shadowrocket, without changing the standard URI returned to other clients.

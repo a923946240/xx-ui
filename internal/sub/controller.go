@@ -508,7 +508,7 @@ func (a *SUBController) subs(c *gin.Context) {
 	} else {
 		var result strings.Builder
 		for _, sub := range subs {
-			result.WriteString(sub)
+			result.WriteString(shadowrocketSubscriptionLink(sub, userAgent))
 			result.WriteString("\n")
 		}
 

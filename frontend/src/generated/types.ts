@@ -582,6 +582,23 @@ export interface ClientsSummary {
   total: number;
 }
 
+export interface ExternalClientRequest {
+  protocol: string;
+}
+
+export interface ExternalClientView {
+  error: string;
+  installed: boolean;
+  latestVersion: string;
+  name: string;
+  protocol: string;
+  release: string;
+  state: string;
+  supported: boolean;
+  updateAvailable: boolean;
+  version: string;
+}
+
 export interface ExternalOutboundInput {
   enable: boolean;
   host: string;

@@ -21,6 +21,7 @@ import {
 
 import { ApiOutlined, EditOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import './ExternalOutbounds.css';
+import ExternalClients from './ExternalClients';
 
 import { FormField } from '@/components/form/rhf';
 import { keys } from '@/api/queryKeys';
@@ -201,242 +202,247 @@ export default function ExternalOutbounds({
     </FormProvider>
   );
   return (
-    <div className="external-workspace">
-      <div className="external-main">
-        <div className="external-toolbar">
-          <p className="external-help">{t('pages.xray.external.helpText')}</p>
-          <Button
-            type="primary"
-            icon={<PlusOutlined aria-hidden />}
-            onClick={() => edit()}
-            disabled={busy}
-          >
-            {t('pages.xray.external.add')}
-          </Button>
-        </div>
-        <div className="external-summary">
-          <Card>
-            <span className="panel-eyebrow">{t('pages.xray.external.title')}</span>
-            <strong>
-              {query.isLoading || query.error ? '—' : String(rows.length).padStart(2, '0')}
-            </strong>
-            <div className="external-protocol-bars" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
-          </Card>
-          <Card>
-            <span className="panel-eyebrow">
-              <span className="panel-status-dot" />
-              {t('pages.xray.external.enabled')}
-            </span>
-            <strong>
-              {query.isLoading || query.error
-                ? '—'
-                : String(rows.filter((row) => row.enable).length).padStart(2, '0')}
-            </strong>
-            <span className="panel-caption">{t('appearance.clientStatus')}</span>
-          </Card>
-          <Card>
-            <span className="panel-eyebrow">{t('appearance.forwarding')}</span>
-            <strong>TCP</strong>
-            <span className="panel-caption">{t('pages.xray.external.title')}</span>
-          </Card>
-        </div>
-        <section aria-label={t('pages.xray.external.title')}>
-          <Card className="external-list" title={t('pages.xray.external.title')}>
-            {disabled ? <Alert type="warning" title={t('pages.xray.external.pending')} /> : null}
-            {query.error ? <Alert type="error" title={query.error.message} /> : null}
-            {error && !editing ? (
-              <Alert type="error" title={error} closable onClose={() => setError('')} />
-            ) : null}
-            {notice ? (
-              <Alert type="info" title={notice} closable onClose={() => setNotice('')} />
-            ) : null}
-            {query.isLoading ? <Spin /> : null}
-            {!query.isLoading && !query.error && rows.length === 0 ? (
-              <Typography.Text type="secondary">{t('pages.xray.external.empty')}</Typography.Text>
-            ) : null}
-            {rows.map((row) => (
-              <div
-                key={row.id}
-                className={`external-exit-row${selected?.id === row.id ? ' is-selected' : ''}`}
-              >
-                <button
-                  type="button"
-                  className={`external-exit-select protocol-${row.protocol}`}
-                  disabled={editing}
-                  onClick={() => setSelectedId(row.id)}
-                  aria-pressed={selected?.id === row.id}
-                  aria-label={`${t('appearance.selectExit')} ${row.tag}`}
+    <>
+      <ExternalClients disabled={disabled} />
+      <div className="external-workspace">
+        <div className="external-main">
+          <div className="external-toolbar">
+            <p className="external-help">{t('pages.xray.external.helpText')}</p>
+            <Button
+              type="primary"
+              icon={<PlusOutlined aria-hidden />}
+              onClick={() => edit()}
+              disabled={busy}
+            >
+              {t('pages.xray.external.add')}
+            </Button>
+          </div>
+          <div className="external-summary">
+            <Card>
+              <span className="panel-eyebrow">{t('pages.xray.external.title')}</span>
+              <strong>
+                {query.isLoading || query.error ? '—' : String(rows.length).padStart(2, '0')}
+              </strong>
+              <div className="external-protocol-bars" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </div>
+            </Card>
+            <Card>
+              <span className="panel-eyebrow">
+                <span className="panel-status-dot" />
+                {t('pages.xray.external.enabled')}
+              </span>
+              <strong>
+                {query.isLoading || query.error
+                  ? '—'
+                  : String(rows.filter((row) => row.enable).length).padStart(2, '0')}
+              </strong>
+              <span className="panel-caption">{t('appearance.clientStatus')}</span>
+            </Card>
+            <Card>
+              <span className="panel-eyebrow">{t('appearance.forwarding')}</span>
+              <strong>TCP</strong>
+              <span className="panel-caption">{t('pages.xray.external.title')}</span>
+            </Card>
+          </div>
+          <section aria-label={t('pages.xray.external.title')}>
+            <Card className="external-list" title={t('pages.xray.external.title')}>
+              {disabled ? <Alert type="warning" title={t('pages.xray.external.pending')} /> : null}
+              {query.error ? <Alert type="error" title={query.error.message} /> : null}
+              {error && !editing ? (
+                <Alert type="error" title={error} closable onClose={() => setError('')} />
+              ) : null}
+              {notice ? (
+                <Alert type="info" title={notice} closable onClose={() => setNotice('')} />
+              ) : null}
+              {query.isLoading ? <Spin /> : null}
+              {!query.isLoading && !query.error && rows.length === 0 ? (
+                <Typography.Text type="secondary">{t('pages.xray.external.empty')}</Typography.Text>
+              ) : null}
+              {rows.map((row) => (
+                <div
+                  key={row.id}
+                  className={`external-exit-row${selected?.id === row.id ? ' is-selected' : ''}`}
                 >
-                  <ApiOutlined aria-hidden />
-                </button>
-                <div className="external-exit-name">
-                  <div>
-                    <strong>{row.remark || row.tag}</strong>
-                    <Tag>{row.tag}</Tag>
-                  </div>
-                  <span>
-                    {protocolLabel(row.protocol)} · {row.host}:{row.port}
-                  </span>
-                </div>
-                <Tag
-                  className="external-state"
-                  color={row.state === 'running' ? 'success' : row.enable ? 'warning' : 'default'}
-                >
-                  {t(`pages.xray.external.states.${row.state}`, { defaultValue: row.state })}
-                </Tag>
-                <Switch
-                  aria-label={`${t('pages.xray.external.enabled')} ${row.tag}`}
-                  checked={row.enable}
-                  disabled={busy}
-                  onChange={(enable) =>
-                    save.mutate(ExternalOutboundInputSchema.parse({ ...row, password: '', enable }))
-                  }
-                />
-                <div className="external-row-actions">
-                  <Button
-                    type="text"
-                    icon={<EditOutlined aria-hidden />}
-                    aria-label={`${t('pages.xray.external.edit')} ${row.tag}`}
-                    disabled={busy}
-                    onClick={() => edit(row)}
+                  <button
+                    type="button"
+                    className={`external-exit-select protocol-${row.protocol}`}
+                    disabled={editing}
+                    onClick={() => setSelectedId(row.id)}
+                    aria-pressed={selected?.id === row.id}
+                    aria-label={`${t('appearance.selectExit')} ${row.tag}`}
                   >
+                    <ApiOutlined aria-hidden />
+                  </button>
+                  <div className="external-exit-name">
+                    <div>
+                      <strong>{row.remark || row.tag}</strong>
+                      <Tag>{row.tag}</Tag>
+                    </div>
+                    <span>
+                      {protocolLabel(row.protocol)} · {row.host}:{row.port}
+                    </span>
+                  </div>
+                  <Tag
+                    className="external-state"
+                    color={row.state === 'running' ? 'success' : row.enable ? 'warning' : 'default'}
+                  >
+                    {t(`pages.xray.external.states.${row.state}`, { defaultValue: row.state })}
+                  </Tag>
+                  <Switch
+                    aria-label={`${t('pages.xray.external.enabled')} ${row.tag}`}
+                    checked={row.enable}
+                    disabled={busy}
+                    onChange={(enable) =>
+                      save.mutate(
+                        ExternalOutboundInputSchema.parse({ ...row, password: '', enable }),
+                      )
+                    }
+                  />
+                  <div className="external-row-actions">
+                    <Button
+                      type="text"
+                      icon={<EditOutlined aria-hidden />}
+                      aria-label={`${t('pages.xray.external.edit')} ${row.tag}`}
+                      disabled={busy}
+                      onClick={() => edit(row)}
+                    >
+                      {t('pages.xray.external.edit')}
+                    </Button>
+                    <Button
+                      type="text"
+                      disabled={probe.isPending || !row.enable}
+                      loading={probe.isPending && probe.variables === row.id}
+                      onClick={() => {
+                        setError('');
+                        setNotice('');
+                        probe.mutate(row.id);
+                      }}
+                    >
+                      {t('pages.xray.external.probe')}
+                    </Button>
+                    <Button
+                      type="text"
+                      icon={<FileTextOutlined aria-hidden />}
+                      onClick={() => setLogsTag(row.tag)}
+                    >
+                      {t('pages.xray.external.logs')}
+                    </Button>
+                    <Popconfirm
+                      title={t('pages.xray.external.deleteConfirm')}
+                      onConfirm={() => remove.mutateAsync(row.id)}
+                    >
+                      <Button type="text" danger disabled={busy || remove.isPending}>
+                        {t('pages.xray.external.delete')}
+                      </Button>
+                    </Popconfirm>
+                  </div>
+                </div>
+              ))}
+            </Card>
+          </section>
+          {children}
+        </div>
+        <aside className="external-inspector">
+          <section aria-label={t('appearance.exitConfiguration')}>
+            <Card title={t('appearance.exitConfiguration')}>
+              {editing && id !== 0 ? (
+                editor
+              ) : selected ? (
+                <>
+                  <p className="panel-caption">{selected.tag}</p>
+                  <dl className="external-details">
+                    {[
+                      [t('pages.xray.external.protocol'), protocolLabel(selected.protocol)],
+                      [t('pages.xray.external.tag'), selected.tag],
+                      [t('pages.xray.external.host'), selected.host],
+                      [t('pages.xray.external.port'), String(selected.port)],
+                      [t('pages.xray.external.username'), selected.username],
+                      [t('pages.xray.external.serverName'), selected.serverName || '—'],
+                      [t('pages.xray.external.transport'), selected.transport.toUpperCase()],
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <Button block type="primary" disabled={busy} onClick={() => edit(selected)}>
                     {t('pages.xray.external.edit')}
                   </Button>
-                  <Button
-                    type="text"
-                    disabled={probe.isPending || !row.enable}
-                    loading={probe.isPending && probe.variables === row.id}
-                    onClick={() => {
-                      setError('');
-                      setNotice('');
-                      probe.mutate(row.id);
-                    }}
-                  >
-                    {t('pages.xray.external.probe')}
-                  </Button>
-                  <Button
-                    type="text"
-                    icon={<FileTextOutlined aria-hidden />}
-                    onClick={() => setLogsTag(row.tag)}
-                  >
-                    {t('pages.xray.external.logs')}
-                  </Button>
-                  <Popconfirm
-                    title={t('pages.xray.external.deleteConfirm')}
-                    onConfirm={() => remove.mutateAsync(row.id)}
-                  >
-                    <Button type="text" danger disabled={busy || remove.isPending}>
-                      {t('pages.xray.external.delete')}
-                    </Button>
-                  </Popconfirm>
-                </div>
-              </div>
-            ))}
-          </Card>
-        </section>
-        {children}
-      </div>
-      <aside className="external-inspector">
-        <section aria-label={t('appearance.exitConfiguration')}>
-          <Card title={t('appearance.exitConfiguration')}>
-            {editing && id !== 0 ? (
-              editor
-            ) : selected ? (
+                </>
+              ) : (
+                <Typography.Text type="secondary">{t('pages.xray.external.empty')}</Typography.Text>
+              )}
+            </Card>
+          </section>
+          <Card title={t('appearance.clientStatus')} className="external-client-card">
+            {selected ? (
               <>
-                <p className="panel-caption">{selected.tag}</p>
-                <dl className="external-details">
-                  {[
-                    [t('pages.xray.external.protocol'), protocolLabel(selected.protocol)],
-                    [t('pages.xray.external.tag'), selected.tag],
-                    [t('pages.xray.external.host'), selected.host],
-                    [t('pages.xray.external.port'), String(selected.port)],
-                    [t('pages.xray.external.username'), selected.username],
-                    [t('pages.xray.external.serverName'), selected.serverName || '—'],
-                    [t('pages.xray.external.transport'), selected.transport.toUpperCase()],
-                  ].map(([label, value]) => (
-                    <div key={label}>
-                      <dt>{label}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <Button block type="primary" disabled={busy} onClick={() => edit(selected)}>
-                  {t('pages.xray.external.edit')}
+                <div className="external-client-heading">
+                  <span className={`external-exit-select protocol-${selected.protocol}`}>
+                    <ApiOutlined aria-hidden />
+                  </span>
+                  <div>
+                    <strong>{protocolLabel(selected.protocol)}</strong>
+                    <p className="panel-caption">
+                      {t(`pages.xray.external.states.${selected.state}`, {
+                        defaultValue: selected.state,
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="link"
+                  icon={<FileTextOutlined aria-hidden />}
+                  onClick={() => setLogsTag(selected.tag)}
+                >
+                  {t('pages.xray.external.logs')}
                 </Button>
               </>
             ) : (
               <Typography.Text type="secondary">{t('pages.xray.external.empty')}</Typography.Text>
             )}
           </Card>
-        </section>
-        <Card title={t('appearance.clientStatus')} className="external-client-card">
-          {selected ? (
-            <>
-              <div className="external-client-heading">
-                <span className={`external-exit-select protocol-${selected.protocol}`}>
-                  <ApiOutlined aria-hidden />
-                </span>
-                <div>
-                  <strong>{protocolLabel(selected.protocol)}</strong>
-                  <p className="panel-caption">
-                    {t(`pages.xray.external.states.${selected.state}`, {
-                      defaultValue: selected.state,
-                    })}
-                  </p>
-                </div>
-              </div>
-              <Button
-                type="link"
-                icon={<FileTextOutlined aria-hidden />}
-                onClick={() => setLogsTag(selected.tag)}
-              >
-                {t('pages.xray.external.logs')}
-              </Button>
-            </>
-          ) : (
-            <Typography.Text type="secondary">{t('pages.xray.external.empty')}</Typography.Text>
-          )}
-        </Card>
-      </aside>
-      <Modal
-        title={t('pages.xray.external.add')}
-        open={editing && id === 0}
-        onCancel={() => {
-          if (!save.isPending) {
-            setEditing(false);
-            setError('');
-            form.reset(defaults);
-          }
-        }}
-        footer={null}
-        destroyOnHidden
-        closable={!save.isPending}
-        mask={{ closable: !save.isPending }}
-        keyboard={!save.isPending}
-      >
-        {editing && id === 0 ? editor : null}
-      </Modal>
-      <Modal
-        title={t('pages.xray.external.logs')}
-        open={logsTag !== null}
-        onCancel={() => setLogsTag(null)}
-        footer={null}
-      >
-        <pre
-          style={{
-            maxHeight: 360,
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-            overflowWrap: 'anywhere',
+        </aside>
+        <Modal
+          title={t('pages.xray.external.add')}
+          open={editing && id === 0}
+          onCancel={() => {
+            if (!save.isPending) {
+              setEditing(false);
+              setError('');
+              form.reset(defaults);
+            }
           }}
+          footer={null}
+          destroyOnHidden
+          closable={!save.isPending}
+          mask={{ closable: !save.isPending }}
+          keyboard={!save.isPending}
         >
-          {logs}
-        </pre>
-      </Modal>
-    </div>
+          {editing && id === 0 ? editor : null}
+        </Modal>
+        <Modal
+          title={t('pages.xray.external.logs')}
+          open={logsTag !== null}
+          onCancel={() => setLogsTag(null)}
+          footer={null}
+        >
+          <pre
+            style={{
+              maxHeight: 360,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {logs}
+          </pre>
+        </Modal>
+      </div>
+    </>
   );
 }

@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Status struct {
@@ -72,6 +73,7 @@ func (m *Manager) Reconcile(specs []Spec) error {
 			continue
 		}
 		r := &runner{spec: s, binary: filepath.Join(m.binaryDir, s.Protocol), dir: filepath.Join(m.stateDir, strconv.Itoa(s.ID)), state: "disabled", logs: newLogBuffer(s)}
+		r.restart = make(chan chan struct{})
 		m.runners[tag] = r
 		if !s.Enable {
 			continue
@@ -152,4 +154,50 @@ func (m *Manager) StopAll() {
 		r.stop()
 	}
 	clear(m.runners)
+}
+
+func (m *Manager) RestartProtocol(ctx context.Context, protocol string) error {
+	m.mu.Lock()
+	var runners []*runner
+	for _, r := range m.runners {
+		if r.spec.Protocol == protocol && r.spec.Enable && r.ctx != nil {
+			runners = append(runners, r)
+		}
+	}
+	m.mu.Unlock()
+	ctx, cancel := context.WithTimeout(ctx, 25*time.Second)
+	defer cancel()
+	for _, r := range runners {
+		acknowledged := make(chan struct{})
+		select {
+		case r.restart <- acknowledged:
+		case <-r.ctx.Done():
+			return errors.New("external client stopped during update")
+		case <-ctx.Done():
+			return errors.New("external client restart timed out")
+		}
+		select {
+		case <-acknowledged:
+		case <-ctx.Done():
+			return errors.New("external client restart timed out")
+		}
+	}
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		ready := true
+		for _, r := range runners {
+			if r.getState() != "running" {
+				ready = false
+			}
+		}
+		if ready {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return errors.New("updated external client did not start")
+		case <-ticker.C:
+		}
+	}
 }

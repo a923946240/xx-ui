@@ -616,6 +616,25 @@ export const ClientsSummarySchema = z.object({
 });
 export type ClientsSummary = z.infer<typeof ClientsSummarySchema>;
 
+export const ExternalClientRequestSchema = z.object({
+  protocol: z.string(),
+});
+export type ExternalClientRequest = z.infer<typeof ExternalClientRequestSchema>;
+
+export const ExternalClientViewSchema = z.object({
+  error: z.string(),
+  installed: z.boolean(),
+  latestVersion: z.string(),
+  name: z.string(),
+  protocol: z.string(),
+  release: z.string(),
+  state: z.string(),
+  supported: z.boolean(),
+  updateAvailable: z.boolean(),
+  version: z.string(),
+});
+export type ExternalClientView = z.infer<typeof ExternalClientViewSchema>;
+
 export const ExternalOutboundInputSchema = z.object({
   enable: z.boolean(),
   host: z.string(),

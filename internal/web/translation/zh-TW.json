@@ -1857,6 +1857,28 @@
     },
     "xray": {
       "external": {
+        "clients": {
+          "title": "用戶端程式管理",
+          "helpText": "查看已安裝版本，安裝或更新至官方穩定版。更新只重啟本面板管理的對應協定用戶端。",
+          "current": "已安裝版本",
+          "latest": "官方穩定版本",
+          "notInstalled": "未安裝",
+          "unknown": "版本未知",
+          "install": "安裝",
+          "update": "更新",
+          "check": "檢查更新",
+          "confirmTitle": "安裝或更新 {name}？",
+          "confirmDescription": "使用此協定的現有連線可能中斷。系統會保留原程式，以便失敗時還原。",
+          "confirm": "確認",
+          "unsupported": "僅支援 Linux amd64 或 arm64",
+          "loadFailed": "無法讀取用戶端版本",
+          "checking": "檢查版本中",
+          "downloading": "下載中",
+          "verifying": "驗證中",
+          "installing": "安裝／重啟中",
+          "failed": "失敗",
+          "installed": "已安裝"
+        },
         "title": "外部隧道出口",
         "add": "添加出口",
         "edit": "编辑",

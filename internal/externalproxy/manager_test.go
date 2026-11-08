@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -15,6 +16,74 @@ import (
 
 	"golang.org/x/net/proxy"
 )
+
+func TestClientProtocolRestartPreservesAuthenticatedGate(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("Linux client supervisor")
+	}
+	t.Setenv("EXTERNAL_PROXY_HELPER", "1")
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	bin := t.TempDir()
+	if err := os.WriteFile(filepath.Join(bin, "naive"), []byte("#!/bin/sh\nexec '"+exe+"' -test.run=TestExternalProxyHelper -- \"$1\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	m := NewManager(t.TempDir(), bin)
+	defer m.StopAll()
+	spec := Spec{ID: 7, Tag: "restart-client", Protocol: "naive", Host: "proxy.example", Port: 443, Username: "test", Password: "local-test-only", Enable: true}
+	if err := m.Reconcile([]Spec{spec}); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(10 * time.Second)
+	for m.Status(spec.Tag).State != "running" && time.Now().Before(deadline) {
+		time.Sleep(20 * time.Millisecond)
+	}
+	if m.Status(spec.Tag).State != "running" {
+		t.Fatal("test client failed to start")
+	}
+	m.mu.Lock()
+	r := m.runners[spec.Tag]
+	m.mu.Unlock()
+	r.mu.Lock()
+	beforePID := r.pid
+	r.mu.Unlock()
+	before := m.Outbounds()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := m.RestartProtocol(ctx, "mieru"); err != nil {
+		t.Fatal(err)
+	}
+	r.mu.Lock()
+	unrelatedPID := r.pid
+	r.mu.Unlock()
+	if unrelatedPID != beforePID {
+		t.Fatal("unrelated protocol restart changed the process")
+	}
+	if err := m.RestartProtocol(ctx, "naive"); err != nil {
+		t.Fatal(err)
+	}
+	r.mu.Lock()
+	afterPID := r.pid
+	r.mu.Unlock()
+	if afterPID == beforePID || afterPID == 0 || !reflect.DeepEqual(before, m.Outbounds()) {
+		t.Fatal("restart did not replace the child while preserving its authenticated SOCKS gate")
+	}
+	c, err := m.DialContext(ctx, spec.Tag, "example.invalid:443")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	_ = c.SetDeadline(time.Now().Add(time.Second))
+	if _, err = c.Write([]byte("after-restart")); err != nil {
+		t.Fatal(err)
+	}
+	data := make([]byte, len("after-restart"))
+	if _, err = io.ReadFull(c, data); err != nil || string(data) != "after-restart" {
+		t.Fatalf("new client cannot forward after restart: %q %v", data, err)
+	}
+}
 
 func TestMissingClientCannotFallBackAndDisableKeepsTagBlocked(t *testing.T) {
 	m := NewManager(t.TempDir(), t.TempDir())

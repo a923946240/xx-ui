@@ -36,6 +36,22 @@ go build -o xx-ui .
 
 The resulting `xx-ui` executable includes the web interface. To run the proxy, place the Xray executable and the geodata used by your routing rules in `bin/` or the directory set by `XUI_BIN_FOLDER`. On Linux amd64 the core executable is named `xray-linux-amd64`. Install any external tunnel clients you plan to use, then start the panel with `./xx-ui`. [External client installer](scripts/install-external-clients.sh)
 
+### Install the external tunnel clients
+
+Open **Outbounds → External tunnel exits → Client software** to view installed versions, check official stable releases, and install or update NaiveProxy, mieru, or TrustTunnel. Installation runs in the background with visible progress and errors. Updates verify the official archive SHA-256, the native ELF architecture, and its version before atomically replacing the executable. Only this panel's clients of that protocol restart; their existing connections may disconnect. The previous executable is kept for activation-failure rollback.
+
+The Web installer supports Linux amd64 and arm64, requires `xz` for NaiveProxy, and accepts only the fixed official GitHub repositories. It uses the configured panel outbound; `XUI_EXTERNAL_CLIENT_PROXY` can override the proxy for these downloads only. Current versions come from the executable, not its filename; a NaiveProxy release build suffix is available after a verified Web installation. Uploading arbitrary executables is not supported.
+
+For command-line installation, Linux build artifacts include `scripts/install-external-clients.sh`. If you deploy only the compiled panel executable, copy that script into `scripts/` under the panel installation directory as well.
+
+From the panel installation directory, run as a user who can write to the binary directory:
+
+```sh
+bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-proxies" all
+```
+
+Replace `all` with `naive`, `mieru`, or `trusttunnel` to install one client. The script downloads pinned official releases and verifies their SHA-256 hashes. The panel looks for the executable names `naive`, `mieru`, and `trusttunnel` in that directory. Installing them does not create an exit or restart the panel.
+
 This repository currently provides source builds. The original installer and deployment examples are retained as upstream references. A private repository also requires authentication for release downloads, which the panel's updater has not been configured to provide.
 
 ## Credits and license

@@ -36,6 +36,9 @@ func (t clientFixtureTransport) RoundTrip(r *http.Request) (*http.Response, erro
 
 func clientFixtureArchive(t *testing.T, duplicate bool) []byte {
 	t.Helper()
+	if !clientPlatformSupported() {
+		t.Skip("requires Linux amd64 or arm64 client installation")
+	}
 	exe, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)

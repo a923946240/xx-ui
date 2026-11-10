@@ -31,15 +31,27 @@ func ownsListener(pid int, address string) bool {
 	if err != nil {
 		return false
 	}
-	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/net/tcp", pid))
+	return ownsSocket(pid, "tcp", map[string]bool{fmt.Sprintf("0100007F:%04X", port): true}, "0A")
+}
+
+// ownsUDPRelay reports whether pid holds an IPv4 UDP socket bound to port on
+// loopback or the wildcard address (Mieru binds its SOCKS UDP relay on 0.0.0.0).
+func ownsUDPRelay(pid, port int) bool {
+	if pid <= 0 || port <= 0 || port > 65535 {
+		return false
+	}
+	return ownsSocket(pid, "udp", map[string]bool{fmt.Sprintf("0100007F:%04X", port): true, fmt.Sprintf("00000000:%04X", port): true}, "")
+}
+
+func ownsSocket(pid int, table string, endpoints map[string]bool, state string) bool {
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/net/%s", pid, table))
 	if err != nil {
 		return false
 	}
-	endpoint := fmt.Sprintf("0100007F:%04X", port)
 	inodes := make(map[string]bool)
 	for _, line := range strings.Split(string(data), "\n") {
 		fields := strings.Fields(line)
-		if len(fields) > 9 && fields[1] == endpoint && fields[3] == "0A" {
+		if len(fields) > 9 && endpoints[fields[1]] && (state == "" || fields[3] == state) {
 			inodes["socket:["+fields[9]+"]"] = true
 		}
 	}

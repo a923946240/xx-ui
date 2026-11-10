@@ -2,7 +2,9 @@ package externalproxy
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -91,6 +93,130 @@ func (r *runner) dial(ctx context.Context, address string) (net.Conn, error) {
 		return nil, errors.New("external tunnel client stopped")
 	}
 	return result, nil
+}
+
+func (r *runner) associateUDP(ctx context.Context) (net.Conn, error) {
+	if r.spec.Protocol != "mieru" {
+		return nil, errors.New("UDP association is unavailable for this client")
+	}
+	r.mu.Lock()
+	pid, backend, state := r.pid, r.backend, r.state
+	r.mu.Unlock()
+	if !r.spec.Enable || state != "running" || r.ctx.Err() != nil {
+		return nil, errors.New("external tunnel client is unavailable")
+	}
+	conn, err := (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, "tcp", backend)
+	if err != nil {
+		return nil, err
+	}
+	stopOnCancel := context.AfterFunc(ctx, func() { _ = conn.Close() })
+	defer stopOnCancel()
+	_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+	valid := func() bool {
+		r.mu.Lock()
+		same := r.pid == pid && r.backend == backend && r.state == "running" && r.ctx.Err() == nil
+		r.mu.Unlock()
+		return same && ownsListener(pid, backend)
+	}
+	if !valid() {
+		_ = conn.Close()
+		return nil, errors.New("external tunnel client changed during UDP setup")
+	}
+	if _, err = conn.Write([]byte{5, 1, 0}); err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	var greeting [2]byte
+	if _, err = io.ReadFull(conn, greeting[:]); err != nil || greeting != [2]byte{5, 0} {
+		_ = conn.Close()
+		return nil, errors.New("Mieru SOCKS method negotiation failed")
+	}
+	if _, err = conn.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0}); err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	header := make([]byte, 4)
+	if _, err = io.ReadFull(conn, header); err != nil || header[0] != 5 || header[1] != 0 || header[2] != 0 {
+		_ = conn.Close()
+		return nil, errors.New("Mieru SOCKS UDP association failed")
+	}
+	relayPort, err := readSOCKSRelayPort(conn, header[3])
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	// Mieru binds its relay on 0.0.0.0 and only rewrites the port in the reply,
+	// so the replied host is not meaningful. Always use the loopback host of the
+	// verified backend, and require that the relay socket belongs to the client.
+	host, _, err := net.SplitHostPort(backend)
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	if !valid() || !ownsUDPRelay(pid, relayPort) {
+		_ = conn.Close()
+		return nil, errors.New("external tunnel client changed during UDP setup")
+	}
+	udp, err := (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, "udp4", net.JoinHostPort(host, strconv.Itoa(relayPort)))
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	_ = conn.SetDeadline(time.Time{})
+	associationCtx, cancel := context.WithCancel(ctx)
+	stopRunner := context.AfterFunc(r.ctx, cancel)
+	stopAssociation := context.AfterFunc(associationCtx, func() { _ = conn.Close(); _ = udp.Close() })
+	// The Mieru association ends when its control connection ends (client
+	// restart, crash or association teardown); stop relaying immediately.
+	go func() { _, _ = io.Copy(io.Discard, conn); cancel() }()
+	return &udpAssociationConn{Conn: udp, control: conn, cancel: cancel, stopRunner: stopRunner, stopAssociation: stopAssociation}, nil
+}
+
+func readSOCKSRelayPort(r io.Reader, typ byte) (int, error) {
+	size := 0
+	switch typ {
+	case 1:
+		size = 4
+	case 4:
+		size = 16
+	case 3:
+		var n [1]byte
+		if _, err := io.ReadFull(r, n[:]); err != nil || n[0] == 0 {
+			return 0, errors.New("invalid Mieru SOCKS relay address")
+		}
+		size = int(n[0])
+	default:
+		return 0, errors.New("invalid Mieru SOCKS relay address type")
+	}
+	if _, err := io.ReadFull(r, make([]byte, size)); err != nil {
+		return 0, err
+	}
+	var port [2]byte
+	if _, err := io.ReadFull(r, port[:]); err != nil {
+		return 0, err
+	}
+	n := int(binary.BigEndian.Uint16(port[:]))
+	if n == 0 {
+		return 0, errors.New("invalid Mieru SOCKS relay port")
+	}
+	return n, nil
+}
+
+type udpAssociationConn struct {
+	net.Conn
+	control         net.Conn
+	cancel          context.CancelFunc
+	stopRunner      func() bool
+	stopAssociation func() bool
+}
+
+func (c *udpAssociationConn) Close() error {
+	c.stopRunner()
+	c.stopAssociation()
+	c.cancel()
+	err := c.Conn.Close()
+	_ = c.control.Close()
+	return err
 }
 
 type connectedBackend struct{ conn net.Conn }

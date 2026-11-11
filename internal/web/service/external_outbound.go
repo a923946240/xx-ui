@@ -34,6 +34,10 @@ type ExternalOutboundInput struct {
 	ServerName string `json:"serverName" example:"proxy.example.com"`
 	Transport  string `json:"transport" example:"tcp"`
 	Enable     bool   `json:"enable" example:"true"`
+
+	MieruMultiplexing  string `json:"mieruMultiplexing" example:"MULTIPLEXING_HIGH"`
+	MieruHandshakeMode string `json:"mieruHandshakeMode" example:"HANDSHAKE_NO_WAIT"`
+	MieruMtu           int    `json:"mieruMtu" example:"1400"`
 }
 
 type ExternalOutboundView struct {
@@ -48,8 +52,12 @@ type ExternalOutboundView struct {
 	Transport   string `json:"transport" example:"tcp"`
 	Enable      bool   `json:"enable" example:"true"`
 	PasswordSet bool   `json:"passwordSet" example:"true"`
-	State       string `json:"state" example:"running"`
-	Logs        string `json:"logs" example:"Client started"`
+
+	MieruMultiplexing  string `json:"mieruMultiplexing" example:"MULTIPLEXING_HIGH"`
+	MieruHandshakeMode string `json:"mieruHandshakeMode" example:"HANDSHAKE_NO_WAIT"`
+	MieruMtu           int    `json:"mieruMtu" example:"1400"`
+	State              string `json:"state" example:"running"`
+	Logs               string `json:"logs" example:"Client started"`
 }
 
 type ExternalOutboundProbe struct {
@@ -87,12 +95,12 @@ func externalOutboundManager() *externalproxy.Manager {
 func StopExternalOutbounds() { externalOutboundManager().StopAll() }
 
 func externalSpec(row model.ExternalOutbound) externalproxy.Spec {
-	return externalproxy.Spec{ID: row.ID, Tag: row.Tag, Protocol: row.Protocol, Host: row.Host, Port: row.Port, Username: row.Username, Password: row.Password, ServerName: row.ServerName, Transport: row.Transport, Enable: row.Enable}
+	return externalproxy.Spec{ID: row.ID, Tag: row.Tag, Protocol: row.Protocol, Host: row.Host, Port: row.Port, Username: row.Username, Password: row.Password, ServerName: row.ServerName, Transport: row.Transport, Enable: row.Enable, MieruMultiplexing: row.MieruMultiplexing, MieruHandshakeMode: row.MieruHandshakeMode, MieruMtu: row.MieruMtu}
 }
 
 func externalView(row model.ExternalOutbound) *ExternalOutboundView {
 	status := externalOutboundManager().Status(row.Tag)
-	return &ExternalOutboundView{ID: row.ID, Tag: row.Tag, Remark: row.Remark, Protocol: row.Protocol, Host: row.Host, Port: row.Port, Username: row.Username, ServerName: row.ServerName, Transport: row.Transport, Enable: row.Enable, PasswordSet: row.Password != "", State: status.State, Logs: status.Logs}
+	return &ExternalOutboundView{ID: row.ID, Tag: row.Tag, Remark: row.Remark, Protocol: row.Protocol, Host: row.Host, Port: row.Port, Username: row.Username, ServerName: row.ServerName, Transport: row.Transport, Enable: row.Enable, PasswordSet: row.Password != "", State: status.State, Logs: status.Logs, MieruMultiplexing: row.MieruMultiplexing, MieruHandshakeMode: row.MieruHandshakeMode, MieruMtu: row.MieruMtu}
 }
 
 func (s *ExternalOutboundService) rows() ([]model.ExternalOutbound, error) {
@@ -129,7 +137,7 @@ func (s *ExternalOutboundService) Save(in ExternalOutboundInput) (*ExternalOutbo
 	if password == "" {
 		password = row.Password
 	}
-	row = model.ExternalOutbound{ID: in.ID, Tag: strings.TrimSpace(in.Tag), Remark: strings.TrimSpace(in.Remark), Protocol: in.Protocol, Host: strings.TrimSpace(in.Host), Port: in.Port, Username: in.Username, Password: password, ServerName: strings.TrimSpace(in.ServerName), Transport: in.Transport, Enable: in.Enable}
+	row = model.ExternalOutbound{ID: in.ID, Tag: strings.TrimSpace(in.Tag), Remark: strings.TrimSpace(in.Remark), Protocol: in.Protocol, Host: strings.TrimSpace(in.Host), Port: in.Port, Username: in.Username, Password: password, ServerName: strings.TrimSpace(in.ServerName), Transport: in.Transport, Enable: in.Enable, MieruMultiplexing: in.MieruMultiplexing, MieruHandshakeMode: in.MieruHandshakeMode, MieruMtu: in.MieruMtu}
 	if row.Transport == "" {
 		row.Transport = "tcp"
 	}

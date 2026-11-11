@@ -14,12 +14,33 @@ const ExternalOutboundFieldsSchema = z.object({
   serverName: z.string(),
   transport: z.enum(['tcp', 'quic']),
   enable: z.boolean(),
+  mieruMultiplexing: z.enum([
+    '',
+    'MULTIPLEXING_OFF',
+    'MULTIPLEXING_LOW',
+    'MULTIPLEXING_MIDDLE',
+    'MULTIPLEXING_HIGH',
+  ]),
+  mieruHandshakeMode: z.enum(['', 'HANDSHAKE_STANDARD', 'HANDSHAKE_NO_WAIT']),
+  mieruMtu: z.number().int().refine((v) => v === 0 || (v >= 1280 && v <= 1400), {
+    message: 'pages.xray.external.mieruMtuRange',
+  }),
 });
 
 export const ExternalOutboundInputSchema = ExternalOutboundFieldsSchema.superRefine(
   (value, ctx) => {
     if (value.id === 0 && !value.password) {
       ctx.addIssue({ code: 'custom', path: ['password'], message: required });
+    }
+    if (
+      value.protocol !== 'mieru' &&
+      (value.mieruMultiplexing !== '' || value.mieruHandshakeMode !== '' || value.mieruMtu !== 0)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['mieruMultiplexing'],
+        message: 'pages.xray.external.mieruOnly',
+      });
     }
     if (value.protocol === 'mieru' && value.transport !== 'tcp') {
       ctx.addIssue({

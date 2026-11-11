@@ -247,3 +247,36 @@ func TestExternalReferenceDetectionIncludesBalancerPrefixes(t *testing.T) {
 		t.Fatal("unrelated tag was treated as a reference")
 	}
 }
+
+// A saved mieru exit must keep its link tuning through the row, the view and
+// the rendered client; dropping it left IX-OUT on per-session underlays.
+func TestExternalMieruTuningSurvivesSaveAndRender(t *testing.T) {
+	setupExternalExitDB(t)
+	s := &ExternalOutboundService{}
+	in := ExternalOutboundInput{Tag: "ix-out", Protocol: "mieru", Host: "114.111.176.43", Port: 24988, Username: "alice", Password: "secret",
+		MieruMultiplexing: "MULTIPLEXING_HIGH", MieruHandshakeMode: "HANDSHAKE_NO_WAIT", MieruMtu: 1400}
+	v, err := s.Save(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.MieruMultiplexing != "MULTIPLEXING_HIGH" || v.MieruHandshakeMode != "HANDSHAKE_NO_WAIT" || v.MieruMtu != 1400 {
+		t.Fatalf("view dropped the tuning: %+v", v)
+	}
+	var row model.ExternalOutbound
+	if err := database.GetDB().First(&row, v.ID).Error; err != nil {
+		t.Fatal(err)
+	}
+	b, err := externalSpec(row).Render(32123)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`"level":"MULTIPLEXING_HIGH"`, `"handshakeMode":"HANDSHAKE_NO_WAIT"`, `"mtu":1400`} {
+		if !strings.Contains(string(b), want) {
+			t.Fatalf("rendered client lacks %s: %s", want, b)
+		}
+	}
+	in.ID, in.Password, in.MieruMtu = v.ID, "", 1500
+	if _, err := s.Save(in); err == nil || err.Error() != "mieru MTU must be between 1280 and 1400" {
+		t.Fatalf("invalid MTU accepted: %v", err)
+	}
+}

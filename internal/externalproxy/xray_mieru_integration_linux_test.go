@@ -3,8 +3,11 @@
 package externalproxy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -21,7 +24,8 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-func TestRealXrayMieruFinalExitAndDisable(t *testing.T) {
+func startRealMieruExit(t *testing.T) (*Manager, Spec, string) {
+	t.Helper()
 	bin := os.Getenv("EXTERNAL_CLIENT_BIN_DIR")
 	mita := os.Getenv("EXTERNAL_MITA_BINARY")
 	xray := os.Getenv("XRAY_E2E_BINARY")
@@ -59,7 +63,7 @@ func TestRealXrayMieruFinalExitAndDisable(t *testing.T) {
 	startFixture(t, mitaCommand)
 	waitFixturePort(t, port)
 	m := NewManager(t.TempDir(), bin)
-	defer m.StopAll()
+	t.Cleanup(m.StopAll)
 	s := Spec{ID: 1, Tag: "mieru-fixture", Protocol: "mieru", Host: "127.0.0.1", Port: port, Username: "fixture", Password: "synthetic-fixture-password", Enable: true}
 	if err := m.Reconcile([]Spec{s}); err != nil {
 		t.Fatal(err)
@@ -71,6 +75,11 @@ func TestRealXrayMieruFinalExitAndDisable(t *testing.T) {
 	if status := m.Status(s.Tag); status.State != "running" {
 		t.Fatalf("mieru client unavailable: %+v", status)
 	}
+	return m, s, xray
+}
+
+func TestRealXrayMieruFinalExitAndDisable(t *testing.T) {
+	m, s, xray := startRealMieruExit(t)
 	xrayPort := fixturePort(t)
 	xrayConfig := map[string]any{
 		"log":       map[string]string{"loglevel": "error"},
@@ -119,6 +128,92 @@ func TestRealXrayMieruFinalExitAndDisable(t *testing.T) {
 	}
 	if reached.Load() != 1 {
 		t.Fatal("disabled exit reached the destination")
+	}
+}
+
+func TestRealXrayMieruUDPExitAndDisable(t *testing.T) {
+	m, s, xray := startRealMieruExit(t)
+	echo, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer echo.Close()
+	var reached atomic.Int64
+	go func() {
+		b := make([]byte, 2048)
+		for {
+			n, addr, e := echo.ReadFromUDP(b)
+			if e != nil {
+				return
+			}
+			reached.Add(1)
+			_, _ = echo.WriteToUDP(b[:n], addr)
+		}
+	}()
+	xrayPort := fixturePort(t)
+	xrayConfig := map[string]any{
+		"log":       map[string]string{"loglevel": "error"},
+		"inbounds":  []any{map[string]any{"tag": "entry", "listen": "127.0.0.1", "port": xrayPort, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true, "ip": "127.0.0.1"}}},
+		"outbounds": m.Outbounds(),
+		"routing":   map[string]any{"rules": []any{map[string]any{"type": "field", "inboundTag": []string{"entry"}, "outboundTag": s.Tag}}},
+	}
+	xrayConfigPath := filepath.Join(t.TempDir(), "xray.json")
+	writeFixtureJSON(t, xrayConfigPath, xrayConfig)
+	startFixture(t, exec.Command(xray, "run", "-c", xrayConfigPath))
+	waitFixturePort(t, xrayPort)
+	echoPort := echo.LocalAddr().(*net.UDPAddr).Port
+	packet := append([]byte{0, 0, 0, 1, 127, 0, 0, 1, byte(echoPort >> 8), byte(echoPort)}, []byte("udp-through-real-mieru")...)
+	roundTrip := func(wait time.Duration) ([]byte, error) {
+		control, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(xrayPort)), time.Second)
+		if err != nil {
+			return nil, err
+		}
+		defer control.Close()
+		_ = control.SetDeadline(time.Now().Add(5 * time.Second))
+		reply := make([]byte, 10)
+		if _, err = control.Write([]byte{5, 1, 0}); err == nil {
+			_, err = io.ReadFull(control, reply[:2])
+		}
+		if err == nil {
+			_, err = control.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
+		}
+		if err == nil {
+			_, err = io.ReadFull(control, reply)
+		}
+		if err != nil || reply[1] != 0 || reply[3] != 1 {
+			return nil, fmt.Errorf("associate %v: %w", reply, err)
+		}
+		relay, err := net.DialUDP("udp4", nil, &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: int(reply[8])<<8 | int(reply[9])})
+		if err != nil {
+			return nil, err
+		}
+		defer relay.Close()
+		got := make([]byte, 2048)
+		for deadline := time.Now().Add(wait); time.Now().Before(deadline); {
+			if _, err = relay.Write(packet); err != nil {
+				return nil, err
+			}
+			_ = relay.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+			if n, e := relay.Read(got); e == nil {
+				return got[:n], nil
+			}
+		}
+		return nil, errors.New("no UDP reply")
+	}
+	got, err := roundTrip(10 * time.Second)
+	if err != nil || !bytes.HasSuffix(got, []byte("udp-through-real-mieru")) || reached.Load() == 0 {
+		t.Fatalf("real Xray → gate → mieru → mita → UDP fixture: %q, %v, reached=%d", got, err, reached.Load())
+	}
+	s.Enable = false
+	if err := m.Reconcile([]Spec{s}); err != nil {
+		t.Fatal(err)
+	}
+	before := reached.Load()
+	if got, err := roundTrip(2 * time.Second); err == nil {
+		t.Fatalf("disabled exit still relayed UDP: %q", got)
+	}
+	if reached.Load() != before {
+		t.Fatal("disabled exit reached the UDP destination")
 	}
 }
 

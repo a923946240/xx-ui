@@ -1908,6 +1908,13 @@
         "required": "This field is required.",
         "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
         "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "mieruMultiplexing": "Ghép kênh",
+        "mieruHandshakeMode": "Chế độ bắt tay",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400; 0 dùng mặc định của máy khách",
+        "mieruMtuRange": "MTU phải là 0 hoặc trong khoảng 1280–1400",
+        "mieruOnly": "Các thiết lập này chỉ áp dụng cho mieru",
+        "clientDefault": "Mặc định của máy khách",
         "states": {
           "starting": "Starting",
           "running": "Client running",

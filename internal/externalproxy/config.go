@@ -23,7 +23,16 @@ type Spec struct {
 	ServerName string
 	Transport  string
 	Enable     bool
+
+	MieruMultiplexing  string
+	MieruHandshakeMode string
+	MieruMtu           int
 }
+
+var (
+	mieruMultiplexingLevels = map[string]bool{"MULTIPLEXING_OFF": true, "MULTIPLEXING_LOW": true, "MULTIPLEXING_MIDDLE": true, "MULTIPLEXING_HIGH": true}
+	mieruHandshakeModes     = map[string]bool{"HANDSHAKE_STANDARD": true, "HANDSHAKE_NO_WAIT": true}
+)
 
 var tagPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$`)
 
@@ -72,8 +81,30 @@ func (s Spec) Validate() error {
 	if s.Protocol == "mieru" && s.Transport == "quic" {
 		return errors.New("mieru transport must be tcp")
 	}
+	if err := s.validateMieruTuning(); err != nil {
+		return err
+	}
 	if s.Protocol == "naive" && s.ServerName != "" && s.ServerName != s.Host && net.ParseIP(s.Host) == nil {
 		return errors.New("NaiveProxy server-name override requires an IP server address")
+	}
+	return nil
+}
+
+func (s Spec) validateMieruTuning() error {
+	if s.Protocol != "mieru" {
+		if s.MieruMultiplexing != "" || s.MieruHandshakeMode != "" || s.MieruMtu != 0 {
+			return errors.New("mieru settings apply only to mieru outbounds")
+		}
+		return nil
+	}
+	if s.MieruMultiplexing != "" && !mieruMultiplexingLevels[s.MieruMultiplexing] {
+		return errors.New("invalid mieru multiplexing level")
+	}
+	if s.MieruHandshakeMode != "" && !mieruHandshakeModes[s.MieruHandshakeMode] {
+		return errors.New("invalid mieru handshake mode")
+	}
+	if s.MieruMtu != 0 && (s.MieruMtu < 1280 || s.MieruMtu > 1400) {
+		return errors.New("mieru MTU must be between 1280 and 1400")
 	}
 	return nil
 }
@@ -108,8 +139,19 @@ func (s Spec) Render(port int) ([]byte, error) {
 		} else {
 			server["ipAddress"] = s.Host
 		}
+		profile := map[string]any{"profileName": "exit", "user": map[string]string{"name": s.Username, "password": s.Password}, "servers": []any{server}}
+		// Unset fields stay absent so the client keeps its own defaults.
+		if s.MieruMultiplexing != "" {
+			profile["multiplexing"] = map[string]string{"level": s.MieruMultiplexing}
+		}
+		if s.MieruHandshakeMode != "" {
+			profile["handshakeMode"] = s.MieruHandshakeMode
+		}
+		if s.MieruMtu != 0 {
+			profile["mtu"] = s.MieruMtu
+		}
 		return json.Marshal(map[string]any{
-			"profiles":      []any{map[string]any{"profileName": "exit", "user": map[string]string{"name": s.Username, "password": s.Password}, "servers": []any{server}}},
+			"profiles":      []any{profile},
 			"activeProfile": "exit", "rpcPort": 0, "socks5Port": port, "socks5ListenLAN": false, "loggingLevel": "INFO",
 		})
 	default:

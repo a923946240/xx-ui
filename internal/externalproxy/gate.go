@@ -16,6 +16,7 @@ type gate struct {
 	listener       net.Listener
 	user, password string
 	dial           func(context.Context, string) (net.Conn, error)
+	associateUDP   func(context.Context) (net.Conn, error)
 	ctx            context.Context
 	cancel         context.CancelFunc
 	mu             sync.Mutex
@@ -25,13 +26,17 @@ type gate struct {
 }
 
 func newGate(user, password string, dial func(context.Context, string) (net.Conn, error)) (*gate, error) {
+	return newGateWithUDP(user, password, dial, nil)
+}
+
+func newGateWithUDP(user, password string, dial func(context.Context, string) (net.Conn, error), associateUDP func(context.Context) (net.Conn, error)) (*gate, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	l, err := (&net.ListenConfig{}).Listen(ctx, "tcp4", "127.0.0.1:0")
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-	g := &gate{listener: l, user: user, password: password, dial: dial, ctx: ctx, cancel: cancel, connections: make(map[net.Conn]struct{})}
+	g := &gate{listener: l, user: user, password: password, dial: dial, associateUDP: associateUDP, ctx: ctx, cancel: cancel, connections: make(map[net.Conn]struct{})}
 	g.wg.Add(1)
 	go g.accept()
 	return g, nil
@@ -132,6 +137,10 @@ func (g *gate) authenticate(c net.Conn) bool {
 }
 
 func readDestination(c net.Conn, addressType byte) (string, error) {
+	return readSocksAddress(c, addressType, true)
+}
+
+func readSocksAddress(c net.Conn, addressType byte, requirePort bool) (string, error) {
 	var host string
 	switch addressType {
 	case 1, 4:
@@ -161,7 +170,7 @@ func readDestination(c net.Conn, addressType byte) (string, error) {
 	if _, err := io.ReadFull(c, port[:]); err != nil {
 		return "", err
 	}
-	if binary.BigEndian.Uint16(port[:]) == 0 {
+	if requirePort && binary.BigEndian.Uint16(port[:]) == 0 {
 		return "", errors.New("invalid SOCKS port")
 	}
 	return net.JoinHostPort(host, strconv.Itoa(int(binary.BigEndian.Uint16(port[:])))), nil
@@ -176,6 +185,18 @@ func (g *gate) serve(c net.Conn) {
 	}
 	header := make([]byte, 4)
 	if _, err := io.ReadFull(c, header); err != nil || header[0] != 5 || header[2] != 0 {
+		return
+	}
+	if header[1] == 3 {
+		if g.associateUDP == nil {
+			socksReply(c, 7)
+			return
+		}
+		if _, err := readSocksAddress(c, header[3], false); err != nil {
+			socksReply(c, 8)
+			return
+		}
+		g.serveUDP(c)
 		return
 	}
 	if header[1] != 1 {
@@ -214,4 +235,111 @@ func (g *gate) serve(c net.Conn) {
 	_ = c.Close()
 	_ = upstream.Close()
 	<-done
+}
+
+func (g *gate) serveUDP(control net.Conn) {
+	ctx, cancel := context.WithCancel(g.ctx)
+	defer cancel()
+	peer, ok := control.RemoteAddr().(*net.TCPAddr)
+	if !ok {
+		socksReply(control, 1)
+		return
+	}
+	upstream, err := g.associateUDP(ctx)
+	if err != nil {
+		socksReply(control, 1)
+		return
+	}
+	defer upstream.Close()
+	local, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		socksReply(control, 1)
+		return
+	}
+	defer local.Close()
+	port := local.LocalAddr().(*net.UDPAddr).Port
+	if _, err = control.Write([]byte{5, 0, 0, 1, 127, 0, 0, 1, byte(port >> 8), byte(port)}); err != nil {
+		return
+	}
+	_ = control.SetDeadline(time.Time{})
+	// The first datagram from the control peer's IP pins the client endpoint;
+	// later senders cannot take over replies for this association.
+	var (
+		mu     sync.Mutex
+		client *net.UDPAddr
+		wg     sync.WaitGroup
+	)
+	stop := func() { _ = control.Close(); _ = upstream.Close(); _ = local.Close() }
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		defer stop()
+		buf := make([]byte, 65535)
+		for {
+			n, addr, e := local.ReadFromUDP(buf)
+			if e != nil {
+				return
+			}
+			if !addr.IP.Equal(peer.IP) || !validSocksDatagram(buf[:n]) {
+				continue
+			}
+			mu.Lock()
+			if client == nil {
+				client = addr
+			}
+			pinned := client.Port == addr.Port && client.IP.Equal(addr.IP)
+			mu.Unlock()
+			if !pinned {
+				continue
+			}
+			if _, e = upstream.Write(buf[:n]); e != nil {
+				return
+			}
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		defer stop()
+		buf := make([]byte, 65535)
+		for {
+			n, e := upstream.Read(buf)
+			if e != nil {
+				return
+			}
+			if !validSocksDatagram(buf[:n]) {
+				continue
+			}
+			mu.Lock()
+			addr := client
+			mu.Unlock()
+			if addr != nil {
+				_, _ = local.WriteToUDP(buf[:n], addr)
+			}
+		}
+	}()
+	// The association lives exactly as long as the TCP control connection.
+	_, _ = io.Copy(io.Discard, control)
+	stop()
+	wg.Wait()
+}
+
+func validSocksDatagram(b []byte) bool {
+	if len(b) < 4 || b[0] != 0 || b[1] != 0 || b[2] != 0 {
+		return false
+	}
+	i := 4
+	switch b[3] {
+	case 1:
+		i += 4
+	case 4:
+		i += 16
+	case 3:
+		if len(b) <= i {
+			return false
+		}
+		i += 1 + int(b[i])
+	default:
+		return false
+	}
+	return len(b) >= i+2
 }

@@ -88,7 +88,11 @@ func (m *Manager) Reconcile(specs []Spec) error {
 		}
 		r.localPassword = token
 		r.ctx, r.cancel = context.WithCancel(context.Background())
-		r.gate, err = newGate("xray", token, r.dial)
+		var associateUDP func(context.Context) (net.Conn, error)
+		if s.Protocol == "mieru" {
+			associateUDP = r.associateUDP
+		}
+		r.gate, err = newGateWithUDP("xray", token, r.dial, associateUDP)
 		if err != nil {
 			r.setState("listener-error")
 			r.logs.add("Could not reserve private SOCKS listener")

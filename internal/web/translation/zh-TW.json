@@ -1908,6 +1908,13 @@
         "required": "此项必填。",
         "invalidTag": "使用 1–64 个字母、数字、点、下划线或短横线，并以字母或数字开头。",
         "mieruTcp": "首版 mieru 集成使用 TCP 传输。",
+        "mieruMultiplexing": "多工",
+        "mieruHandshakeMode": "握手模式",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400；0 表示使用用戶端預設值",
+        "mieruMtuRange": "MTU 必須為 0 或 1280–1400 之間",
+        "mieruOnly": "這些設定僅適用於 mieru",
+        "clientDefault": "用戶端預設",
         "states": {
           "starting": "正在启动",
           "running": "客户端运行中",

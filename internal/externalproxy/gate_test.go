@@ -225,3 +225,54 @@ func TestGateRejectsBadAuthenticationAndUDP(t *testing.T) {
 		_ = c.Close()
 	}
 }
+
+func TestGateSessionLimitCountsClientSessionsNotForwardedLegs(t *testing.T) {
+	echo, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer echo.Close()
+	go func() {
+		for {
+			c, e := echo.Accept()
+			if e != nil {
+				return
+			}
+			go func() { defer c.Close(); _, _ = io.Copy(c, c) }()
+		}
+	}()
+	const limit = 4
+	gate, err := newGateLimited("local", "token", func(ctx context.Context, address string) (net.Conn, error) {
+		return (&net.Dialer{}).DialContext(ctx, "tcp", address)
+	}, nil, limit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer gate.Close()
+	d, err := proxy.SOCKS5("tcp", gate.Address(), &proxy.Auth{User: "local", Password: "token"}, proxy.Direct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roundTrip := func(i int) error {
+		c, e := d.Dial("tcp", echo.Addr().String())
+		if e != nil {
+			return e
+		}
+		t.Cleanup(func() { _ = c.Close() })
+		_ = c.SetDeadline(time.Now().Add(2 * time.Second))
+		if _, e = c.Write([]byte{byte(i)}); e != nil {
+			return e
+		}
+		b := make([]byte, 1)
+		_, e = io.ReadFull(c, b)
+		return e
+	}
+	for i := range limit {
+		if err := roundTrip(i); err != nil {
+			t.Fatalf("concurrent session %d of %d was dropped: %v", i+1, limit, err)
+		}
+	}
+	if err := roundTrip(limit); err == nil {
+		t.Fatalf("session %d beyond the limit of %d was accepted", limit+1, limit)
+	}
+}

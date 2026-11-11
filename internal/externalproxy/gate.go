@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+// maxGateSessions bounds concurrent SOCKS sessions from Xray; the old 256 cap counted
+// both legs of each session and dropped new connections on busy fronts.
+const maxGateSessions = 4096
+
 type gate struct {
 	listener       net.Listener
 	user, password string
@@ -20,9 +24,11 @@ type gate struct {
 	ctx            context.Context
 	cancel         context.CancelFunc
 	mu             sync.Mutex
-	connections    map[net.Conn]struct{}
+	sessions       map[net.Conn]struct{}
+	upstreams      map[net.Conn]struct{}
 	closed         bool
 	wg             sync.WaitGroup
+	maxSessions    int
 }
 
 func newGate(user, password string, dial func(context.Context, string) (net.Conn, error)) (*gate, error) {
@@ -30,13 +36,17 @@ func newGate(user, password string, dial func(context.Context, string) (net.Conn
 }
 
 func newGateWithUDP(user, password string, dial func(context.Context, string) (net.Conn, error), associateUDP func(context.Context) (net.Conn, error)) (*gate, error) {
+	return newGateLimited(user, password, dial, associateUDP, maxGateSessions)
+}
+
+func newGateLimited(user, password string, dial func(context.Context, string) (net.Conn, error), associateUDP func(context.Context) (net.Conn, error), maxSessions int) (*gate, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	l, err := (&net.ListenConfig{}).Listen(ctx, "tcp4", "127.0.0.1:0")
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-	g := &gate{listener: l, user: user, password: password, dial: dial, associateUDP: associateUDP, ctx: ctx, cancel: cancel, connections: make(map[net.Conn]struct{})}
+	g := &gate{listener: l, user: user, password: password, dial: dial, associateUDP: associateUDP, ctx: ctx, cancel: cancel, sessions: make(map[net.Conn]struct{}), upstreams: make(map[net.Conn]struct{}), maxSessions: maxSessions}
 	g.wg.Add(1)
 	go g.accept()
 	return g, nil
@@ -44,20 +54,31 @@ func newGateWithUDP(user, password string, dial func(context.Context, string) (n
 
 func (g *gate) Address() string { return g.listener.Addr().String() }
 
-func (g *gate) track(c net.Conn) bool {
+func (g *gate) trackSession(c net.Conn) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if g.closed || len(g.connections) >= 256 {
+	if g.closed || len(g.sessions) >= g.maxSessions {
 		return false
 	}
-	g.connections[c] = struct{}{}
+	g.sessions[c] = struct{}{}
+	return true
+}
+
+func (g *gate) trackUpstream(c net.Conn) bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.closed {
+		return false
+	}
+	g.upstreams[c] = struct{}{}
 	return true
 }
 
 func (g *gate) untrack(c net.Conn) {
 	_ = c.Close()
 	g.mu.Lock()
-	delete(g.connections, c)
+	delete(g.sessions, c)
+	delete(g.upstreams, c)
 	g.mu.Unlock()
 }
 
@@ -68,7 +89,7 @@ func (g *gate) accept() {
 		if err != nil {
 			return
 		}
-		if !g.track(c) {
+		if !g.trackSession(c) {
 			_ = c.Close()
 			continue
 		}
@@ -86,7 +107,10 @@ func (g *gate) Close() {
 	g.closed = true
 	g.cancel()
 	_ = g.listener.Close()
-	for c := range g.connections {
+	for c := range g.sessions {
+		_ = c.Close()
+	}
+	for c := range g.upstreams {
 		_ = c.Close()
 	}
 	g.mu.Unlock()
@@ -215,7 +239,7 @@ func (g *gate) serve(c net.Conn) {
 		socksReply(c, 1)
 		return
 	}
-	if !g.track(upstream) {
+	if !g.trackUpstream(upstream) {
 		_ = upstream.Close()
 		socksReply(c, 1)
 		return

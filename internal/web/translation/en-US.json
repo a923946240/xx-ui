@@ -2029,6 +2029,13 @@
         "required": "This field is required.",
         "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
         "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "mieruMultiplexing": "Multiplexing",
+        "mieruHandshakeMode": "Handshake mode",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400; 0 uses the client default",
+        "mieruMtuRange": "MTU must be 0 or between 1280 and 1400",
+        "mieruOnly": "These settings apply only to mieru",
+        "clientDefault": "Client default",
         "states": {
           "starting": "Starting",
           "running": "Client running",

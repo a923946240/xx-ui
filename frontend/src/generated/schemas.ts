@@ -2583,6 +2583,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "mieruHandshakeMode": {
+        "example": "HANDSHAKE_NO_WAIT",
+        "type": "string"
+      },
+      "mieruMtu": {
+        "example": 1400,
+        "type": "integer"
+      },
+      "mieruMultiplexing": {
+        "example": "MULTIPLEXING_HIGH",
+        "type": "string"
+      },
       "password": {
         "example": "replace-me",
         "type": "string"
@@ -2620,6 +2632,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "enable",
       "host",
       "id",
+      "mieruHandshakeMode",
+      "mieruMtu",
+      "mieruMultiplexing",
       "port",
       "protocol",
       "remark",
@@ -2671,6 +2686,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "Client started",
         "type": "string"
       },
+      "mieruHandshakeMode": {
+        "example": "HANDSHAKE_NO_WAIT",
+        "type": "string"
+      },
+      "mieruMtu": {
+        "example": 1400,
+        "type": "integer"
+      },
+      "mieruMultiplexing": {
+        "example": "MULTIPLEXING_HIGH",
+        "type": "string"
+      },
       "passwordSet": {
         "example": true,
         "type": "boolean"
@@ -2713,6 +2740,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "host",
       "id",
       "logs",
+      "mieruHandshakeMode",
+      "mieruMtu",
+      "mieruMultiplexing",
       "passwordSet",
       "port",
       "protocol",

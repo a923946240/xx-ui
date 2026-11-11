@@ -2029,6 +2029,13 @@
         "required": "This field is required.",
         "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
         "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "mieruMultiplexing": "Multiplexovanie",
+        "mieruHandshakeMode": "Režim handshake",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400; 0 použije predvolenú hodnotu klienta",
+        "mieruMtuRange": "MTU musí byť 0 alebo v rozsahu 1280 až 1400",
+        "mieruOnly": "Tieto nastavenia platia iba pre mieru",
+        "clientDefault": "Predvolené klientom",
         "states": {
           "starting": "Starting",
           "running": "Client running",

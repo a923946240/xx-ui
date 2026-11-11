@@ -2609,6 +2609,18 @@
             "example": 0,
             "type": "integer"
           },
+          "mieruHandshakeMode": {
+            "example": "HANDSHAKE_NO_WAIT",
+            "type": "string"
+          },
+          "mieruMtu": {
+            "example": 1400,
+            "type": "integer"
+          },
+          "mieruMultiplexing": {
+            "example": "MULTIPLEXING_HIGH",
+            "type": "string"
+          },
           "password": {
             "example": "replace-me",
             "type": "string"
@@ -2646,6 +2658,9 @@
           "enable",
           "host",
           "id",
+          "mieruHandshakeMode",
+          "mieruMtu",
+          "mieruMultiplexing",
           "port",
           "protocol",
           "remark",
@@ -2697,6 +2712,18 @@
             "example": "Client started",
             "type": "string"
           },
+          "mieruHandshakeMode": {
+            "example": "HANDSHAKE_NO_WAIT",
+            "type": "string"
+          },
+          "mieruMtu": {
+            "example": 1400,
+            "type": "integer"
+          },
+          "mieruMultiplexing": {
+            "example": "MULTIPLEXING_HIGH",
+            "type": "string"
+          },
           "passwordSet": {
             "example": true,
             "type": "boolean"
@@ -2739,6 +2766,9 @@
           "host",
           "id",
           "logs",
+          "mieruHandshakeMode",
+          "mieruMtu",
+          "mieruMultiplexing",
           "passwordSet",
           "port",
           "protocol",
@@ -5469,6 +5499,9 @@
                       "host": "proxy.example.com",
                       "id": 1,
                       "logs": "Client started",
+                      "mieruHandshakeMode": "HANDSHAKE_NO_WAIT",
+                      "mieruMtu": 1400,
+                      "mieruMultiplexing": "MULTIPLEXING_HIGH",
                       "passwordSet": true,
                       "port": 443,
                       "protocol": "naive",
@@ -5530,6 +5563,9 @@
                     "host": "proxy.example.com",
                     "id": 1,
                     "logs": "Client started",
+                    "mieruHandshakeMode": "HANDSHAKE_NO_WAIT",
+                    "mieruMtu": 1400,
+                    "mieruMultiplexing": "MULTIPLEXING_HIGH",
                     "passwordSet": true,
                     "port": 443,
                     "protocol": "naive",

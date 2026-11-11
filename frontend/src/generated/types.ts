@@ -603,6 +603,9 @@ export interface ExternalOutboundInput {
   enable: boolean;
   host: string;
   id: number;
+  mieruHandshakeMode: string;
+  mieruMtu: number;
+  mieruMultiplexing: string;
   password?: string;
   port: number;
   protocol: string;
@@ -624,6 +627,9 @@ export interface ExternalOutboundView {
   host: string;
   id: number;
   logs: string;
+  mieruHandshakeMode: string;
+  mieruMtu: number;
+  mieruMultiplexing: string;
   passwordSet: boolean;
   port: number;
   protocol: string;

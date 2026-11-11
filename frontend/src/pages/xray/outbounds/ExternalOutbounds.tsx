@@ -47,7 +47,17 @@ const defaults: ExternalOutboundInput = {
   serverName: '',
   transport: 'tcp',
   enable: true,
+  mieruMultiplexing: '',
+  mieruHandshakeMode: '',
+  mieruMtu: 0,
 };
+
+const mieruMultiplexingLevels = [
+  'MULTIPLEXING_OFF',
+  'MULTIPLEXING_LOW',
+  'MULTIPLEXING_MIDDLE',
+  'MULTIPLEXING_HIGH',
+] as const;
 
 export default function ExternalOutbounds({
   disabled = false,
@@ -129,7 +139,12 @@ export default function ExternalOutbounds({
         <FormField
           name="protocol"
           label={t('pages.xray.external.protocol')}
-          onAfterChange={() => form.setValue('transport', 'tcp')}
+          onAfterChange={() => {
+            form.setValue('transport', 'tcp');
+            form.setValue('mieruMultiplexing', '');
+            form.setValue('mieruHandshakeMode', '');
+            form.setValue('mieruMtu', 0);
+          }}
         >
           <Select
             options={['naive', 'mieru', 'trusttunnel'].map((value) => ({
@@ -179,7 +194,34 @@ export default function ExternalOutbounds({
               />
             </FormField>
           </>
-        ) : null}
+        ) : (
+          <>
+            <FormField name="mieruMultiplexing" label={t('pages.xray.external.mieruMultiplexing')}>
+              <Select
+                options={[
+                  { value: '', label: t('pages.xray.external.clientDefault') },
+                  ...mieruMultiplexingLevels.map((value) => ({ value, label: value })),
+                ]}
+              />
+            </FormField>
+            <FormField name="mieruHandshakeMode" label={t('pages.xray.external.mieruHandshakeMode')}>
+              <Select
+                options={[
+                  { value: '', label: t('pages.xray.external.clientDefault') },
+                  { value: 'HANDSHAKE_STANDARD', label: 'HANDSHAKE_STANDARD' },
+                  { value: 'HANDSHAKE_NO_WAIT', label: 'HANDSHAKE_NO_WAIT' },
+                ]}
+              />
+            </FormField>
+            <FormField
+              name="mieruMtu"
+              label={t('pages.xray.external.mieruMtu')}
+              extra={t('pages.xray.external.mieruMtuHint')}
+            >
+              <InputNumber min={0} max={1400} style={{ width: '100%' }} />
+            </FormField>
+          </>
+        )}
         <FormField name="enable" label={t('pages.xray.external.enabled')} valueProp="checked">
           <Switch />
         </FormField>
@@ -362,6 +404,22 @@ export default function ExternalOutbounds({
                       [t('pages.xray.external.username'), selected.username],
                       [t('pages.xray.external.serverName'), selected.serverName || '—'],
                       [t('pages.xray.external.transport'), selected.transport.toUpperCase()],
+                      ...(selected.protocol === 'mieru'
+                        ? [
+                            [
+                              t('pages.xray.external.mieruMultiplexing'),
+                              selected.mieruMultiplexing || t('pages.xray.external.clientDefault'),
+                            ],
+                            [
+                              t('pages.xray.external.mieruHandshakeMode'),
+                              selected.mieruHandshakeMode || t('pages.xray.external.clientDefault'),
+                            ],
+                            [
+                              t('pages.xray.external.mieruMtu'),
+                              selected.mieruMtu ? String(selected.mieruMtu) : t('pages.xray.external.clientDefault'),
+                            ],
+                          ]
+                        : []),
                     ].map(([label, value]) => (
                       <div key={label}>
                         <dt>{label}</dt>

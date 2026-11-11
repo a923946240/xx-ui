@@ -1908,6 +1908,13 @@
         "required": "This field is required.",
         "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
         "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "mieruMultiplexing": "Çoğullama",
+        "mieruHandshakeMode": "El sıkışma modu",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400; 0 istemci varsayılanını kullanır",
+        "mieruMtuRange": "MTU 0 veya 1280 ile 1400 arasında olmalıdır",
+        "mieruOnly": "Bu ayarlar yalnızca mieru için geçerlidir",
+        "clientDefault": "İstemci varsayılanı",
         "states": {
           "starting": "Starting",
           "running": "Client running",

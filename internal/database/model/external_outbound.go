@@ -12,4 +12,8 @@ type ExternalOutbound struct {
 	ServerName string `json:"serverName"`
 	Transport  string `json:"transport"`
 	Enable     bool   `json:"enable"`
+
+	MieruMultiplexing  string `json:"mieruMultiplexing"`
+	MieruHandshakeMode string `json:"mieruHandshakeMode"`
+	MieruMtu           int    `json:"mieruMtu"`
 }

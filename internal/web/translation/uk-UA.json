@@ -1908,6 +1908,13 @@
         "required": "This field is required.",
         "invalidTag": "Use 1–64 letters, numbers, dots, underscores or hyphens; start with a letter or number.",
         "mieruTcp": "The initial mieru integration uses TCP transport.",
+        "mieruMultiplexing": "Мультиплексування",
+        "mieruHandshakeMode": "Режим рукостискання",
+        "mieruMtu": "MTU",
+        "mieruMtuHint": "1280–1400; 0 — типове значення клієнта",
+        "mieruMtuRange": "MTU має бути 0 або від 1280 до 1400",
+        "mieruOnly": "Ці параметри застосовуються лише до mieru",
+        "clientDefault": "Типове значення клієнта",
         "states": {
           "starting": "Starting",
           "running": "Client running",

@@ -86,6 +86,9 @@ func TestClientProtocolRestartPreservesAuthenticatedGate(t *testing.T) {
 }
 
 func TestMissingClientCannotFallBackAndDisableKeepsTagBlocked(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("Linux client supervisor")
+	}
 	m := NewManager(t.TempDir(), t.TempDir())
 	defer m.StopAll()
 	s := Spec{ID: 1, Tag: "exit", Protocol: "naive", Host: "proxy.example", Port: 443, Username: "alice", Password: "secret", Enable: true}

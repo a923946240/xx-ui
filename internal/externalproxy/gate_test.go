@@ -3,6 +3,7 @@ package externalproxy
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"io"
 	"net"
 	"testing"
@@ -111,6 +112,7 @@ func TestGateForwardsAuthenticatedUDPAssociation(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := make([]byte, 256)
+	_ = relay.SetReadDeadline(time.Now().Add(2 * time.Second))
 	n, err := relay.Read(got)
 	if err != nil || string(got[:n]) != string(packet) {
 		t.Fatalf("UDP packet %q, %v", got[:n], err)
@@ -223,6 +225,37 @@ func TestGateRejectsBadAuthenticationAndUDP(t *testing.T) {
 			}
 		}
 		_ = c.Close()
+	}
+}
+
+func TestGateRefusesUDPWhenAssociationCannotBeEstablished(t *testing.T) {
+	gate, err := newGateWithUDP("local", "token",
+		func(context.Context, string) (net.Conn, error) { return nil, net.ErrClosed },
+		func(context.Context) (net.Conn, error) { return nil, errors.New("mieru client unavailable") })
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer gate.Close()
+	c, err := net.Dial("tcp", gate.Address())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	_ = c.SetDeadline(time.Now().Add(2 * time.Second))
+	_, _ = c.Write([]byte{5, 1, 2})
+	negotiated := make([]byte, 2)
+	if _, err = io.ReadFull(c, negotiated); err != nil || negotiated[1] != 2 {
+		t.Fatalf("negotiation %v %v", negotiated, err)
+	}
+	_, _ = c.Write(append(append([]byte{1, 5}, []byte("local")...), append([]byte{5}, []byte("token")...)...))
+	auth := make([]byte, 2)
+	if _, err = io.ReadFull(c, auth); err != nil || auth[1] != 0 {
+		t.Fatalf("auth %v %v", auth, err)
+	}
+	_, _ = c.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
+	reply := make([]byte, 10)
+	if _, err = io.ReadFull(c, reply); err != nil || reply[1] != 1 {
+		t.Fatalf("failed association reply %v %v, want status 1", reply, err)
 	}
 }
 

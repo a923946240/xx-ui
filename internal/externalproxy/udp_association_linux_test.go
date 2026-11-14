@@ -4,6 +4,7 @@ package externalproxy
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net"
 	"os"
@@ -113,6 +114,6 @@ func TestMieruUDPAssociationRejectsUnownedBackend(t *testing.T) {
 }
 
 func isTimeout(err error) bool {
-	ne, ok := err.(net.Error)
-	return ok && ne.Timeout()
+	var ne net.Error
+	return errors.As(err, &ne) && ne.Timeout()
 }

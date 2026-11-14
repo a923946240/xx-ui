@@ -253,8 +253,10 @@ func TestExternalReferenceDetectionIncludesBalancerPrefixes(t *testing.T) {
 func TestExternalMieruTuningSurvivesSaveAndRender(t *testing.T) {
 	setupExternalExitDB(t)
 	s := &ExternalOutboundService{}
-	in := ExternalOutboundInput{Tag: "ix-out", Protocol: "mieru", Host: "114.111.176.43", Port: 24988, Username: "alice", Password: "secret",
-		MieruMultiplexing: "MULTIPLEXING_HIGH", MieruHandshakeMode: "HANDSHAKE_NO_WAIT", MieruMtu: 1400}
+	in := ExternalOutboundInput{
+		Tag: "ix-out", Protocol: "mieru", Host: "192.0.2.10", Port: 24988, Username: "alice", Password: "secret",
+		MieruMultiplexing: "MULTIPLEXING_HIGH", MieruHandshakeMode: "HANDSHAKE_NO_WAIT", MieruMtu: 1400,
+	}
 	v, err := s.Save(in)
 	if err != nil {
 		t.Fatal(err)

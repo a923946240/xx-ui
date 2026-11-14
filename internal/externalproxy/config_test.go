@@ -68,8 +68,10 @@ func TestConfigRejectsMalformedEndpointsAndCredentials(t *testing.T) {
 // IX-OUT dropped ~25% of TLS handshakes because the rendered client lost the
 // link's multiplexing/handshake/MTU and opened a new underlay per session.
 func TestMieruRenderCarriesTransportTuning(t *testing.T) {
-	s := Spec{ID: 1, Tag: "exit", Protocol: "mieru", Host: "114.111.176.43", Port: 24988, Username: "alice", Password: "secret", Transport: "tcp",
-		MieruMultiplexing: "MULTIPLEXING_HIGH", MieruHandshakeMode: "HANDSHAKE_NO_WAIT", MieruMtu: 1400}
+	s := Spec{
+		ID: 1, Tag: "exit", Protocol: "mieru", Host: "192.0.2.10", Port: 24988, Username: "alice", Password: "secret", Transport: "tcp",
+		MieruMultiplexing: "MULTIPLEXING_HIGH", MieruHandshakeMode: "HANDSHAKE_NO_WAIT", MieruMtu: 1400,
+	}
 	if err := s.Validate(); err != nil {
 		t.Fatal(err)
 	}

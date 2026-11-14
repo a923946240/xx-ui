@@ -204,7 +204,10 @@ export default function ExternalOutbounds({
                 ]}
               />
             </FormField>
-            <FormField name="mieruHandshakeMode" label={t('pages.xray.external.mieruHandshakeMode')}>
+            <FormField
+              name="mieruHandshakeMode"
+              label={t('pages.xray.external.mieruHandshakeMode')}
+            >
               <Select
                 options={[
                   { value: '', label: t('pages.xray.external.clientDefault') },
@@ -416,7 +419,9 @@ export default function ExternalOutbounds({
                             ],
                             [
                               t('pages.xray.external.mieruMtu'),
-                              selected.mieruMtu ? String(selected.mieruMtu) : t('pages.xray.external.clientDefault'),
+                              selected.mieruMtu
+                                ? String(selected.mieruMtu)
+                                : t('pages.xray.external.clientDefault'),
                             ],
                           ]
                         : []),

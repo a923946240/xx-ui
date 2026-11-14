@@ -22,9 +22,12 @@ const ExternalOutboundFieldsSchema = z.object({
     'MULTIPLEXING_HIGH',
   ]),
   mieruHandshakeMode: z.enum(['', 'HANDSHAKE_STANDARD', 'HANDSHAKE_NO_WAIT']),
-  mieruMtu: z.number().int().refine((v) => v === 0 || (v >= 1280 && v <= 1400), {
-    message: 'pages.xray.external.mieruMtuRange',
-  }),
+  mieruMtu: z
+    .number()
+    .int()
+    .refine((v) => v === 0 || (v >= 1280 && v <= 1400), {
+      message: 'pages.xray.external.mieruMtuRange',
+    }),
 });
 
 export const ExternalOutboundInputSchema = ExternalOutboundFieldsSchema.superRefine(

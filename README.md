@@ -26,7 +26,7 @@ The dark theme combines charcoal surfaces, frosted panels, and a subtle particle
 
 ## Build from source on Linux
 
-From the repository root, use Go 1.27.3, Node.js 26, npm 11 or later, and a C compiler for SQLite. [Go requirements](go.mod) · [Frontend requirements](frontend/package.json)
+From the repository root, use Go 1.27.4, Node.js 26, npm 11 or later, and a C compiler for SQLite. [Go requirements](go.mod) · [Frontend requirements](frontend/package.json)
 
 ```sh
 npm --prefix frontend ci

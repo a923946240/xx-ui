@@ -26,7 +26,7 @@ xx-ui 是基于 Xray 开发的 Xray 管理面板，增加了三种外部隧道�
 
 ## 在 Linux 上从源码构建
 
-在仓库根目录执行以下命令。构建需要 Go 1.27.3、Node.js 26、npm 11 或更高版本，以及供 SQLite 使用的 C 编译器。[Go 版本](go.mod) · [前端工具版本](frontend/package.json)
+在仓库根目录执行以下命令。构建需要 Go 1.27.4、Node.js 26、npm 11 或更高版本，以及供 SQLite 使用的 C 编译器。[Go 版本](go.mod) · [前端工具版本](frontend/package.json)
 
 ```sh
 npm --prefix frontend ci

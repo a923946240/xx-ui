@@ -132,8 +132,6 @@
     "routing": "ルーティング",
     "outbounds": "アウトバウンド",
     "apiDocs": "API ドキュメント",
-    "donate": "寄付",
-    "sponsors": "スポンサー",
     "hosts": "ホスト",
     "docs": "ドキュメント",
     "openMenu": "メニューを開く",
@@ -2580,15 +2578,6 @@
         "badVlessRoute": "0〜65535 の単一の数値を入力してください"
       },
       "dragToReorder": "ドラッグして {name} を並べ替え"
-    },
-    "sponsors": {
-      "title": "スポンサー",
-      "intro": "xx-ui の開発を支援している企業です。スポンサーリンクは新しいタブで開きます。",
-      "become": "スポンサーになる",
-      "tag": "スポンサー",
-      "visit": "訪問",
-      "yourBrand": "ここにあなたのブランドを",
-      "yourBrandText": "毎日 xx-ui を開く何千人ものサーバー管理者に御社をアピールできます。"
     }
   },
   "tgbot": {

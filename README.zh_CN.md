@@ -60,4 +60,10 @@ bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-prox
 
 ## 公开发行包
 
-从 xx-ui 仓库下载 install.sh，然后以 root 执行 bash install.sh。安装脚本和面板更新从公开 GitHub 仓库下载 xx-ui 发行包及校验文件。
+在已安装 curl 和 sudo 的 Linux 服务器上执行：
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
+```
+
+此命令安装 xx-ui 最新稳定版，并校验发行包的 SHA-256。已登录 root 时，把 `sudo bash` 改为 `bash`。安装后输入 `x-ui` 打开管理菜单。

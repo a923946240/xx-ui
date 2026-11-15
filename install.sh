@@ -34,11 +34,12 @@ arch() {
         armv6* | armv6) echo 'armv6' ;;
         armv5* | armv5) echo 'armv5' ;;
         s390x) echo 's390x' ;;
-        *) echo -e "${green}Unsupported CPU architecture! ${plain}" && rm -f "$(realpath "$0")" && exit 1 ;;
+        *) echo "Unsupported CPU architecture: $(uname -m)" >&2; return 1 ;;
     esac
 }
 
-echo "Arch: $(arch)"
+install_arch=$(arch) || exit 1
+echo "Arch: $install_arch"
 
 # Non-interactive mode: triggered explicitly via XUI_NONINTERACTIVE=1, or
 # implicitly when stdin is not a TTY (e.g. `curl ... | bash`, cloud-init).
@@ -1646,23 +1647,16 @@ _install_xui_service_unit() {
     return 0
 }
 
-# Resolve the latest stable release with the authenticated API.
+# Resolve the latest stable release from the public repository.
 resolve_latest_tag() {
     curl -Ls --retry 5 --retry-delay 3 --connect-timeout 15 --max-time 60 "https://api.github.com/repos/a923946240/xx-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-# Releases publish <asset>.sha256 next to each archive. A mismatch or a failed
-# sidecar download aborts the install; only a 404 (releases predating the
-# sidecar) is tolerated with a warning.
+# Require the checksum published alongside each xx-ui archive.
 verify_release_checksum() {
     local url="$1" file="$2" sums="$2.sha256" code expected actual
     rm -f "${sums}"
     code=$(curl -sL --retry 3 --retry-delay 3 --connect-timeout 15 --max-time 60 -o "${sums}" -w '%{http_code}' "${url}.sha256")
-    if [[ "${code}" == "404" ]]; then
-        rm -f "${sums}"
-        echo -e "${yellow}No checksum published for this release, skipping verification${plain}"
-        return 0
-    fi
     if [[ "${code}" != "200" ]]; then
         rm -f "${sums}" "${file}"
         echo -e "${red}Failed to download the checksum for $(basename "${file}") (HTTP ${code})${plain}"
@@ -1702,7 +1696,7 @@ install_x-ui() {
     # Download resources
     if [ $# == 0 ]; then
         tag_version=$(resolve_latest_tag)
-        if [[ ! -n "$tag_version" ]]; then
+        if [[ ! "$tag_version" =~ ^v[0-9]+[.][0-9]+[.][0-9]+$ ]]; then
             echo -e "${red}Failed to fetch x-ui version, it may be due to GitHub API restrictions, please try it later${plain}"
             exit 1
         fi
@@ -1937,7 +1931,7 @@ install_x-ui() {
         fi
         chmod +x /etc/init.d/x-ui
         rc-update add x-ui
-        rc-service x-ui start
+        rc-service x-ui start || return 1
     else
         # Install systemd service file
         service_installed=false
@@ -2006,7 +2000,7 @@ install_x-ui() {
             chmod 644 ${xui_service}/x-ui.service > /dev/null 2>&1
             systemctl daemon-reload
             systemctl enable x-ui
-            systemctl start x-ui
+            systemctl start x-ui || return 1
         else
             echo -e "${red}Failed to install x-ui.service file${plain}"
             exit 1
@@ -2041,4 +2035,4 @@ install_x-ui() {
 
 echo -e "${green}Running...${plain}"
 install_base
-install_x-ui $1
+install_x-ui "$@"

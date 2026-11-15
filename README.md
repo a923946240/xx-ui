@@ -60,4 +60,10 @@ This repository currently provides source builds. The original installer and dep
 
 ## Public releases
 
-Download install.sh from the xx-ui repository and run it as root. The installer and panel updater download xx-ui release artifacts and checksums from the public GitHub repository.
+On a Linux server with curl and sudo, run:
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
+```
+
+This installs the latest stable version of xx-ui and verifies the archive's SHA-256 checksum. If you are already root, use `bash` in place of `sudo bash`. Run `x-ui` after installation to open the management menu.

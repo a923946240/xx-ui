@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 // AmneziaWG's own kernel interface Address is exactly the configured

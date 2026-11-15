@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	wgutil "github.com/a923946240/xx-ui/v3/internal/util/wireguard"
 )
 
 func TestAllocateWireguardAddress(t *testing.T) {

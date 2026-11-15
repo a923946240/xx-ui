@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/netproxy"
+	"github.com/a923946240/xx-ui/v3/internal/util/netproxy"
 )
 
 func TestExternalClientsOfficialInstallation(t *testing.T) {

@@ -3,7 +3,7 @@ package middleware
 import (
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 // The inbound add/update handlers validate the body with this validator, so a protocol

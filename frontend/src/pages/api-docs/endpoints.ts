@@ -94,9 +94,9 @@ const outboundSubscriptionBodyParams: EndpointParam[] = [
     name: 'userAgent',
     in: 'body (form)',
     type: 'string',
-    desc: 'Custom User-Agent sent when fetching this subscription. Defaults to "3x-ui-outbound-sub/1.0".',
+    desc: 'Custom User-Agent sent when fetching this subscription. Defaults to "xx-ui-outbound-sub/1.0".',
     optional: true,
-    defaultValue: '3x-ui-outbound-sub/1.0',
+    defaultValue: 'xx-ui-outbound-sub/1.0',
   },
   {
     name: 'updateInterval',
@@ -295,13 +295,6 @@ export const sections: readonly Section[] = [
         summary:
           'Mint a CSRF token for the current session. The SPA replays it in the X-CSRF-Token header on unsafe requests. Bearer-token callers can skip this — the middleware short-circuits CSRF for authenticated API requests.',
         response: '{\n  "success": true,\n  "obj": "csrf-token-string"\n}',
-      },
-      {
-        method: 'GET',
-        path: '/sponsors',
-        summary:
-          'Public. Active paid sponsor placements read from the project sponsors.json (cached for 1h); entries outside their from/until window are dropped. Logos are proxied by the panel at /sponsors/logo/{name}. Used by the login page and panel sponsor slots.',
-        responseSchema: 'SponsorList',
       },
       {
         method: 'POST',

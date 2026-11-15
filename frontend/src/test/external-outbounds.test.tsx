@@ -20,6 +20,9 @@ const initialRow = {
   serverName: '',
   transport: 'tcp',
   enable: true,
+  mieruMultiplexing: '',
+  mieruHandshakeMode: '',
+  mieruMtu: 0,
   passwordSet: true,
   state: 'missing-binary',
   logs: '',
@@ -32,7 +35,9 @@ describe('external final exits', () => {
   beforeEach(() => {
     row = { ...initialRow };
     sent = undefined;
-    vi.spyOn(HttpUtil, 'get').mockImplementation(async () => new Msg(true, '', [row]));
+    vi.spyOn(HttpUtil, 'get').mockImplementation(
+      async (path) => new Msg(true, '', path.endsWith('/clients') ? [] : [row]),
+    );
     vi.spyOn(HttpUtil, 'post').mockImplementation(async (path, input) => {
       if (path.endsWith('/save')) {
         sent = input;

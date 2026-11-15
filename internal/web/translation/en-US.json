@@ -133,8 +133,6 @@
     "routing": "Routing",
     "outbounds": "Outbounds",
     "apiDocs": "API Docs",
-    "donate": "Donate",
-    "sponsors": "Sponsors",
     "docs": "Documentation",
     "openMenu": "Open menu",
     "pinSidebar": "Pin sidebar",
@@ -1462,7 +1460,7 @@
       "subAnnounce": "Announce",
       "subAnnounceDesc": "The announcement text displayed in the VPN client. Supports client identity tokens: {{EMAIL}}, {{ID}}, {{SHORT_ID}}, {{SUB_ID}}, {{TELEGRAM_ID}}.",
       "subThemeDir": "Sub Theme Directory",
-      "subThemeDirDesc": "Absolute path to a folder containing a custom index.html/sub.html subscription page template (e.g. /etc/3x-ui/sub_templates/my-theme/). Leave empty to use the default page.",
+      "subThemeDirDesc": "Absolute path to a folder containing a custom index.html/sub.html subscription page template (e.g. /etc/xx-ui/sub_templates/my-theme/). Leave empty to use the default page.",
       "subThemeDirDocs": "Template guide ↗",
       "subEnableRouting": "Enable routing",
       "happLinkEnable": "Encrypted subscription links",
@@ -2580,15 +2578,6 @@
       "routingScript": "Routing Script",
       "routingScriptDesc": "Path to a .lua file defining HandleRoute, absolute or relative to the Xray bin folder. The script then picks every route and Xray ignores all routing rules, the panel's api rule included: send the api inbound to the api outbound or traffic stats and live client changes stop. Xray will not start if the file is missing or invalid.",
       "routingScriptActive": "A routing script is set under {section}, so Xray ignores these rules."
-    },
-    "sponsors": {
-      "title": "Sponsors",
-      "intro": "Companies that support 3X-UI development. Sponsored links open in a new tab.",
-      "become": "Become a sponsor",
-      "tag": "Sponsor",
-      "visit": "Visit",
-      "yourBrand": "Your brand here",
-      "yourBrandText": "Put your company in front of thousands of server admins who open 3X-UI every day."
     }
   },
   "tgbot": {

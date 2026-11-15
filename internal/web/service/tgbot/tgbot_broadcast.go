@@ -11,8 +11,8 @@ import (
 
 	telegoapi "github.com/mymmrac/telego/telegoapi"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/util/common"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"

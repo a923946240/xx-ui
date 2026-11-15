@@ -2,7 +2,7 @@
 
 English · [简体中文](README.zh_CN.md)
 
-xx-ui is a web panel for managing Xray. It extends 3x-ui v3.11.0 with three additional tunnel clients, per-rule outbound failover, and a charcoal theme. [Project repository](https://github.com/a923946240/xx-ui)
+xx-ui is a web panel for managing Xray. It includes three additional tunnel clients, per-rule outbound failover, and a charcoal theme. [Project repository](https://github.com/a923946240/xx-ui)
 
 ## Route traffic through a tunnel
 
@@ -26,7 +26,7 @@ The dark theme combines charcoal surfaces, frosted panels, and a subtle particle
 
 ## Build from source on Linux
 
-From the repository root, use Go 1.27.3, Node.js 26, npm 11 or later, and a C compiler for SQLite. [Go requirements](go.mod) · [Frontend requirements](frontend/package.json)
+From the repository root, use Go 1.27.4, Node.js 26, npm 11 or later, and a C compiler for SQLite. [Go requirements](go.mod) · [Frontend requirements](frontend/package.json)
 
 ```sh
 npm --prefix frontend ci
@@ -56,4 +56,8 @@ This repository currently provides source builds. The original installer and dep
 
 ## Credits and license
 
-xx-ui builds on the work of **MHSanaei and the 3x-ui contributors** and uses Xray-core from the XTLS project. This fork is distributed under the GNU General Public License v3 (GPLv3). [3x-ui v3.11.0](https://github.com/MHSanaei/3x-ui/tree/v3.11.0) · [Xray-core](https://github.com/XTLS/Xray-core) · [License](LICENSE)
+[License and source notices](NOTICE.md)
+
+## Public releases
+
+Download install.sh from the xx-ui repository and run it as root. The installer and panel updater download xx-ui release artifacts and checksums from the public GitHub repository.

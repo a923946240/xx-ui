@@ -15,7 +15,6 @@ import { useStatusQuery } from '@/api/queries/useStatusQuery';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import AppSidebar from '@/layouts/AppSidebar';
 import { LazyMount } from '@/components/utility';
-import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import { setMessageInstance } from '@/utils/messageBus';
 import OverviewActionBar from './OverviewActionBar';
 import OverviewBento from './OverviewBento';
@@ -223,7 +222,6 @@ export default function IndexPage() {
                     showIp={showIp}
                     onToggleIp={() => setShowIp((v) => !v)}
                   />
-                  <SponsorSlot slot="dashboard" />
                 </div>
               )}
             </Spin>

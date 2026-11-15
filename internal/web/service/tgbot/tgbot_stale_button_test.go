@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/dbtest"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 
 	"github.com/mymmrac/telego"
 )

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 // legacyXdnsStream carries the 26.9.30 xdns objects, whose "name" and typed resolvers

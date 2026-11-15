@@ -11,14 +11,14 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgkern"
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawg"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawgkern"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawgnet"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/mtproto"
+	"github.com/a923946240/xx-ui/v3/internal/tuic"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 )
 
 type LocalDeps struct {

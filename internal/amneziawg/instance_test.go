@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 func mkInboundSettings(t *testing.T, server *ServerSettings, clients []model.Client) string {

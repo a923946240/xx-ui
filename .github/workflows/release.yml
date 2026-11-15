@@ -1,8 +1,13 @@
 name: Build xx-ui artifacts
 
-# Build artifacts explicitly. Publishing a release requires a separate action.
+# Leave release_tag empty for a build without publishing.
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing stable tag to publish, e.g. v3.12.0
+        type: string
+        required: false
 
 jobs:
   build:
@@ -82,14 +87,14 @@ jobs:
           # stable releases stay unstamped so config.IsDevBuild() returns false.
           LDFLAGS="-w -s -linkmode external -extldflags '-static'"
           if [[ "$GITHUB_REF" != refs/tags/* ]]; then
-            LDFLAGS="$LDFLAGS -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${GITHUB_SHA::8} -X github.com/mhsanaei/3x-ui/v3/internal/config.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            LDFLAGS="$LDFLAGS -X github.com/a923946240/xx-ui/v3/internal/config.buildCommit=${GITHUB_SHA::8} -X github.com/a923946240/xx-ui/v3/internal/config.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           fi
           go build -buildvcs=true -ldflags "$LDFLAGS" -o xui-release -v .
           file xui-release
           ldd xui-release || echo "Static binary confirmed"
 
           mkdir x-ui
-          cp xui-release x-ui/
+          cp xui-release LICENSE NOTICE.md x-ui/
           cp x-ui.service.debian x-ui/
           cp x-ui.service.arch x-ui/
           cp x-ui.service.rhel x-ui/
@@ -254,7 +259,7 @@ jobs:
           # Stamp the commit into per-commit (dev channel) builds only.
           LDFLAGS="-w -s"
           if [[ "$GITHUB_REF" != refs/tags/* ]]; then
-            LDFLAGS="$LDFLAGS -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${GITHUB_SHA:0:8} -X github.com/mhsanaei/3x-ui/v3/internal/config.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            LDFLAGS="$LDFLAGS -X github.com/a923946240/xx-ui/v3/internal/config.buildCommit=${GITHUB_SHA:0:8} -X github.com/a923946240/xx-ui/v3/internal/config.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           fi
           go build -buildvcs=true -ldflags "$LDFLAGS" -o xui-release.exe -v .
 
@@ -263,7 +268,8 @@ jobs:
         run: |
           $retry = @{ MaximumRetryCount = 5; RetryIntervalSec = 10 }
           mkdir x-ui
-          Copy-Item xui-release.exe x-ui\3x-ui.exe
+          Copy-Item LICENSE, NOTICE.md -Destination x-ui
+          Copy-Item xui-release.exe x-ui\xx-ui.exe
           mkdir x-ui\bin
           cd x-ui\bin
 
@@ -388,3 +394,33 @@ jobs:
           fi
 
           retry gh release upload dev-latest dev-artifacts/*.tar.gz dev-artifacts/*.zip dev-artifacts/*.sha256 --clobber
+
+  publish-stable:
+    name: Publish xx-ui stable release
+    needs: [build, build-windows]
+    if: inputs.release_tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: stable-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: release-artifacts
+          merge-multiple: true
+      - name: Publish xx-ui release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          BUILD_REF: ${{ github.ref }}
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+[.][0-9]+[.][0-9]+$ ]]
+          [[ "$BUILD_REF" == "refs/tags/$RELEASE_TAG" ]]
+          [[ "$(gh api "repos/$GH_REPO/commits/$RELEASE_TAG" --jq .sha)" == "$BUILD_SHA" ]]
+          gh release create "$RELEASE_TAG" --verify-tag --latest --generate-notes \
+            release-artifacts/*.tar.gz release-artifacts/*.zip release-artifacts/*.sha256

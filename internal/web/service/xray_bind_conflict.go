@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/util/json_util"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 )
 
 // bindConflict names two generated inbounds whose listens cannot coexist.

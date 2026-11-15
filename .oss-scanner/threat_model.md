@@ -1,6 +1,6 @@
-# 3x-ui threat model
+# xx-ui threat model
 
-3x-ui is a self-hosted web control panel for Xray-core. One Go binary stores
+xx-ui is a self-hosted web control panel for Xray-core. One Go binary stores
 inbounds, clients and settings in SQLite (default) or PostgreSQL, renders an
 Xray JSON config from that state, supervises Xray-core and the `mtg-multi`
 MTProto sidecar as child processes, runs AmneziaWG and TUIC servers in-process,
@@ -109,8 +109,8 @@ test that fails without the fix. Merge findings sharing one root cause.
 - Anything requiring the admin account or an admin-scope token, including
   admin-supplied Xray config, custom geo files, panel update and DB import.
 - Vulnerabilities inside Xray-core, mtg-multi, amneziawg-go or other
-  dependencies, unless 3x-ui itself makes them reachable in a way upstream
-  does not; report the 3x-ui path.
+  dependencies, unless xx-ui itself makes them reachable in a way upstream
+  does not; report the xx-ui path.
 - `skip` TLS mode accepting any node certificate: it is an explicit,
   documented opt-out.
 - The `docs/` site, `tools/`, install scripts and CI workflows.

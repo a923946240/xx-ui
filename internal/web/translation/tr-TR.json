@@ -132,8 +132,6 @@
     "routing": "Yönlendirme",
     "outbounds": "Giden Bağlantılar",
     "apiDocs": "API Belgeleri",
-    "donate": "Bağış Yap",
-    "sponsors": "Sponsorlar",
     "hosts": "Host'lar",
     "docs": "Belgeler",
     "openMenu": "Menüyü aç",
@@ -1337,7 +1335,7 @@
       "subAnnounce": "Duyuru",
       "subAnnounceDesc": "VPN istemcisinde görüntülenen duyuru metni. İstemci kimlik tokenlarını destekler: {{EMAIL}}, {{ID}}, {{SHORT_ID}}, {{SUB_ID}}, {{TELEGRAM_ID}}.",
       "subThemeDir": "Abonelik Tema Dizini",
-      "subThemeDirDesc": "Abonelik sayfası için özel bir şablon (index.html/sub.html) içeren klasörün mutlak yolu (örn. /etc/3x-ui/sub_templates/my-theme/). Varsayılan sayfayı kullanmak için boş bırakın.",
+      "subThemeDirDesc": "Abonelik sayfası için özel bir şablon (index.html/sub.html) içeren klasörün mutlak yolu (örn. /etc/xx-ui/sub_templates/my-theme/). Varsayılan sayfayı kullanmak için boş bırakın.",
       "subThemeDirDocs": "Şablon kılavuzu ↗",
       "subEnableRouting": "Yönlendirmeyi etkinleştir",
       "happLinkEnable": "Şifreli abonelik bağlantıları",
@@ -2580,15 +2578,6 @@
         "badVlessRoute": "0 ile 65535 arasında tek bir sayı girin"
       },
       "dragToReorder": "{name} öğesini yeniden sıralamak için sürükleyin"
-    },
-    "sponsors": {
-      "title": "Sponsorlar",
-      "intro": "3X-UI geliştirmesini destekleyen şirketler. Sponsor bağlantıları yeni sekmede açılır.",
-      "become": "Sponsor ol",
-      "tag": "Sponsor",
-      "visit": "Ziyaret et",
-      "yourBrand": "Markanız burada",
-      "yourBrandText": "Şirketinizi her gün 3X-UI açan binlerce sunucu yöneticisinin önüne çıkarın."
     }
   },
   "tgbot": {

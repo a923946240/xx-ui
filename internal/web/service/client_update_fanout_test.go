@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 // applyBarrierRuntime holds every armed node push until fanout of them are

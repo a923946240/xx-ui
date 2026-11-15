@@ -129,8 +129,9 @@ before_show_menu() {
 }
 
 install() {
-    LOGE "Build xx-ui from source: https://github.com/a923946240/xx-ui#build-from-source-on-linux"
-    return 1
+    local installer
+    installer=$(curl -fsS https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh) || { LOGE "Unable to download the xx-ui installer"; return 1; }
+    bash -c "$installer" -- "$@"
 }
 
 update() {
@@ -142,7 +143,9 @@ update() {
         fi
         return 0
     fi
-    bash <(curl -Ls https://raw.githubusercontent.com/a923946240/xx-ui/main/update.sh)
+    local updater
+    updater=$(curl -fsS https://raw.githubusercontent.com/a923946240/xx-ui/main/update.sh) || { LOGE "Unable to download the xx-ui updater"; return 1; }
+    bash -c "$updater"
     if [[ $? == 0 ]]; then
         LOGI "Update is complete, Panel has automatically restarted "
         before_show_menu
@@ -160,7 +163,9 @@ update_dev() {
     fi
     # XUI_UPDATE_TAG tells update.sh to install the dev-latest pre-release
     # instead of the latest stable tag.
-    XUI_UPDATE_TAG="dev-latest" bash <(curl -Ls https://raw.githubusercontent.com/a923946240/xx-ui/main/update.sh)
+    XUI_UPDATE_TAG="dev-latest" local updater
+    updater=$(curl -fsS https://raw.githubusercontent.com/a923946240/xx-ui/main/update.sh) || { LOGE "Unable to download the xx-ui updater"; return 1; }
+    bash -c "$updater"
     if [[ $? == 0 ]]; then
         LOGI "Dev update is complete, Panel has automatically restarted "
         before_show_menu
@@ -207,7 +212,7 @@ replace_xui_script() {
 installed_script_url() {
     local ver
     ver=$("${xui_folder}/x-ui" -v 2> /dev/null | tr -d '[:space:]')
-    if [[ "$ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && curl -fsIL -o /dev/null "https://raw.githubusercontent.com/a923946240/xx-ui/v${ver}/x-ui.sh"; then
+    if [[ "$ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && curl -fsL -o /dev/null "https://raw.githubusercontent.com/a923946240/xx-ui/v${ver}/x-ui.sh"; then
         echo "https://raw.githubusercontent.com/a923946240/xx-ui/v${ver}/x-ui.sh"
     else
         echo -e "${yellow}No x-ui.sh published for the installed version (${ver:-unknown}), using main${plain}" >&2
@@ -306,7 +311,7 @@ uninstall() {
     echo ""
     echo -e "Uninstalled Successfully.\n"
     echo "If you need to install this panel again, you can use below command:"
-    echo -e "${green}bash <(curl -Ls https://raw.githubusercontent.com/a923946240/xx-ui/master/install.sh)${plain}"
+    echo -e "${green}bash install.sh${plain}"
     echo ""
     # Trap the SIGTERM signal
     trap delete_script SIGTERM
@@ -2897,7 +2902,7 @@ pg_ensure_hba_password_auth() {
     local tmp
     tmp=$(mktemp) || return 1
     {
-        echo "# Added by 3x-ui: allow password logins for the panel database."
+        echo "# Added by xx-ui: allow password logins for the panel database."
         echo "host    ${pg_db}    all    127.0.0.1/32    md5"
         echo "host    ${pg_db}    all    ::1/128         md5"
         cat "${hba_file}"

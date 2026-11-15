@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
 
 	"gorm.io/gorm"
 )

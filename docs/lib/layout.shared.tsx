@@ -1,23 +1,14 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { Heart } from 'lucide-react';
-import { Logo } from '@/components/logo';
-import { TelegramIcon } from '@/components/icons';
-import { DocsThemeSwitch } from '@/components/theme-switch';
-import {
-  appName,
-  productRepoUrl,
-  telegramChannel,
-  telegramChannelUrl,
-  donateUrl,
-  siteUrl,
-} from './shared';
 import { getSiteMessages } from './site-i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { Logo } from '@/components/logo';
+import { DocsThemeSwitch } from '@/components/theme-switch';
+import { appName, productRepoUrl, siteUrl } from './shared';
 
 // Build locale-aware shared layout options. With `hideLocale: 'default-locale'`,
 // English URLs have no prefix while other locales are prefixed (`/fa`, `/ru`, `/zh`).
 export function baseOptions(lang: string): BaseLayoutProps {
-  const prefix = lang === 'en' ? '' : `/${lang}`;
   const m = getSiteMessages(lang);
+  const prefix = lang === 'en' ? '' : `/${lang}`;
 
   return {
     slots: {
@@ -43,33 +34,6 @@ export function baseOptions(lang: string): BaseLayoutProps {
       {
         text: 'Storybook',
         url: `${siteUrl}/storybook/`,
-        external: true,
-      },
-      {
-        type: 'icon',
-        label: `Telegram channel (@${telegramChannel})`,
-        icon: <TelegramIcon />,
-        text: 'Telegram',
-        url: telegramChannelUrl,
-        external: true,
-      },
-      // Compact heart icon in the top nav bars (home + docs).
-      {
-        type: 'icon',
-        on: 'nav',
-        label: m.donate,
-        icon: <Heart />,
-        text: m.donate,
-        url: donateUrl,
-        external: true,
-      },
-      // Prominent labelled entry in the docs sidebar / mobile menu.
-      {
-        type: 'main',
-        on: 'menu',
-        icon: <Heart />,
-        text: m.donate,
-        url: donateUrl,
         external: true,
       },
     ],

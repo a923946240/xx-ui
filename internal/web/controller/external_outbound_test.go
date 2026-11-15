@@ -9,10 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/a923946240/xx-ui/v3/internal/database/dbtest"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/web/locale"
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
 )
 
 func TestExternalAPIHidesPasswordAndRestrictsMonitorTokens(t *testing.T) {

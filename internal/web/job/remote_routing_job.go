@@ -1,9 +1,9 @@
 package job
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/sub"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/sub"
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
 )
 
 // RemoteRoutingJob keeps remote Happ and Clash/Mihomo routing URLs warm: all

@@ -1,3 +1,4 @@
+import { getSiteMessages } from './site-i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { Logo } from '@/components/logo';
 import { DocsThemeSwitch } from '@/components/theme-switch';
@@ -10,6 +11,7 @@ import {
 // Build locale-aware shared layout options. With `hideLocale: 'default-locale'`,
 // English URLs have no prefix while other locales are prefixed (`/fa`, `/ru`, `/zh`).
 export function baseOptions(lang: string): BaseLayoutProps {
+  const m = getSiteMessages(lang);
   const prefix = lang === 'en' ? '' : `/${lang}`;
 
   return {

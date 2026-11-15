@@ -2,11 +2,7 @@ import { getSiteMessages } from './site-i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { Logo } from '@/components/logo';
 import { DocsThemeSwitch } from '@/components/theme-switch';
-import {
-  appName,
-  productRepoUrl,
-  siteUrl,
-} from './shared';
+import { appName, productRepoUrl, siteUrl } from './shared';
 
 // Build locale-aware shared layout options. With `hideLocale: 'default-locale'`,
 // English URLs have no prefix while other locales are prefixed (`/fa`, `/ru`, `/zh`).

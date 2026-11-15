@@ -1,12 +1,11 @@
 # External tunnel final outbounds
 
-Approved in chat on 2026-11-02. Base: MHSanaei/3x-ui v3.11.0, upstream commit
-`c621ba9014a6aa21fd7c9ecf45655e44e24ebf13`. Source imported from the official
+Approved in chat on 2026-11-02. Base provenance is recorded in [NOTICE.md](../../../NOTICE.md). Source imported from the official
 tag archive because Git smart-HTTP stalled. No LucX source is reused.
 
 ## Intent and scope
 
-Clients connect to existing 3x-ui inbounds. Selected traffic exits through an
+Clients connect to existing panel inbounds. Selected traffic exits through an
 existing remote NaiveProxy, mieru, or TrustTunnel server. The panel manages the
 corresponding official local client. No remote service deployment, multi-hop
 chain builder, new inbound protocol, or LucX-wide migration is included.

@@ -10,11 +10,11 @@ import (
 	"github.com/op/go-logging"
 	"gorm.io/gorm"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/testpg"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	xuilogger "github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/testpg"
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
 )
 
 func TestClientIpWritersPreserveCanonicalBytes(t *testing.T) {

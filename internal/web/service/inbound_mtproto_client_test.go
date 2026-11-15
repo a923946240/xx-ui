@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/mtproto"
+	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
 )
 
 func TestClientCrudMtprotoAppliesImmediately(t *testing.T) {

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to xx-ui, based on 3x-ui. This guide gets a development panel running locally and explains the conventions the project follows so changes land cleanly.
+Thanks for contributing to xx-ui, based on xx-ui. This guide gets a development panel running locally and explains the conventions the project follows so changes land cleanly.
 
 ## Prerequisites
 
@@ -50,8 +50,8 @@ Cross-building the Linux SQLite target from Windows (or vice versa) requires a s
 ## First-time setup
 
 ```bash
-git clone https://github.com/MHSanaei/3x-ui.git
-cd 3x-ui
+git clone https://github.com/a923946240/xx-ui.git
+cd xx-ui
 
 cp .env.example .env
 
@@ -88,7 +88,7 @@ Open [http://localhost:2053](http://localhost:2053) and log in with the username
 
 ### Inside VS Code
 
-The repo checks in two VS Code launch profiles in `.vscode/launch.json`: **Run 3x-ui (Debug)** for the default SQLite setup, and **Run 3x-ui (Postgres)** which points `XUI_DB_TYPE`/`XUI_DB_DSN` at a local PostgreSQL. The Postgres profile also prepends the PostgreSQL `bin` to `PATH` so the panel can find `pg_dump`/`pg_restore` (the `postgresql-client` tools used for DB backup/restore) — adjust the DSN and that path to your machine:
+The repo checks in two VS Code launch profiles in `.vscode/launch.json`: **Run xx-ui (Debug)** for the default SQLite setup, and **Run xx-ui (Postgres)** which points `XUI_DB_TYPE`/`XUI_DB_DSN` at a local PostgreSQL. The Postgres profile also prepends the PostgreSQL `bin` to `PATH` so the panel can find `pg_dump`/`pg_restore` (the `postgresql-client` tools used for DB backup/restore) — adjust the DSN and that path to your machine:
 
 ```jsonc
 {
@@ -96,7 +96,7 @@ The repo checks in two VS Code launch profiles in `.vscode/launch.json`: **Run 3
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run 3x-ui (Debug)",
+      "name": "Run xx-ui (Debug)",
       "type": "go",
       "request": "launch",
       "mode": "auto",
@@ -111,7 +111,7 @@ The repo checks in two VS Code launch profiles in `.vscode/launch.json`: **Run 3
       "console": "integratedTerminal"
     },
     {
-      "name": "Run 3x-ui (Postgres)",
+      "name": "Run xx-ui (Postgres)",
       "type": "go",
       "request": "launch",
       "mode": "auto",
@@ -306,7 +306,7 @@ CI runs this for you nightly (and on demand) via `.github/workflows/mutation.yml
 | `XUI_DEBUG` | `false` | Verbose logs + Gin debug mode + serve `/assets` from disk |
 | `XUI_LOG_LEVEL` | `info` | `debug` / `info` / `notice` / `warning` / `error` |
 | `XUI_DB_FOLDER` | platform default | Where `x-ui.db` lives |
-| `XUI_LOG_FOLDER` | platform default | Where `3xui.log` lives |
+| `XUI_LOG_FOLDER` | platform default | Where `xx-ui.log` lives |
 | `XUI_BIN_FOLDER` | `bin` | Where the xray binary, geo files, and xray `config.json` live |
 | `XUI_INIT_WEB_BASE_PATH` | `/` | The initial URI path for the web panel |
 | `XUI_PORT` | persisted `webPort` | Runtime-only web panel listener port override (`1` through `65535`) |
@@ -321,6 +321,6 @@ must match the override, for example `XUI_PORT: "8080"` with `ports: ["8080:8080
 
 ## Issues
 
-- Bug reports and feature requests: [GitHub Issues](https://github.com/MHSanaei/3x-ui/issues)
+- Bug reports and feature requests: [GitHub Issues](https://github.com/a923946240/xx-ui/issues)
 
-Before filing a bug, include the OS, Go version, panel version (`/panel/api/server/status` or the dashboard footer), and the relevant excerpt from `x-ui/3xui.log`.
+Before filing a bug, include the OS, Go version, panel version (`/panel/api/server/status` or the dashboard footer), and the relevant excerpt from `x-ui/xx-ui.log`.

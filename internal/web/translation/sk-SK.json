@@ -1462,7 +1462,7 @@
       "subAnnounce": "Oznámenie",
       "subAnnounceDesc": "Text oznámenia vo VPN klientovi. Podporuje premenné identity klienta: {{EMAIL}}, {{ID}}, {{SHORT_ID}}, {{SUB_ID}}, {{TELEGRAM_ID}}.",
       "subThemeDir": "Priečinok vzhľadu odberu",
-      "subThemeDirDesc": "Absolútna cesta k priečinku s vlastnou šablónou klientskej stránky index.html/sub.html (napr. /etc/3x-ui/sub_templates/my-theme/). Prázdne pole použije predvolenú stránku.",
+      "subThemeDirDesc": "Absolútna cesta k priečinku s vlastnou šablónou klientskej stránky index.html/sub.html (napr. /etc/xx-ui/sub_templates/my-theme/). Prázdne pole použije predvolenú stránku.",
       "subThemeDirDocs": "Návod na šablóny ↗",
       "subEnableRouting": "Zapnúť smerovanie",
       "happLinkEnable": "Šifrované odkazy na odber",
@@ -2583,12 +2583,12 @@
     },
     "sponsors": {
       "title": "Sponzori",
-      "intro": "Spoločnosti podporujúce vývoj 3X-UI. Sponzorované odkazy sa otvoria na novej karte.",
+      "intro": "Spoločnosti podporujúce vývoj xx-ui. Sponzorované odkazy sa otvoria na novej karte.",
       "become": "Stať sa sponzorom",
       "tag": "Sponzor",
       "visit": "Navštíviť",
       "yourBrand": "Miesto pre vašu značku",
-      "yourBrandText": "Predstavte svoju spoločnosť tisícom správcov serverov, ktorí denne otvárajú 3X-UI."
+      "yourBrandText": "Predstavte svoju spoločnosť tisícom správcov serverov, ktorí denne otvárajú xx-ui."
     }
   },
   "tgbot": {

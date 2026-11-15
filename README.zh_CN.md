@@ -2,7 +2,7 @@
 
 [English](README.md) · 简体中文
 
-xx-ui 是基于 3x-ui v3.11.0 开发的 Xray 管理面板，增加了三种外部隧道出口、按路由规则自动切换主备出口的功能，以及炭黑磨砂主题。[项目仓库](https://github.com/a923946240/xx-ui)
+xx-ui 是基于 Xray 开发的 Xray 管理面板，增加了三种外部隧道出口、按路由规则自动切换主备出口的功能，以及炭黑磨砂主题。[项目仓库](https://github.com/a923946240/xx-ui)
 
 ## 通过外部隧道访问网站
 
@@ -56,4 +56,8 @@ bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-prox
 
 ## 上游与许可证
 
-感谢 **MHSanaei 和 3x-ui 的所有贡献者**提供面板底座，感谢 XTLS 项目提供 Xray-core。本分支沿用 GNU 通用公共许可证第 3 版（GPLv3）。[上游 3x-ui v3.11.0](https://github.com/MHSanaei/3x-ui/tree/v3.11.0) · [Xray-core](https://github.com/XTLS/Xray-core) · [许可证全文](LICENSE)
+[许可证和来源声明](NOTICE.md)
+
+## 公开发行包
+
+从 xx-ui 仓库下载 install.sh，然后以 root 执行 bash install.sh。安装脚本和面板更新从公开 GitHub 仓库下载 xx-ui 发行包及校验文件。

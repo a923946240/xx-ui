@@ -1,4 +1,4 @@
-// Package web provides the main web server implementation for the 3x-ui panel,
+// Package web provides the main web server implementation for the xx-ui panel,
 // including HTTP/HTTPS serving, routing, templates, and background job scheduling.
 package web
 
@@ -17,29 +17,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgkern"
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/cronspec"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/controller"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/job"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/discord"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/email"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawgkern"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawgnet"
+	"github.com/a923946240/xx-ui/v3/internal/config"
+	"github.com/a923946240/xx-ui/v3/internal/eventbus"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/mtproto"
+	"github.com/a923946240/xx-ui/v3/internal/tuic"
+	"github.com/a923946240/xx-ui/v3/internal/util/common"
+	"github.com/a923946240/xx-ui/v3/internal/util/cronspec"
+	"github.com/a923946240/xx-ui/v3/internal/util/sys"
+	"github.com/a923946240/xx-ui/v3/internal/web/controller"
+	"github.com/a923946240/xx-ui/v3/internal/web/job"
+	"github.com/a923946240/xx-ui/v3/internal/web/locale"
+	"github.com/a923946240/xx-ui/v3/internal/web/middleware"
+	"github.com/a923946240/xx-ui/v3/internal/web/network"
+	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
+	"github.com/a923946240/xx-ui/v3/internal/web/service/discord"
+	"github.com/a923946240/xx-ui/v3/internal/web/service/email"
+	"github.com/a923946240/xx-ui/v3/internal/web/service/panel"
+	"github.com/a923946240/xx-ui/v3/internal/web/service/tgbot"
+	"github.com/a923946240/xx-ui/v3/internal/web/websocket"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
@@ -113,7 +113,7 @@ func EmbeddedDist() embed.FS {
 	return distFS
 }
 
-// Server represents the main web server for the 3x-ui panel with controllers, services, and scheduled jobs.
+// Server represents the main web server for the xx-ui panel with controllers, services, and scheduled jobs.
 type Server struct {
 	httpServer *http.Server
 	listener   net.Listener
@@ -220,7 +220,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		sessionOptions.MaxAge = sessionMaxAge * 60 // minutes -> seconds
 	}
 	store.Options(sessionOptions)
-	engine.Use(sessions.Sessions("3x-ui", store))
+	engine.Use(sessions.Sessions("xx-ui", store))
 	engine.Use(func(c *gin.Context) {
 		c.Set("base_path", basePath)
 	})

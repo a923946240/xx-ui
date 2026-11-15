@@ -28,7 +28,7 @@ const SECURITY_SCHEMES = {
   cookieAuth: {
     type: 'apiKey',
     in: 'cookie',
-    name: '3x-ui',
+    name: 'xx-ui',
     description: 'Session cookie set by POST /login. Browser-only.',
   },
 };

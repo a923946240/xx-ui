@@ -8,9 +8,9 @@ import (
 
 	"github.com/op/go-logging"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/database/dbtest"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	xuilogger "github.com/a923946240/xx-ui/v3/internal/logger"
 )
 
 var subBalancerLoggerOnce sync.Once

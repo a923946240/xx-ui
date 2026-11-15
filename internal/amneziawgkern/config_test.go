@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
+	"github.com/a923946240/xx-ui/v3/internal/amneziawg"
 )
 
 func testInstance() amneziawg.Instance {

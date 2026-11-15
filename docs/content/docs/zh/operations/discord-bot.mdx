@@ -1,10 +1,10 @@
 ---
 title: Discord 机器人
-description: 将 Discord 机器人接入 3x-ui，在指定频道接收实时的面板事件 Embed 告警、周期性健康报告（含数据库备份）以及执行交互式控制命令。
+description: 将 Discord 机器人接入 xx-ui，在指定频道接收实时的面板事件 Embed 告警、周期性健康报告（含数据库备份）以及执行交互式控制命令。
 icon: Bot
 ---
 
-3x-ui 提供了完整的 Discord 集成支持：通过事件总线（`EventBus`）实时推送事件告警、通过定时任务发送包含数据库备份的服务器状态报告，以及通过 Discord Gateway 执行交互式管理命令。
+xx-ui 提供了完整的 Discord 集成支持：通过事件总线（`EventBus`）实时推送事件告警、通过定时任务发送包含数据库备份的服务器状态报告，以及通过 Discord Gateway 执行交互式管理命令。
 
 <Callout type="info">
   Discord 实时通知和周期性报告使用出站 HTTPS REST API v10 请求。交互式机器人命令则通过与 Discord Gateway 建立的后台安全 WebSocket 连接实现。
@@ -18,7 +18,7 @@ icon: Bot
 ### 创建 Discord 应用程序与机器人
 
 1. 打开 [Discord 开发者门户](https://discord.com/developers/applications) 并登录。
-2. 点击右上角的 **New Application**，输入名称（例如 `3x-ui Notifier`）并确认创建。
+2. 点击右上角的 **New Application**，输入名称（例如 `xx-ui Notifier`）并确认创建。
 3. 在左侧菜单中，进入 **Bot** 标签页。
 4. 点击 **Reset Token**（如果尚未创建机器人则点击 **Add Bot**），并复制生成的 **Bot Token**。请妥善保管该令牌。
 5. 在 **Privileged Gateway Intents** 区域，勾选启用 **Message Content Intent**（机器人读取 `!status` 等前缀命令所必需）。
@@ -48,7 +48,7 @@ icon: Bot
 <Step>
 ### 配置面板
 
-1. 在 3x-ui 面板中，打开**面板设置** → **Discord 机器人**（或直接访问 `/settings#discord`）。
+1. 在 xx-ui 面板中，打开**面板设置** → **Discord 机器人**（或直接访问 `/settings#discord`）。
 2. 在**通用**区域：
    - 开启**启用 Discord 通知**。
    - 填入你的 **Discord Bot Token** 和 **频道 ID**。

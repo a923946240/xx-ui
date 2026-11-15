@@ -25,7 +25,7 @@ node_modules/
 # Ignore compiled binaries
 xx-ui
 main
-3x-ui
+xx-ui
 
 # Ignore OS specific files
 .DS_Store

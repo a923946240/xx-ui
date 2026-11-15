@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 )
 
 func TestWeeklyRenewalSearchFailsClosed(t *testing.T) {

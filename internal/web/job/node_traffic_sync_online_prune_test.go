@@ -6,13 +6,13 @@ import (
 
 	"github.com/op/go-logging"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/database/dbtest"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	xuilogger "github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 )
 
 // The sync tick is the only place that sees which nodes it no longer fetches, so it

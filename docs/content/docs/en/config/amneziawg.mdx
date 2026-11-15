@@ -1,6 +1,6 @@
 ---
 title: AmneziaWG
-description: Configure embedded or optional Linux kernel AmneziaWG inbounds in 3x-ui.
+description: Configure embedded or optional Linux kernel AmneziaWG inbounds in xx-ui.
 icon: Lock
 ---
 
@@ -143,7 +143,7 @@ kernel headers and, when Secure Boot is enabled, module signing must be
 available. Review the script and host changes before running it.
 
 The panel enables IPv4 forwarding and, when `iptables` is installed, adds two
-`FORWARD` accept rules per interface (commented `3x-ui:xui-awg<id>`), so a host
+`FORWARD` accept rules per interface (commented `xx-ui:xui-awg<id>`), so a host
 whose `FORWARD` policy is `DROP` — as Docker and ufw set it — still forwards
 the tunnel. A firewall that drops forwarded traffic in its own nftables table,
 such as firewalld, still needs a rule from you.

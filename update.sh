@@ -69,7 +69,7 @@ trap 'exit 130' INT
 [[ $EUID -ne 0 ]] && _fail "FATAL ERROR: Please run this script with root privilege."
 
 if _command_exists curl; then
-    curl_bin=$(which curl)
+    curl_bin=$(command -v curl)
 else
     _fail "ERROR: Command 'curl' not found."
 fi
@@ -491,7 +491,7 @@ require_repo_files() {
     shift
     [[ "${ref}" == "main" ]] && return 0
     for name in "$@"; do
-        status=$(${curl_bin} -sIL --retry 3 --connect-timeout 15 -o /dev/null -w '%{http_code}' "https://raw.githubusercontent.com/a923946240/xx-ui/${ref}/${name}")
+        status=$(${curl_bin} -sL --retry 3 --connect-timeout 15 -o /dev/null -w '%{http_code}' "https://raw.githubusercontent.com/a923946240/xx-ui/${ref}/${name}")
         if [[ "${status}" != "200" ]]; then
             _fail "ERROR: ${name} is not available for ${ref} (HTTP ${status}). Update to a release that ships it, or to 'dev-latest'. The current installation is untouched."
         fi

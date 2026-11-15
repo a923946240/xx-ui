@@ -1337,7 +1337,7 @@
       "subAnnounce": "Anuncio",
       "subAnnounceDesc": "El texto del anuncio mostrado en el cliente VPN. Admite tokens de identidad del cliente: {{EMAIL}}, {{ID}}, {{SHORT_ID}}, {{SUB_ID}}, {{TELEGRAM_ID}}.",
       "subThemeDir": "Directorio del tema de suscripción",
-      "subThemeDirDesc": "Ruta absoluta a una carpeta que contiene una plantilla personalizada (index.html/sub.html) para la página de suscripción (p. ej. /etc/3x-ui/sub_templates/my-theme/). Déjalo vacío para usar la página predeterminada.",
+      "subThemeDirDesc": "Ruta absoluta a una carpeta que contiene una plantilla personalizada (index.html/sub.html) para la página de suscripción (p. ej. /etc/xx-ui/sub_templates/my-theme/). Déjalo vacío para usar la página predeterminada.",
       "subThemeDirDocs": "Guía de plantillas ↗",
       "subEnableRouting": "Habilitar enrutamiento",
       "happLinkEnable": "Enlaces de suscripción cifrados",
@@ -2583,12 +2583,12 @@
     },
     "sponsors": {
       "title": "Patrocinadores",
-      "intro": "Empresas que apoyan el desarrollo de 3X-UI. Los enlaces patrocinados se abren en una pestaña nueva.",
+      "intro": "Empresas que apoyan el desarrollo de xx-ui. Los enlaces patrocinados se abren en una pestaña nueva.",
       "become": "Hazte patrocinador",
       "tag": "Patrocinador",
       "visit": "Visitar",
       "yourBrand": "Tu marca aquí",
-      "yourBrandText": "Muestra tu empresa a miles de administradores de servidores que abren 3X-UI cada día."
+      "yourBrandText": "Muestra tu empresa a miles de administradores de servidores que abren xx-ui cada día."
     }
   },
   "tgbot": {

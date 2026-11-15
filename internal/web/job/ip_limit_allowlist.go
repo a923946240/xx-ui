@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 )
 
 // An address that matches is neither counted towards a client's IP limit nor

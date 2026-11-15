@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/link"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/util/common"
+	"github.com/a923946240/xx-ui/v3/internal/util/link"
+	"github.com/a923946240/xx-ui/v3/internal/util/netsafe"
+	"github.com/a923946240/xx-ui/v3/internal/xray"
 )
 
 // filterOutboundsRejectedByCore drops outbounds the vendored xray-core config
@@ -58,7 +58,7 @@ func filterOutboundsRejectedByCore(label string, outbounds []any) ([]any, []stri
 // subscription may aggregate many upstream outbounds into one document.
 const maxOutboundSubscriptionBytes int64 = 8 << 20
 
-const defaultOutboundSubscriptionUserAgent = "3x-ui-outbound-sub/1.0"
+const defaultOutboundSubscriptionUserAgent = "xx-ui-outbound-sub/1.0"
 
 var errOutboundSubscriptionBodyTooLarge = errors.New("outbound subscription response body exceeds size limit")
 
@@ -374,7 +374,7 @@ func (s *OutboundSubscriptionService) fetchAndStore(sub *model.OutboundSubscript
 		userAgent = defaultOutboundSubscriptionUserAgent
 	}
 	req.Header.Set("User-Agent", userAgent)
-	// A 3x-ui donor with an HWID limit answers 404 when the header is empty (#6574).
+	// A xx-ui donor with an HWID limit answers 404 when the header is empty (#6574).
 	if hwid := ExternalSubscriptionHwid(); hwid != "" {
 		req.Header.Set("X-HWID", hwid)
 	}

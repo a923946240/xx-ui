@@ -19,7 +19,7 @@ import (
 
 const (
 	maxLogBufferSize = 10240                 // Maximum log entries kept in memory
-	logFileName      = "xx-ui.log"            // Log file name
+	logFileName      = "xx-ui.log"           // Log file name
 	timeFormat       = "2006/01/02 15:04:05" // Log timestamp format
 
 	// On-disk rotation limits — single file capped, old segments pruned automatically.

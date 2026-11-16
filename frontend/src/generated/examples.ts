@@ -969,6 +969,45 @@ export const EXAMPLES: Record<string, unknown> = {
     "obj": null,
     "success": false
   },
+  "NATSyncConfig": {
+    "enabled": false,
+    "hostKeyFingerprint": "",
+    "outboundTags": [
+      ""
+    ],
+    "relayHost": "",
+    "relayPort": 0,
+    "relayUser": ""
+  },
+  "NATSyncReport": {
+    "candidateIp": "",
+    "seenAt": 0
+  },
+  "NATSyncStatus": {
+    "appliedAt": 0,
+    "candidateIp": "",
+    "currentIp": "",
+    "probeAt": 0,
+    "probeIp": "",
+    "probeResult": "",
+    "state": "",
+    "updatedAt": 0
+  },
+  "NATSyncView": {
+    "config": {
+      "enabled": false,
+      "hostKeyFingerprint": "",
+      "outboundTags": [
+        ""
+      ],
+      "relayHost": "",
+      "relayPort": 0,
+      "relayUser": ""
+    },
+    "legacyStatus": false,
+    "publicKey": "",
+    "status": null
+  },
   "NewUUIDResponse": {
     "uuid": "550e8400-e29b-41d4-a716-446655440000"
   },

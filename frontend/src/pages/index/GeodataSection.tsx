@@ -44,6 +44,7 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
   const [outboundTags, setOutboundTags] = useState<string[]>([]);
   const [template, setTemplate] = useState<Record<string, unknown> | null>(null);
   const outboundTestUrlRef = useRef('');
+  const revisionRef = useRef<string | undefined>(undefined);
 
   const load = useCallback(async () => {
     try {
@@ -54,6 +55,7 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
       const payload = parsed.data;
       const next = payload.xraySetting as Record<string, unknown>;
       setTemplate(next);
+      revisionRef.current = payload.templateRevision;
       outboundTestUrlRef.current =
         typeof payload.outboundTestUrl === 'string' ? payload.outboundTestUrl : '';
 
@@ -122,6 +124,8 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
 
   function save() {
     if (!template) return;
+    const revision = revisionRef.current;
+    const testUrl = outboundTestUrlRef.current;
     const assets = rows
       .map((r) => ({ url: r.url.trim(), file: r.file.trim() }))
       .filter((r) => r.url || r.file);
@@ -157,14 +161,18 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
           if (outbound) geodata.outbound = outbound;
           next.geodata = geodata;
         }
-        onClose();
         onBusy({ busy: true, tip: t('pages.index.dontRefresh') });
         try {
-          const msg = await HttpUtil.post('/panel/api/xray/update', {
-            xraySetting: JSON.stringify(next, null, 2),
-            outboundTestUrl: outboundTestUrlRef.current,
-          });
+          const msg = await HttpUtil.post(
+            '/panel/api/xray/update',
+            {
+              xraySetting: JSON.stringify(next, null, 2),
+              outboundTestUrl: testUrl,
+            },
+            revision ? { headers: { 'If-Match': revision } } : undefined,
+          );
           if (msg?.success) {
+            onClose();
             await HttpUtil.post('/panel/api/server/restartXrayService');
           }
         } finally {

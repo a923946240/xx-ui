@@ -49,7 +49,7 @@ def read_report(path, max_age):
     entry = json.loads(path.read_text())
     if not 0 <= time.time() - entry["seen_at"] <= max_age:
         raise ValueError("NAT report expired")
-    return public_ipv4(entry["address"])
+    return {"address": public_ipv4(entry["address"]), "seen_at": entry["seen_at"]}
 
 
 class NoRedirects(HTTPRedirectHandler):
@@ -226,12 +226,14 @@ def main():
         command.add_argument("file", type=Path)
         if name == "read":
             command.add_argument("--max-age", type=int, default=60)
+            command.add_argument("--json", action="store_true", help="include the original report time")
     args = parser.parse_args()
     try:
         if args.command == "report":
             report(args.file)
         elif args.command == "read":
-            print(read_report(args.file, args.max_age))
+            entry = read_report(args.file, args.max_age)
+            print(json.dumps(entry) if args.json else entry["address"])
         else:
             sync(json.loads(args.file.read_text()))
     except HTTPError as err:

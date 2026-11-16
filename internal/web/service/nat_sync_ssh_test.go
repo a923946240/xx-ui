@@ -148,8 +148,10 @@ func TestNATSyncSSHUsesPinnedHostAndFixedReadCommand(t *testing.T) {
 		{"wrong host", ssh.FingerprintSHA256(readerKey.PublicKey()), nil, ""},
 		// Including a valid report prefix with only whitespace afterward would
 		// succeed if io.Copy bypassed the bounded output writer.
-		{"excessive output", ssh.FingerprintSHA256(relayKey.PublicKey()),
-			append([]byte("8.8.4.4\n"), bytes.Repeat([]byte{' '}, 4096)...), ""},
+		{
+			"excessive output", ssh.FingerprintSHA256(relayKey.PublicKey()),
+			append([]byte("8.8.4.4\n"), bytes.Repeat([]byte{' '}, 4096)...), "",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			listener, err := net.Listen("tcp4", "127.0.0.1:0")

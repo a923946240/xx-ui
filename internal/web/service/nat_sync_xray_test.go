@@ -6,8 +6,10 @@ import (
 	"testing"
 )
 
-const natSyncTestTarget = `{"tag":"tw","protocol":"shadowsocks","settings":{"servers":[{"address":"8.8.8.8","port":35974,"extra":9007199254740993}]},"streamSettings":{"sockopt":{"dialerProxy":"hk"}}}`
-const natSyncTestRelay = `{"tag":"hk","protocol":"socks","settings":{"servers":[{"address":"127.0.0.1","port":1080}]}}`
+const (
+	natSyncTestTarget = `{"tag":"tw","protocol":"shadowsocks","settings":{"servers":[{"address":"8.8.8.8","port":35974,"extra":9007199254740993}]},"streamSettings":{"sockopt":{"dialerProxy":"hk"}}}`
+	natSyncTestRelay  = `{"tag":"hk","protocol":"socks","settings":{"servers":[{"address":"127.0.0.1","port":1080}]}}`
+)
 
 func TestPrepareNATSyncUsesRunningManagedRelayAndPreservesTemplate(t *testing.T) {
 	template := `{"outbounds":[` + natSyncTestTarget + `],"someExtension":{"id":9007199254740993}}`

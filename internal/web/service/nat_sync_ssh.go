@@ -20,9 +20,10 @@ import (
 	"syscall"
 	"time"
 
+	"golang.org/x/crypto/ssh"
+
 	"github.com/a923946240/xx-ui/v3/internal/config"
 	"github.com/a923946240/xx-ui/v3/internal/util/netsafe"
-	"golang.org/x/crypto/ssh"
 )
 
 const (

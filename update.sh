@@ -55,12 +55,16 @@ _write_update_status() {
 
 _report_update_exit() {
     local code=$?
+    if [[ -n "$update_stage" ]]; then
+        rm -rf -- "$update_stage"
+    fi
     if [[ "${code}" -eq 0 ]]; then
         _write_update_status "success" "0"
     else
         _write_update_status "failed" "${code}"
     fi
 }
+update_stage=""
 trap _report_update_exit EXIT
 trap 'exit 143' TERM
 trap 'exit 130' INT
@@ -445,24 +449,17 @@ EOF
 }
 
 # Lands a systemd unit file at ${xui_service}/x-ui.service via a temp file +
-# atomic mv, so a failed cp/curl or an interrupted mv never leaves a
+# atomic mv, so a failed copy or an interrupted mv never leaves a
 # truncated unit file at the live path -- systemd would then fail to parse
 # it on the next daemon-reload/start. Same pattern already used for
-# /usr/bin/x-ui elsewhere in this script. source_is_url picks cp (from a
-# file already extracted from the release tarball) vs curl (GitHub fallback).
+# /usr/bin/x-ui elsewhere in this script. The source is a local release file.
 _install_xui_service_unit() {
     local source="$1"
-    local source_is_url="$2"
     local dest="${xui_service}/x-ui.service"
     local temp_file="${dest}.tmp.$$"
 
     rm -f "$temp_file"
-    if [[ "$source_is_url" == "true" ]]; then
-        ${curl_bin} -fLRo "$temp_file" "$source" > /dev/null 2>&1
-    else
-        cp -f "$source" "$temp_file" > /dev/null 2>&1
-    fi
-    if [[ $? -ne 0 ]]; then
+    if ! cp -f "$source" "$temp_file" > /dev/null 2>&1; then
         rm -f "$temp_file"
         return 1
     fi
@@ -483,19 +480,22 @@ _install_xui_service_unit() {
     return 0
 }
 
-# Older tags predate some of these files (x-ui.rc arrived in v2.8.4). Serving
-# main's copy against an old binary is the mismatch this pinning exists to
-# prevent, so probe before the old install is removed and refuse the tag.
-require_repo_files() {
-    local ref="$1" name status
-    shift
-    [[ "${ref}" == "main" ]] && return 0
-    for name in "$@"; do
-        status=$(${curl_bin} -sL --retry 3 --connect-timeout 15 -o /dev/null -w '%{http_code}' "https://raw.githubusercontent.com/a923946240/xx-ui/${ref}/${name}")
-        if [[ "${status}" != "200" ]]; then
-            _fail "ERROR: ${name} is not available for ${ref} (HTTP ${status}). Update to a release that ships it, or to 'dev-latest'. The current installation is untouched."
-        fi
-    done
+# The panel outbound takes precedence over ambient proxy settings.
+release_curl() {
+    if [[ -n "$XUI_UPDATE_PROXY" ]]; then
+        "$curl_bin" --proxy "$XUI_UPDATE_PROXY" --noproxy "" "$@"
+    else
+        "$curl_bin" "$@"
+    fi
+}
+
+stage_release_file() {
+    local name="$1"
+    if ! release_curl -fsSL --retry 3 --connect-timeout 15 --max-time 120 \
+        -o "$update_stage/$name" "https://raw.githubusercontent.com/a923946240/xx-ui/$script_ref/$name" ||
+        [[ ! -s "$update_stage/$name" ]]; then
+        _fail "ERROR: Failed to download $name for $script_ref. The current installation is untouched."
+    fi
 }
 
 update_x-ui() {
@@ -510,6 +510,7 @@ update_x-ui() {
         _fail "ERROR: Current x-ui version: unknown"
     fi
 
+    update_stage="$(mktemp -d)" || _fail "ERROR: Could not create the update staging directory."
     echo -e "${green}Downloading new x-ui version...${plain}"
 
     # XUI_UPDATE_TAG lets the panel target a specific release tag (e.g. the
@@ -518,7 +519,7 @@ update_x-ui() {
         tag_version="${XUI_UPDATE_TAG}"
         echo -e "${green}Using update tag: ${tag_version}${plain}"
     else
-        tag_version=$(${curl_bin} -Ls "https://api.github.com/repos/a923946240/xx-ui/releases/latest" 2> /dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        tag_version=$(release_curl -Ls --connect-timeout 15 --max-time 60 "https://api.github.com/repos/a923946240/xx-ui/releases/latest" 2> /dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$tag_version" ]]; then
             _fail "ERROR: Failed to fetch x-ui version, it may be due to GitHub API restrictions, please try it later"
         fi
@@ -530,25 +531,22 @@ update_x-ui() {
     if [[ "${tag_version}" == "dev-latest" ]]; then
         script_ref="main"
     fi
-    # The unit files are only fetched when the release tarball lacks them, so
-    # they are checked at that point instead of here.
-    local required_files=("x-ui.sh")
-    [[ $release == "alpine" ]] && required_files+=("x-ui.rc")
-    require_repo_files "${script_ref}" "${required_files[@]}"
-    ${curl_bin} -fLRo ${xui_folder}-linux-$(arch).tar.gz https://github.com/a923946240/xx-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz 2> /dev/null
+    local archive="$update_stage/x-ui-linux-$(arch).tar.gz"
+    local release_url="https://github.com/a923946240/xx-ui/releases/download/$tag_version/x-ui-linux-$(arch).tar.gz"
+    release_curl -fLR --retry 3 --connect-timeout 15 --speed-limit 1024 --speed-time 90 -o "$archive" "$release_url" 2> /dev/null
     if [[ $? -ne 0 ]]; then
         _fail "ERROR: Failed to download x-ui, please be sure that your server can access GitHub"
     fi
-    if [[ ! -s ${xui_folder}-linux-$(arch).tar.gz ]]; then
-        rm ${xui_folder}-linux-$(arch).tar.gz -f > /dev/null 2>&1
-        _fail "ERROR: Downloaded x-ui release archive is empty, please be sure that your server can access GitHub"
+    if [[ ! -s "$archive" ]]; then
+        _fail "ERROR: Downloaded x-ui release archive is empty"
     fi
     # Releases publish <asset>.sha256 next to each archive. A mismatch or a
-    # failed sidecar download aborts the update; only a 404 (releases
-    # predating the sidecar) is tolerated with a warning.
-    archive="${xui_folder}-linux-$(arch).tar.gz"
-    rm -f "${archive}.sha256"
-    sidecar_code=$(${curl_bin} -sL --retry 3 --retry-delay 3 --connect-timeout 15 --max-time 60 -o "${archive}.sha256" -w '%{http_code}' "https://github.com/a923946240/xx-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz.sha256" 2> /dev/null)
+    # failed sidecar download aborts the update. Keep compatibility with
+    # pre-checksum releases only for standalone script invocations.
+    local expected_sha256 actual_sha256 sidecar_code
+    sidecar_code=$(release_curl -sL --retry 3 --retry-delay 3 --connect-timeout 15 --max-time 60 \
+        -o "$archive.sha256" -w '%{http_code}' "$release_url.sha256") ||
+        _fail "ERROR: Failed to download the x-ui release checksum."
     if [[ "${sidecar_code}" == "200" ]]; then
         expected_sha256=$(awk 'NR == 1 {print $1}' "${archive}.sha256")
         actual_sha256=$(sha256sum "${archive}" | awk '{print $1}')
@@ -558,12 +556,32 @@ update_x-ui() {
             _fail "ERROR: Checksum mismatch for $(basename "${archive}"): expected ${expected_sha256:-<none>}, got ${actual_sha256}"
         fi
         echo -e "${green}Checksum verified: ${actual_sha256}${plain}"
-    elif [[ "${sidecar_code}" == "404" ]]; then
+    elif [[ "${sidecar_code}" == "404" && "$xui_update_run_id" == "0" && -z "$XUI_UPDATE_PROXY" ]]; then
         rm -f "${archive}.sha256"
         echo -e "${yellow}No checksum published for this release, skipping verification${plain}"
     else
         rm -f "${archive}.sha256" "${archive}"
         _fail "ERROR: Failed to download the checksum for x-ui-linux-$(arch).tar.gz (HTTP ${sidecar_code})"
+    fi
+
+    local archive_files="$update_stage/archive-files" service_unit
+    if ! tar -tzf "$archive" > "$archive_files" ||
+        ! grep -Fxq 'x-ui/x-ui' "$archive_files"; then
+        _fail "ERROR: Invalid x-ui release archive. The current installation is untouched."
+    fi
+    stage_release_file "x-ui.sh"
+    if [[ "$release" == "alpine" ]]; then
+        stage_release_file "x-ui.rc"
+    else
+        case "$release" in
+            ubuntu | debian | armbian) service_unit="x-ui.service.debian" ;;
+            arch | manjaro | parch) service_unit="x-ui.service.arch" ;;
+            *) service_unit="x-ui.service.rhel" ;;
+        esac
+        if ! grep -Fxq 'x-ui/x-ui.service' "$archive_files" &&
+            ! grep -Fxq "x-ui/$service_unit" "$archive_files"; then
+            stage_release_file "$service_unit"
+        fi
     fi
 
     if [[ -e ${xui_folder}/ ]]; then
@@ -575,7 +593,6 @@ update_x-ui() {
                 echo -e "${green}Removing old service unit version...${plain}"
                 rm -f /etc/init.d/x-ui > /dev/null 2>&1
             else
-                rm x-ui-linux-$(arch).tar.gz -f > /dev/null 2>&1
                 _fail "ERROR: x-ui service unit not installed."
             fi
         else
@@ -586,7 +603,6 @@ update_x-ui() {
                 rm ${xui_service}/x-ui.service -f > /dev/null 2>&1
                 systemctl daemon-reload > /dev/null 2>&1
             else
-                rm x-ui-linux-$(arch).tar.gz -f > /dev/null 2>&1
                 _fail "ERROR: x-ui systemd unit not installed."
             fi
         fi
@@ -614,17 +630,14 @@ update_x-ui() {
         rm ${xui_folder}/bin/tuic-server -f > /dev/null 2>&1
         rm ${xui_folder}/bin/tuic -rf > /dev/null 2>&1
     else
-        rm x-ui-linux-$(arch).tar.gz -f > /dev/null 2>&1
         _fail "ERROR: x-ui not installed."
     fi
 
     echo -e "${green}Installing new x-ui version...${plain}"
-    tar zxvf x-ui-linux-$(arch).tar.gz > /dev/null 2>&1
+    tar zxvf "$archive" > /dev/null 2>&1
     if [[ $? -ne 0 ]]; then
-        rm x-ui-linux-$(arch).tar.gz -f > /dev/null 2>&1
         _fail "ERROR: Failed to extract the x-ui release archive -- the previous installation has already been removed, so the panel will not start until this is fixed; try running the update again"
     fi
-    rm x-ui-linux-$(arch).tar.gz -f > /dev/null 2>&1
     cd x-ui > /dev/null 2>&1
     if [[ $? -ne 0 || ! -s x-ui ]]; then
         _fail "ERROR: Extracted x-ui archive is missing the x-ui binary -- the previous installation has already been removed, so the panel will not start until this is fixed; try running the update again"
@@ -650,17 +663,11 @@ update_x-ui() {
         chmod +x bin/mtg-linux-$(arch) > /dev/null 2>&1
     fi
 
-    echo -e "${green}Downloading and installing x-ui.sh script...${plain}"
+    echo -e "${green}Installing x-ui.sh script...${plain}"
     local xui_script_temp="/usr/bin/x-ui-temp.$$"
-    rm -f "${xui_script_temp}"
-    ${curl_bin} -fLRo "${xui_script_temp}" "https://raw.githubusercontent.com/a923946240/xx-ui/${script_ref}/x-ui.sh" > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        rm -f "${xui_script_temp}"
-        _fail "ERROR: Failed to download x-ui.sh script, please be sure that your server can access GitHub"
-    fi
-    if [[ ! -s "${xui_script_temp}" ]]; then
-        rm -f "${xui_script_temp}"
-        _fail "ERROR: Downloaded x-ui.sh script is empty, please be sure that your server can access GitHub"
+    if ! cp -- "$update_stage/x-ui.sh" "$xui_script_temp"; then
+        rm -f -- "$xui_script_temp"
+        _fail "ERROR: Failed to copy the staged x-ui.sh script"
     fi
     mv -f "${xui_script_temp}" /usr/bin/x-ui
     if [[ $? -ne 0 ]]; then
@@ -686,17 +693,11 @@ update_x-ui() {
     "${xui_folder}/x-ui" migrate
 
     if [[ $release == "alpine" ]]; then
-        echo -e "${green}Downloading and installing startup unit x-ui.rc...${plain}"
-        xui_rc_temp="/etc/init.d/x-ui.tmp.$$"
-        rm -f "${xui_rc_temp}"
-        ${curl_bin} -fLRo "${xui_rc_temp}" "https://raw.githubusercontent.com/a923946240/xx-ui/${script_ref}/x-ui.rc" > /dev/null 2>&1
-        if [[ $? -ne 0 ]]; then
-            rm -f "${xui_rc_temp}"
-            _fail "ERROR: Failed to download startup unit x-ui.rc, please be sure that your server can access GitHub"
-        fi
-        if [[ ! -s "${xui_rc_temp}" ]]; then
-            rm -f "${xui_rc_temp}"
-            _fail "ERROR: Downloaded startup unit x-ui.rc is empty, please be sure that your server can access GitHub"
+        echo -e "${green}Installing startup unit x-ui.rc...${plain}"
+        local xui_rc_temp="/etc/init.d/x-ui.tmp.$$"
+        if ! cp -- "$update_stage/x-ui.rc" "$xui_rc_temp"; then
+            rm -f -- "$xui_rc_temp"
+            _fail "ERROR: Failed to copy the staged x-ui.rc"
         fi
         mv -f "${xui_rc_temp}" /etc/init.d/x-ui
         if [[ $? -ne 0 ]]; then
@@ -708,61 +709,14 @@ update_x-ui() {
         rc-update add x-ui > /dev/null 2>&1
         rc-service x-ui start > /dev/null 2>&1
     else
-        if [ -f "x-ui.service" ]; then
-            echo -e "${green}Installing systemd unit...${plain}"
-            if ! _install_xui_service_unit "x-ui.service" "false"; then
-                echo -e "${red}Failed to copy x-ui.service${plain}"
-                exit 1
-            fi
-        else
-            service_installed=false
-            case "${release}" in
-                ubuntu | debian | armbian)
-                    if [ -f "x-ui.service.debian" ]; then
-                        echo -e "${green}Installing debian-like systemd unit...${plain}"
-                        if _install_xui_service_unit "x-ui.service.debian" "false"; then
-                            service_installed=true
-                        fi
-                    fi
-                    ;;
-                arch | manjaro | parch)
-                    if [ -f "x-ui.service.arch" ]; then
-                        echo -e "${green}Installing arch-like systemd unit...${plain}"
-                        if _install_xui_service_unit "x-ui.service.arch" "false"; then
-                            service_installed=true
-                        fi
-                    fi
-                    ;;
-                *)
-                    if [ -f "x-ui.service.rhel" ]; then
-                        echo -e "${green}Installing rhel-like systemd unit...${plain}"
-                        if _install_xui_service_unit "x-ui.service.rhel" "false"; then
-                            service_installed=true
-                        fi
-                    fi
-                    ;;
-            esac
-
-            # If service file not found in tar.gz, download from GitHub
-            if [ "$service_installed" = false ]; then
-                echo -e "${yellow}Service files not found in tar.gz, downloading from GitHub...${plain}"
-                case "${release}" in
-                    ubuntu | debian | armbian)
-                        service_unit_url="https://raw.githubusercontent.com/a923946240/xx-ui/${script_ref}/x-ui.service.debian"
-                        ;;
-                    arch | manjaro | parch)
-                        service_unit_url="https://raw.githubusercontent.com/a923946240/xx-ui/${script_ref}/x-ui.service.arch"
-                        ;;
-                    *)
-                        service_unit_url="https://raw.githubusercontent.com/a923946240/xx-ui/${script_ref}/x-ui.service.rhel"
-                        ;;
-                esac
-
-                if ! _install_xui_service_unit "$service_unit_url" "true"; then
-                    echo -e "${red}Failed to install x-ui.service from GitHub (${script_ref}) -- the release tarball did not ship one either${plain}"
-                    exit 1
-                fi
-            fi
+        if [[ -s "x-ui.service" ]]; then
+            service_unit="x-ui.service"
+        elif [[ ! -s "$service_unit" ]]; then
+            service_unit="$update_stage/$service_unit"
+        fi
+        echo -e "${green}Installing systemd unit...${plain}"
+        if ! _install_xui_service_unit "$service_unit"; then
+            _fail "ERROR: Failed to install the staged systemd unit"
         fi
         chown root:root ${xui_service}/x-ui.service > /dev/null 2>&1
         chmod 644 ${xui_service}/x-ui.service > /dev/null 2>&1

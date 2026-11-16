@@ -19,6 +19,7 @@ import (
 
 	"github.com/a923946240/xx-ui/v3/internal/config"
 	"github.com/a923946240/xx-ui/v3/internal/logger"
+	"github.com/a923946240/xx-ui/v3/internal/util/netproxy"
 	"github.com/a923946240/xx-ui/v3/internal/util/version"
 	"github.com/a923946240/xx-ui/v3/internal/web/global"
 	"github.com/a923946240/xx-ui/v3/internal/web/service"
@@ -234,7 +235,19 @@ func (s *PanelService) startUpdate(useDev bool) (int64, error) {
 		return 0, fmt.Errorf("bash is required to run the panel updater: %w", err)
 	}
 
-	scriptPath, err := downloadPanelUpdater()
+	settings := &service.SettingService{}
+	outbound, err := settings.GetPanelOutbound()
+	if err != nil {
+		return 0, fmt.Errorf("read panel update outbound: %w", err)
+	}
+	updateProxy := settings.PanelEgressProxyURL()
+	if outbound != "" && updateProxy == "" {
+		return 0, fmt.Errorf("the configured panel outbound is unavailable for updates")
+	}
+	// curl's socks5h scheme delegates GitHub hostname resolution to Xray.
+	updateProxy = strings.Replace(updateProxy, "socks5://", "socks5h://", 1)
+
+	scriptPath, err := downloadPanelUpdater(updateProxy)
 	if err != nil {
 		return 0, err
 	}
@@ -249,6 +262,7 @@ func (s *PanelService) startUpdate(useDev bool) (int64, error) {
 	updateScript := fmt.Sprintf("set -e; trap 'rm -f %s' EXIT; %s %s", shellQuote(scriptPath), shellQuote(bash), shellQuote(scriptPath))
 	runIDEnv := "XUI_UPDATE_RUN_ID=" + strconv.FormatInt(runID, 10)
 	statusFileEnv := "XUI_UPDATE_STATUS_FILE=" + statusFile
+	updateProxyEnv := "XUI_UPDATE_PROXY=" + updateProxy
 	proxyEnv := updateProxyEnvVars()
 
 	if systemdRun, err := exec.LookPath("systemd-run"); err == nil {
@@ -260,6 +274,7 @@ func (s *PanelService) startUpdate(useDev bool) (int64, error) {
 			"--setenv", "XUI_UPDATE_TAG=" + updateTag,
 			"--setenv", runIDEnv,
 			"--setenv", statusFileEnv,
+			"--setenv", updateProxyEnv,
 		}
 		for _, kv := range proxyEnv {
 			args = append(args, "--setenv", kv)
@@ -289,6 +304,7 @@ func (s *PanelService) startUpdate(useDev bool) (int64, error) {
 		"XUI_UPDATE_TAG="+updateTag,
 		runIDEnv,
 		statusFileEnv,
+		updateProxyEnv,
 	)
 	setDetachedProcess(cmd)
 	if err := cmd.Start(); err != nil {
@@ -372,8 +388,15 @@ func releaseUpdateSlot() {
 	updateMu.Unlock()
 }
 
-func downloadPanelUpdater() (string, error) {
-	client := (&service.SettingService{}).NewProxiedHTTPClient(15 * time.Second)
+func downloadPanelUpdater(proxyURL string) (string, error) {
+	client, err := netproxy.NewHTTPClient(proxyURL, 15*time.Second)
+	if err != nil {
+		return "", fmt.Errorf("configure panel updater proxy: %w", err)
+	}
+	if transport, ok := client.Transport.(*http.Transport); ok && proxyURL != "" {
+		// The SOCKS dialer already provides the selected route.
+		transport.Proxy = nil
+	}
 	req, reqErr := http.NewRequestWithContext(context.Background(), http.MethodGet, panelUpdaterURL, nil)
 	if reqErr != nil {
 		return "", fmt.Errorf("download panel updater: %w", reqErr)

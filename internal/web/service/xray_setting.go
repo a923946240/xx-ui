@@ -1,9 +1,12 @@
 package service
 
 import (
+	"crypto/sha256"
 	_ "embed"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"slices"
 	"strconv"
 	"strings"
@@ -26,8 +29,28 @@ const (
 )
 
 func (s *XraySettingService) SaveXraySetting(newXraySettings string) error {
+	return s.SaveXraySettingIfMatch(newXraySettings, "")
+}
+
+var ErrXrayTemplateChanged = errors.New("Xray template changed since it was read")
+
+func XrayTemplateETag(template string) string {
+	sum := sha256.Sum256([]byte(UnwrapXrayTemplateConfig(template)))
+	return "\"" + hex.EncodeToString(sum[:]) + "\""
+}
+
+func (s *XraySettingService) SaveXraySettingIfMatch(newXraySettings, expected string) error {
 	externalConfigMu.Lock()
 	defer externalConfigMu.Unlock()
+	if expected != "" {
+		current, err := s.GetXrayConfigTemplate()
+		if err != nil {
+			return err
+		}
+		if XrayTemplateETag(current) != expected {
+			return ErrXrayTemplateChanged
+		}
+	}
 	// The frontend round-trips the whole getXraySetting response back
 	// through the textarea, so if it has ever received a wrapped
 	// payload (see UnwrapXrayTemplateConfig) it sends that same wrapper

@@ -2,8 +2,25 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
+
+func TestSaveXraySettingIfMatchRejectsStaleTemplate(t *testing.T) {
+	setupSettingTestDB(t)
+	svc := &XraySettingService{}
+	old, err := svc.GetXrayConfigTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	edited := `{"outbounds":[{"tag":"direct","protocol":"freedom"}]}`
+	if err := svc.SaveXraySettingIfMatch(edited, XrayTemplateETag(old)); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.SaveXraySettingIfMatch(old, XrayTemplateETag(old)); !errors.Is(err, ErrXrayTemplateChanged) {
+		t.Fatalf("stale save: got %v, want ErrXrayTemplateChanged", err)
+	}
+}
 
 // The template editor saves raw JSON that never passes the outbound form's
 // adapter, and the core reads a numeric qType 0 as every query.

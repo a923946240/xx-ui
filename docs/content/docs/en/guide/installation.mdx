@@ -22,6 +22,11 @@ The official script is the recommended path. During installation it generates a
 **random** username, password, and access (web base) path, sets up the service,
 and installs the `x-ui` management command.
 
+The normal installer checks for an existing panel before making changes.
+If it detects 3x-ui, a panel Docker container, or an unrecognized x-ui
+installation, it stops. See [Migration](/docs/help/migration) to check and
+prepare a supported existing installation.
+
 ```bash title="latest stable"
 bash <(curl -Ls https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh)
 ```

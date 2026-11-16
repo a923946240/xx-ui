@@ -4,6 +4,26 @@
 
 xx-ui 是基于 Xray 开发的 Xray 管理面板，增加了三种外部隧道出口、按路由规则自动切换主备出口的功能，以及炭黑磨砂主题。[项目仓库](https://github.com/a923946240/xx-ui)
 
+## 在 Linux 上安装或更新
+
+在已安装 curl 和 sudo 的服务器上执行：
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
+```
+
+脚本下载[最新稳定版](https://github.com/a923946240/xx-ui/releases/latest)并校验发行包的 SHA-256。已用 root 登录时，把 `sudo bash` 改成 `bash`。安装后运行 `x-ui` 打开管理菜单。
+
+普通安装会在停服务或写数据库前检查现有面板。全新安装和已识别的 xx-ui 可以继续。检测到 3x-ui、面板 Docker 容器或无法识别的 x-ui 安装时，脚本会退出并提示下一步。
+
+### 从 3x-ui 迁移
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f" --migrate-3x-ui check)
+```
+
+`check` 只读检查。通过后，将 `check` 改为 `backup` 可单独备份，改为 `prepare` 可备份并执行隔离导入及测试。准备阶段会生成 xx-ui 候选数据库，旧面板继续运行。正式接管原端口需要单独执行。支持范围、配置限制和切换验收见[迁移说明](docs/content/docs/en/help/migration.mdx#prepare-a-3x-ui-migration)。
+
 ## 通过外部隧道访问网站
 
 客户端仍连接原有的 Xray 入站。在「出站」页面添加 NaiveProxy、mieru 或 TrustTunnel 出口并设置标签，再到路由规则中选择该标签。匹配规则的 TCP 连接会沿以下路径访问目标网站。
@@ -52,18 +72,6 @@ bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-prox
 
 将 `all` 换为 `naive`、`mieru` 或 `trusttunnel` 可只安装一种客户端。脚本从官方发布地址下载固定版本并校验 SHA-256。面板会在该目录中查找文件名为 `naive`、`mieru`、`trusttunnel` 的可执行文件。安装文件不会自动创建出口，也不会重启面板。
 
-当前提供源码构建，原版安装器与部署示例保留为上游参考。私有仓库的发行包下载需要认证，面板的自动更新尚未配置这项认证。
-
 ## 上游与许可证
 
 [许可证和来源声明](NOTICE.md)
-
-## 公开发行包
-
-在已安装 curl 和 sudo 的 Linux 服务器上执行：
-
-```bash
-(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
-```
-
-此命令安装 xx-ui 最新稳定版，并校验发行包的 SHA-256。已登录 root 时，把 `sudo bash` 改为 `bash`。安装后输入 `x-ui` 打开管理菜单。

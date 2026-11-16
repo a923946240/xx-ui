@@ -4,6 +4,26 @@ English · [简体中文](README.zh_CN.md)
 
 xx-ui is a web panel for managing Xray. It includes three additional tunnel clients, per-rule outbound failover, and a charcoal theme. [Project repository](https://github.com/a923946240/xx-ui)
 
+## Install or update on Linux
+
+On a Linux server with curl and sudo, run:
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
+```
+
+The installer downloads the latest stable [release](https://github.com/a923946240/xx-ui/releases/latest) and verifies its SHA-256 checksum. Use `bash` in place of `sudo bash` when logged in as root. After installation, run `x-ui` to open the management menu.
+
+The normal installer checks for an existing panel before stopping a service or writing to the database. It proceeds for a fresh installation or an identified xx-ui installation. If it detects 3x-ui, a panel Docker container, or an unidentified x-ui installation, it stops and prints the applicable next step.
+
+### Migrate an existing 3x-ui installation
+
+```bash
+(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f" --migrate-3x-ui check)
+```
+
+`check` is read-only. For a supported source, use `backup` to create the backup alone or `prepare` to back up, import and test in isolation. Preparation keeps the old panel running and writes a candidate xx-ui database. Production cutover is a separate step. See the [migration guide](docs/content/docs/en/help/migration.mdx#prepare-a-3x-ui-migration) for supported versions, configuration limits, and cutover checks.
+
 ## Route traffic through a tunnel
 
 Clients connect to an existing Xray inbound. On the **Outbounds** page, add a NaiveProxy, mieru, or TrustTunnel exit and give it a tag. Choose that tag in a routing rule to send matching TCP connections through the tunnel.
@@ -52,18 +72,6 @@ bash scripts/install-external-clients.sh "${XUI_BIN_FOLDER:-./bin}/external-prox
 
 Replace `all` with `naive`, `mieru`, or `trusttunnel` to install one client. The script downloads pinned official releases and verifies their SHA-256 hashes. The panel looks for the executable names `naive`, `mieru`, and `trusttunnel` in that directory. Installing them does not create an exit or restart the panel.
 
-This repository currently provides source builds. The original installer and deployment examples are retained as upstream references. A private repository also requires authentication for release downloads, which the panel's updater has not been configured to provide.
-
 ## Credits and license
 
 [License and source notices](NOTICE.md)
-
-## Public releases
-
-On a Linux server with curl and sudo, run:
-
-```bash
-(f=$(mktemp) && trap 'rm -f "$f"' EXIT && curl -fsSL --retry 3 https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh -o "$f" && sudo bash "$f")
-```
-
-This installs the latest stable version of xx-ui and verifies the archive's SHA-256 checksum. If you are already root, use `bash` in place of `sudo bash`. Run `x-ui` after installation to open the management menu.

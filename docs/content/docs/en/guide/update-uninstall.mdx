@@ -42,6 +42,24 @@ The menu (items `0`–`28`) shows the panel/Xray status at the top, then:
 | 26    | Enable BBR                             | Toggle the BBR congestion-control sysctl                  |
 | 27    | Update Geo Files                       | Update geoip/geosite data (Loyalsoldier, IR, RU)          |
 | 28    | Speedtest by Ookla                     | Run an Ookla speed test                                   |
+| 29    | Repair Panel Listen Domain             | Change or clear the panel hostname restriction            |
+| 30    | Language / 语言                         | Switch the terminal menu between English and Simplified Chinese |
+
+On the first interactive run, choose **1** for English or **2** for Simplified
+Chinese. Press Enter to use English. The script saves your choice in
+`/etc/x-ui/menu-language` (or in the directory set by `XUI_DB_FOLDER`).
+Use option **30** to change it later. A non-interactive run without a saved
+choice uses English. This preference applies to the terminal menu and its
+prompts. Direct subcommands retain English output. The Web panel keeps its own
+language setting, and external commands display their original output.
+
+If a wrong listen domain locks you out, open the terminal menu over SSH or
+from the server console and choose **29**. Enter the correct hostname without
+the scheme, port, or path. Enter `-` to clear the hostname restriction.
+Confirm to save the setting and restart the panel. Connect with the existing
+port and access path, and use a hostname covered by the installed certificate
+if HTTPS is enabled. This option requires a panel binary that supports
+`setting -webDomain`.
 | 0     | Exit                                   | —                                                         |
 
 Some of these have their own pages: [SSL certificates](/docs/config/ssl-certificates)

@@ -99,8 +99,8 @@ Name the scanned commit, the attacker's starting position from the list
 above, the configuration needed (default or not), the entry route, and the
 full path to impact. Give a deterministic reproducer, ideally a Go test in the
 package that owns the bug, using the real DB helpers rather than mocks.
-Patches should fix the root cause, follow `CLAUDE.md` in the repository
-(comments at most two lines, stdlib `testing`, state-changing inbound/client
+Patches should fix the root cause and follow `CONTRIBUTING.md` in the repository
+(stdlib `testing`, state-changing inbound/client
 operations dispatched through `runtime.Runtime`), and include a regression
 test that fails without the fix. Merge findings sharing one root cause.
 

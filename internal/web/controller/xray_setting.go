@@ -119,6 +119,9 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 		"outboundTestUrl":   outboundTestUrl,
 		"geodataSources":    service.StandardGeodataSources(),
 	}
+	if status := readNATSyncStatus(natSyncStatusPath); status != nil {
+		xrayResponse["natSyncStatus"] = status
+	}
 	if tags, err := (&service.ExternalOutboundService{}).Tags(); err == nil {
 		xrayResponse["externalOutboundTags"] = tags
 	}

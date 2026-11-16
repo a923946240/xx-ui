@@ -17,6 +17,16 @@ separate per-rule UI — you edit the JSON, and the panel reloads Xray. The pane
 also offers an **outbound connectivity test** and a **route test** (ask the
 running core which outbound a given destination would use).
 
+## Line wizard and NAT SSH sync
+
+On **Networking → Outbounds**, import outbound JSON or open the line wizard
+to configure intermediate hops, a backup line, and an inbound routing rule.
+Review the draft and save the Xray settings to apply it.
+
+For a front server that publishes SSH sync status, open **NAT SSH Sync** to
+see the active IP, last reported IP, HTTPS probe, and last application time.
+See the [deployment guide](https://github.com/a923946240/xx-ui/blob/main/scripts/nat-outbound-sync.md).
+
 ## Build an outbound
 
 Every outbound is a JSON object with up to four parts: a **`tag`** (referenced by

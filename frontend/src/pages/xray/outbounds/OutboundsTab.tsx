@@ -35,6 +35,7 @@ import {
   WarningOutlined,
   ExportOutlined,
   ImportOutlined,
+  BranchesOutlined,
 } from '@ant-design/icons';
 
 import { isOutboundProtocol } from '@/schemas/primitives';
@@ -45,7 +46,11 @@ import TextModal from '@/components/feedback/TextModal';
 
 import OutboundFormModal from './OutboundFormModal';
 import { propagateOutboundTagRename } from '../basics/helpers';
-import { planOutboundDeletion, applyOutboundDeletion } from '../reference-cleanup';
+import {
+  planOutboundDeletion,
+  applyOutboundDeletion,
+  outboundDialerDependents,
+} from '../reference-cleanup';
 import DeletionImpactList from '../DeletionImpactList';
 import { isBalancerLoopbackTag } from '../balancers/balancer-loopback';
 import type {
@@ -62,6 +67,9 @@ import { originalOutboundIndex } from './outbounds-tab-helpers';
 import { useOutboundColumns } from './useOutboundColumns';
 import OutboundCardList from './OutboundCardList';
 import SubscriptionOutbounds from './SubscriptionOutbounds';
+import LineWizard from './LineWizard';
+import NATSyncStatusButton from './NATSyncStatusButton';
+import { lineCopySource, updateLineCopy } from './line-plan';
 
 const defaultOutboundSubscriptionUserAgent = 'xx-ui-outbound-sub/1.0';
 
@@ -129,6 +137,7 @@ export default function OutboundsTab({
   const [messageApi, messageContextHolder] = message.useMessage();
   const [testMode, setTestMode] = useState<OutboundTestMode>('tcp');
   const [modalOpen, setModalOpen] = useState(false);
+  const [lineWizardOpen, setLineWizardOpen] = useState(false);
   const [editingOutbound, setEditingOutbound] = useState<Record<string, unknown> | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [existingTags, setExistingTags] = useState<string[]>([]);
@@ -232,6 +241,20 @@ export default function OutboundsTab({
     setModalOpen(true);
   }
   function onConfirm(outbound: Record<string, unknown>) {
+    const previous =
+      editingIndex === null ? undefined : templateSettings?.outbounds?.[editingIndex];
+    if (lineCopySource(previous?.tag)) {
+      messageApi.error(t('pages.xray.lineWizard.copyEditBlocked'));
+      return;
+    }
+    if (
+      previous?.tag &&
+      (previous.tag !== outbound.tag || previous.protocol !== outbound.protocol) &&
+      templateSettings?.outbounds?.some((value) => lineCopySource(value.tag) === previous.tag)
+    ) {
+      messageApi.error(t('pages.xray.lineWizard.sourceEditBlocked'));
+      return;
+    }
     mutate((tt) => {
       if (!Array.isArray(tt.outbounds)) tt.outbounds = [];
       const newTag = typeof outbound.tag === 'string' ? outbound.tag : '';
@@ -241,6 +264,12 @@ export default function OutboundsTab({
       } else {
         const oldTag = tt.outbounds[editingIndex]?.tag;
         tt.outbounds[editingIndex] = outbound as never;
+        const source = tt.outbounds[editingIndex];
+        if (newTag && oldTag === newTag) {
+          tt.outbounds = tt.outbounds.map((copy) =>
+            lineCopySource(copy.tag) === newTag ? updateLineCopy(source, copy) : copy,
+          );
+        }
         if (oldTag && newTag && oldTag !== newTag) {
           propagateOutboundTagRename(tt, oldTag, newTag);
         }
@@ -251,6 +280,14 @@ export default function OutboundsTab({
 
   function confirmDelete(idx: number) {
     const target = originalOutboundIndex(rowsRef.current, idx);
+    const dependents = templateSettings ? outboundDialerDependents(templateSettings, target) : [];
+    if (dependents.length) {
+      modal.warning({
+        title: t('pages.xray.lineWizard.deleteBlocked'),
+        content: t('pages.xray.lineWizard.deleteDependents', { tags: dependents.join(', ') }),
+      });
+      return;
+    }
     const impact = templateSettings
       ? planOutboundDeletion(templateSettings, target)
       : { rules: [], balancers: [], observatory: false, burst: false };
@@ -558,9 +595,20 @@ export default function OutboundsTab({
               <Button type="primary" icon={<PlusOutlined aria-hidden />} onClick={openAdd}>
                 {!isMobile && t('pages.xray.Outbounds')}
               </Button>
+              <Button icon={<ImportOutlined aria-hidden />} onClick={() => setImportOpen(true)}>
+                {t('pages.xray.importOutbounds')}
+              </Button>
               <Button icon={<CloudOutlined aria-hidden />} onClick={openSubManager}>
                 {t('pages.xray.outboundSub.manage')}
               </Button>
+              <Button
+                icon={<BranchesOutlined aria-hidden />}
+                disabled={!templateSettings}
+                onClick={() => setLineWizardOpen(true)}
+              >
+                {t('pages.xray.lineWizard.title')}
+              </Button>
+              <NATSyncStatusButton />
               <Dropdown
                 trigger={['click']}
                 menu={{
@@ -584,12 +632,6 @@ export default function OutboundsTab({
                       onClick: onShowPia,
                     },
                     { type: 'divider' },
-                    {
-                      key: 'import',
-                      icon: <ImportOutlined aria-hidden />,
-                      label: t('pages.xray.importOutbounds'),
-                      onClick: () => setImportOpen(true),
-                    },
                     {
                       key: 'export',
                       icon: <ExportOutlined aria-hidden />,
@@ -672,6 +714,16 @@ export default function OutboundsTab({
           />
         )}
 
+        {lineWizardOpen && templateSettings && (
+          <LineWizard
+            config={templateSettings}
+            managedTags={subscriptionOutboundTags ?? []}
+            setConfig={setTemplateSettings}
+            testStates={outboundTestStates}
+            onTest={onTest}
+            onClose={() => setLineWizardOpen(false)}
+          />
+        )}
         <OutboundFormModal
           open={modalOpen}
           outbound={editingOutbound}

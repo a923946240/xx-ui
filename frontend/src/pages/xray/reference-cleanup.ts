@@ -1,6 +1,7 @@
 import type { XraySettingsValue } from '@/hooks/useXraySetting';
 import type { BalancerObject, RuleObject } from '@/schemas/routing';
 import { syncObservatories } from './balancers/balancer-helpers';
+import { lineCopySource } from './outbounds/line-plan';
 
 /**
  * Reference cleanup for the Xray-config blob: when an outbound or balancer is
@@ -172,17 +173,6 @@ function applyCleanup(
     tt.outbounds = tt.outbounds.filter(
       (o) => !(typeof o?.tag === 'string' && removedOutbounds.has(o.tag)),
     );
-    for (const outbound of tt.outbounds) {
-      const sockopt = (outbound as { streamSettings?: { sockopt?: { dialerProxy?: string } } })
-        ?.streamSettings?.sockopt;
-      if (
-        sockopt &&
-        typeof sockopt.dialerProxy === 'string' &&
-        removedOutbounds.has(sockopt.dialerProxy)
-      ) {
-        delete sockopt.dialerProxy;
-      }
-    }
   }
 
   syncObservatories(tt);
@@ -243,7 +233,20 @@ export function planOutboundDeletion(tt: XraySettingsValue, index: number): Dele
   };
 }
 
+export function outboundDialerDependents(tt: XraySettingsValue, index: number): string[] {
+  const tag = outboundTagAt(tt, index);
+  if (!tag) return [];
+  return (tt.outbounds ?? []).flatMap((outbound, currentIndex) => {
+    const stream = outbound?.streamSettings as { sockopt?: { dialerProxy?: string } } | undefined;
+    return currentIndex !== index &&
+      (stream?.sockopt?.dialerProxy === tag || lineCopySource(outbound?.tag) === tag)
+      ? [outbound?.tag || `#${currentIndex + 1}`]
+      : [];
+  });
+}
+
 export function applyOutboundDeletion(tt: XraySettingsValue, index: number): void {
+  if (outboundDialerDependents(tt, index).length > 0) return;
   const tag = outboundTagAt(tt, index);
   if (!tag) {
     if (Array.isArray(tt.outbounds)) tt.outbounds.splice(index, 1);

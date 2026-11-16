@@ -46,6 +46,24 @@ export const XraySettingsValueSchema = z
   })
   .loose();
 
+export const NATSyncStatusSchema = z.object({
+  state: z.enum([
+    'in_sync',
+    'relay_error',
+    'config_error',
+    'probe_error',
+    'candidate_changed',
+    'apply_error',
+  ]),
+  currentIp: z.ipv4().optional(),
+  candidateIp: z.ipv4().optional(),
+  probeIp: z.ipv4().optional(),
+  probeResult: z.enum(['passed', 'failed']).optional(),
+  probeAt: z.number().int().positive().optional(),
+  appliedAt: z.number().int().positive().optional(),
+  updatedAt: z.number().int().positive(),
+});
+
 export const XrayConfigPayloadSchema = z
   .object({
     xraySetting: XraySettingsValueSchema,
@@ -58,6 +76,7 @@ export const XrayConfigPayloadSchema = z
     subscriptionOutbounds: z.array(z.unknown()).optional(),
     subscriptionOutboundTags: z.array(z.string()).optional(),
     externalOutboundTags: z.array(z.string()).optional(),
+    natSyncStatus: NATSyncStatusSchema.optional(),
     geodataSources: z.array(z.object({ url: z.string(), file: z.string() })).optional(),
   })
   .loose();

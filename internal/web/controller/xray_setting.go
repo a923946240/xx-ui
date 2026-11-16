@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -137,6 +138,7 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.getSettings"), err)
 		return
 	}
+	c.Header("ETag", service.XrayTemplateETag(xraySetting))
 	jsonObj(c, string(result), nil)
 }
 
@@ -145,7 +147,11 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 // outbounds or routing rules changed, with a process restart otherwise.
 func (a *XraySettingController) updateSetting(c *gin.Context) {
 	xraySetting := c.PostForm("xraySetting")
-	if err := a.XraySettingService.SaveXraySetting(xraySetting); err != nil {
+	if err := a.XraySettingService.SaveXraySettingIfMatch(xraySetting, c.GetHeader("If-Match")); err != nil {
+		if errors.Is(err, service.ErrXrayTemplateChanged) {
+			c.JSON(http.StatusPreconditionFailed, gin.H{"success": false, "msg": err.Error()})
+			return
+		}
 		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifySettings"), err)
 		return
 	}

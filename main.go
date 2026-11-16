@@ -24,6 +24,7 @@ import (
 	"github.com/a923946240/xx-ui/v3/internal/logger"
 	"github.com/a923946240/xx-ui/v3/internal/sub"
 	"github.com/a923946240/xx-ui/v3/internal/tunnelmonitor"
+	"github.com/a923946240/xx-ui/v3/internal/util/netsafe"
 	"github.com/a923946240/xx-ui/v3/internal/util/sys"
 	"github.com/a923946240/xx-ui/v3/internal/web"
 	"github.com/a923946240/xx-ui/v3/internal/web/global"
@@ -366,8 +367,19 @@ func encryptNodeTokens() {
 	fmt.Printf("node-token migration complete: %d re-encrypted, %d already current/skipped\n", changed, skipped)
 }
 
-// updateSetting updates various panel settings including port, credentials, base path, listen IP, and two-factor authentication.
-func updateSetting(port int, username string, password string, webBasePath string, listenIP string, resetTwoFactor bool) error {
+// updateSetting updates the selected panel settings.
+func updateSetting(port int, username string, password string, webBasePath string, listenIP string, resetTwoFactor bool, webDomain *string) error {
+	domain := ""
+	if webDomain != nil {
+		value := strings.TrimSpace(*webDomain)
+		if value != "" {
+			normalized, err := netsafe.NormalizeHost(strings.ToLower(strings.TrimSuffix(value, ".")))
+			if err != nil {
+				return fmt.Errorf("invalid panel listen domain: enter a hostname without a scheme, port or path: %w", err)
+			}
+			domain = normalized
+		}
+	}
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		fmt.Println("Database initialization failed:", err)
@@ -376,6 +388,13 @@ func updateSetting(port int, username string, password string, webBasePath strin
 
 	settingService := service.SettingService{}
 	userService := panel.UserService{}
+
+	if webDomain != nil {
+		if err := settingService.SetWebDomain(domain); err != nil {
+			return fmt.Errorf("save panel listen domain: %w", err)
+		}
+		fmt.Println("Panel listen domain saved successfully")
+	}
 
 	if port > 0 {
 		err := settingService.SetPort(port)
@@ -613,6 +632,7 @@ func main() {
 	var password string
 	var webBasePath string
 	var listenIP string
+	var webDomain *string
 	var getListen bool
 	var webCertFile string
 	var webKeyFile string
@@ -634,6 +654,10 @@ func main() {
 	settingCmd.StringVar(&password, "password", "", "Set login password")
 	settingCmd.StringVar(&webBasePath, "webBasePath", "", "Set base path for Panel")
 	settingCmd.StringVar(&listenIP, "listenIP", "", "set panel listenIP IP")
+	settingCmd.Func("webDomain", "Set the panel listen domain; pass an empty value to clear it", func(value string) error {
+		webDomain = &value
+		return nil
+	})
 	settingCmd.BoolVar(&resetTwoFactor, "resetTwoFactor", false, "Reset two-factor authentication settings")
 	settingCmd.BoolVar(&getListen, "getListen", false, "Display current panel listenIP IP")
 	settingCmd.BoolVar(&getCert, "getCert", false, "Display current certificate settings")
@@ -719,11 +743,19 @@ func main() {
 			fmt.Printf("warning: ignored %q and any flags after it; put flags before positional arguments\n", strings.Join(rest, " "))
 		}
 		if reset {
+			if webDomain != nil {
+				fmt.Fprintln(os.Stderr, "-webDomain cannot be combined with -reset")
+				os.Exit(1)
+			}
 			if err = resetSetting(); err != nil {
 				return
 			}
 		} else {
-			if err = updateSetting(port, username, password, webBasePath, listenIP, resetTwoFactor); err != nil {
+			if err = updateSetting(port, username, password, webBasePath, listenIP, resetTwoFactor, webDomain); err != nil {
+				if webDomain != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
 				return
 			}
 		}

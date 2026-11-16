@@ -105,10 +105,20 @@ it. Copy the token — it's shown only once.
 <Step>
 ### Run the Cloudflare issuer
 
-`x-ui` → **`21` — Cloudflare SSL Certificate**. When asked, choose **`t`** for an
-API token (the default) or **`g`** for the Global API Key, then enter your
-domain (and, for the Global API Key, your account email and key). acme.sh creates
-the TXT record, validates, and cleans it up.
+`x-ui` → **`21` — Cloudflare SSL Certificate**. Enter the domain and choose how
+to wait for the challenge TXT records:
+
+- **1. Wait 120 seconds** (default). The menu passes `--dnssleep 120` to
+  acme.sh. This is useful on servers that cannot reach public DNS over HTTPS.
+- **2. Automatic (public DoH)**. acme.sh checks whether the records have
+  propagated before notifying Let's Encrypt. Choose this if the server can
+  reach the public DoH resolvers.
+
+Choose **`t`** for an API token (the default) or **`g`** for a Global API Key
+with your registered email. In both modes, Let's Encrypt validates the TXT
+records and acme.sh cleans them up. Future renewals use the settings stored by
+acme.sh for the domain. An existing fixed wait stays saved when you select the
+automatic check for an issuance.
 </Step>
 
 <Step>

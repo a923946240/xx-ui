@@ -2033,6 +2033,68 @@ install_x-ui() {
 └───────────────────────────────────────────────────────┘"
 }
 
+panel_binary_kind() {
+    local binary="$1"
+    if [[ -f "$binary" ]] && LC_ALL=C grep -aiqF -- $'path\tgithub.com/mhsanaei/3x-ui/v3' "$binary"; then
+        echo "3x-ui"
+    elif [[ -f "$binary" ]] && LC_ALL=C grep -aiqF -- $'path\tgithub.com/a923946240/xx-ui/v3' "$binary"; then
+        echo "xx-ui"
+    else
+        echo "unknown"
+    fi
+}
+
+check_existing_installation() {
+    local pid="" load_state="" containers="" binary kind found_xxui=0
+    local -a binaries=("${xui_folder}/x-ui")
+    if [[ "$xui_folder" != /usr/local/x-ui ]]; then
+        binaries+=(/usr/local/x-ui/x-ui)
+    fi
+    if command -v systemctl >/dev/null 2>&1; then
+        pid="$(systemctl show x-ui.service --property=MainPID --value 2>/dev/null)" || pid=""
+        load_state="$(systemctl show x-ui.service --property=LoadState --value 2>/dev/null)" || load_state=""
+        if [[ "$pid" =~ ^[1-9][0-9]*$ ]]; then
+            if [[ ! -e "/proc/$pid/exe" ]]; then
+                echo "Cannot identify the running x-ui executable. Installation stopped before changing the service." >&2
+                return 1
+            fi
+            binaries+=("/proc/$pid/exe")
+        fi
+    fi
+    if command -v docker >/dev/null 2>&1; then
+        containers="$(docker ps -a --format '{{.Image}} {{.Names}}' 2>/dev/null)" || containers=""
+        if grep -Eiq '(^|/)(3x-ui|xx-ui|x-ui)(:[^ ]+|@[^ ]+)?[[:space:]]|[[:space:]](3x-ui|xx-ui|x-ui)$' <<< "$containers"; then
+            echo "An existing x-ui Docker container was detected. Use the Docker upgrade or migration procedure." >&2
+            return 1
+        fi
+    fi
+    for binary in "${binaries[@]}"; do
+        [[ -e "$binary" || -L "$binary" ]] || continue
+        kind="$(panel_binary_kind "$binary")"
+        case "$kind" in
+            3x-ui)
+                echo "Detected an existing 3x-ui installation. No service or database changes were made." >&2
+                echo "Re-run this installer with --migrate-3x-ui check, then --migrate-3x-ui prepare if the check passes." >&2
+                return 1
+                ;;
+            xx-ui)
+                found_xxui=1
+                ;;
+            *)
+                echo "Cannot identify the existing panel binary at $binary. Installation stopped before changing the service." >&2
+                return 1
+                ;;
+        esac
+    done
+    if (( found_xxui == 0 )) && [[ "$load_state" =~ ^(loaded|masked|error|bad-setting)$ ||
+        -e "${xui_service}/x-ui.service" || -L "${xui_service}/x-ui.service" ||
+        -e /etc/init.d/x-ui || -e "${XUI_DB_FOLDER:-/etc/x-ui}/x-ui.db" ||
+        -L "${XUI_DB_FOLDER:-/etc/x-ui}/x-ui.db" || -e /etc/x-ui/x-ui.db ]]; then
+        echo "An x-ui service or database exists without an identifiable xx-ui binary. Verify the existing installation and back it up before proceeding." >&2
+        return 1
+    fi
+}
+
 if [[ "${1:-}" == "--migrate-3x-ui" ]]; then
     shift
     if ! command -v python3 >/dev/null || ! command -v curl >/dev/null; then
@@ -2052,6 +2114,7 @@ if [[ "${1:-}" == "--migrate-3x-ui" ]]; then
     exit $?
 fi
 
+check_existing_installation || exit 1
 echo -e "${green}Running...${plain}"
 install_base
 install_x-ui "$@"

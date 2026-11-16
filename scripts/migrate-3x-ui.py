@@ -98,8 +98,11 @@ def source_service():
     if state["ActiveState"] != "active" or int(state["MainPID"]) <= 0:
         raise MigrationError("The existing x-ui systemd service must be running.")
     binary = Path(f'/proc/{state["MainPID"]}/exe').resolve(strict=True)
+    build = binary.read_bytes()
+    if b"path\tgithub.com/a923946240/xx-ui/v3" in build:
+        raise MigrationError("xx-ui is already running. Use the normal installer to update it.")
     if binary != OLD_BINARY or not re.search(
-        rb"mod\tgithub\.com/mhsanaei/3x-ui/v3\tv3\.10\.2\t", binary.read_bytes(), re.I,
+        rb"mod\tgithub\.com/mhsanaei/3x-ui/v3\tv3\.10\.2\t", build, re.I,
     ):
         raise MigrationError("This importer supports the systemd installation of 3x-ui v3.10.2.")
     running_env = dict(item.split(b"=", 1) for item in

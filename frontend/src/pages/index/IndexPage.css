@@ -29,6 +29,65 @@
   gap: var(--ov-gap);
 }
 
+.ov-service-section,
+.ov-workflow {
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 12px;
+  background: var(--ant-color-bg-container);
+}
+
+.ov-service-section {
+  padding: 14px 16px;
+}
+
+.ov-workflows {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ov-gap, 12px);
+}
+
+.ov-workflow {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  color: var(--ant-color-text);
+}
+
+.ov-workflow:hover,
+.ov-workflow:focus-visible {
+  border-color: var(--ant-color-primary);
+  color: var(--ant-color-primary);
+}
+
+.ov-workflow-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.ov-workflow-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.ov-workflow-copy > span {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .ov-workflows {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* — action bar — */
 
 .ov-bar {

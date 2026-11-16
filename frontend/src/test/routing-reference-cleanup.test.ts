@@ -176,7 +176,7 @@ describe('outbound deletion', () => {
     ]);
   });
 
-  it('clears a fallbackTag and a dialerProxy pointing at the deleted outbound', () => {
+  it('refuses to delete a dialer hop and leaves the dependent traffic path intact', () => {
     const tt = tpl({
       outbounds: [
         { tag: 'proxy-us' },
@@ -188,9 +188,10 @@ describe('outbound deletion', () => {
       },
     });
     applyOutboundDeletion(tt, 0);
-    expect(tt.routing!.balancers![0].selector).toEqual(['proxy-uk']);
-    expect(tt.routing!.balancers![0].fallbackTag).toBe('');
-    expect(dialerProxyOf(tt, 'chain')).toBeUndefined();
+    expect(tt.outbounds).toHaveLength(2);
+    expect(tt.routing!.balancers![0].selector).toEqual(['proxy-us', 'proxy-uk']);
+    expect(tt.routing!.balancers![0].fallbackTag).toBe('proxy-us');
+    expect(dialerProxyOf(tt, 'chain')).toBe('proxy-us');
   });
 
   it('never cascade-removes a tagless balancer (an empty tag must not match others)', () => {

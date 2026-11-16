@@ -18,6 +18,7 @@ import { LazyMount } from '@/components/utility';
 import { setMessageInstance } from '@/utils/messageBus';
 import OverviewActionBar from './OverviewActionBar';
 import OverviewBento from './OverviewBento';
+import OverviewEntryPoints from './OverviewEntryPoints';
 import { useOverviewHistory } from './useOverviewHistory';
 import type { PanelUpdateInfo } from './PanelUpdateModal';
 const JsonEditor = lazy(() => import('@/components/form/JsonEditor'));
@@ -188,25 +189,27 @@ export default function IndexPage() {
                     </div>
                     <span className="panel-eyebrow">xx-ui / {displayVersion}</span>
                   </header>
-                  <OverviewActionBar
-                    status={status}
-                    isMobile={isMobile}
-                    accessLogEnable={accessLogEnable}
-                    panelVersion={displayVersion}
-                    latestVersion={panelUpdateInfo.latestVersion}
-                    updateAvailable={panelUpdateInfo.updateAvailable}
-                    onStopXray={stopXray}
-                    onRestartXray={restartXray}
-                    onOpenLogs={() => setLogsOpen(true)}
-                    onOpenXrayLogs={() => setXrayLogsOpen(true)}
-                    onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
-                    onOpenConfig={openConfig}
-                    onOpenBackup={() => setBackupOpen(true)}
-                    onOpenSystemHistory={() => setSysHistoryOpen(true)}
-                    onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
-                    onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
-                    onOpenVersionSwitch={() => setVersionOpen(true)}
-                  />
+                  <section className="ov-service-section" aria-label={t('pages.index.xrayStatus')}>
+                    <OverviewActionBar
+                      status={status}
+                      isMobile={isMobile}
+                      accessLogEnable={accessLogEnable}
+                      panelVersion={displayVersion}
+                      latestVersion={panelUpdateInfo.latestVersion}
+                      updateAvailable={panelUpdateInfo.updateAvailable}
+                      onStopXray={stopXray}
+                      onRestartXray={restartXray}
+                      onOpenLogs={() => setLogsOpen(true)}
+                      onOpenXrayLogs={() => setXrayLogsOpen(true)}
+                      onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
+                      onOpenConfig={openConfig}
+                      onOpenBackup={() => setBackupOpen(true)}
+                      onOpenSystemHistory={() => setSysHistoryOpen(true)}
+                      onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
+                      onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
+                      onOpenVersionSwitch={() => setVersionOpen(true)}
+                    />
+                  </section>
 
                   {health && (
                     <div className="ov-health" style={{ color: health.color }}>
@@ -215,6 +218,7 @@ export default function IndexPage() {
                     </div>
                   )}
 
+                  <OverviewEntryPoints />
                   <OverviewBento
                     status={status}
                     history={history}

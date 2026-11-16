@@ -33,7 +33,7 @@ import { formatPanelVersion } from '@/lib/panel-version';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useAllSettings } from '@/api/queries/useAllSettings';
 import { useCommandPalette } from '@/components/command-palette/useCommandPalette';
-import { PANEL_ROUTES } from '@/routes/panelRoutes';
+import { PANEL_NAV_GROUPS, PANEL_ROUTES } from '@/routes/panelRoutes';
 import './AppSidebar.css';
 
 // The palette listens for Ctrl as well as Cmd, so the chip must not show a
@@ -129,7 +129,7 @@ function saveSidebarPinned(pinned: boolean) {
   } catch {}
 }
 
-export default function AppSidebar() {
+export default function AppSidebar({ onLogout }: { onLogout?: () => void } = {}) {
   const { t } = useTranslation();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
   const { open: openCommandPalette } = useCommandPalette();
@@ -181,16 +181,6 @@ export default function AppSidebar() {
       { key: LOGOUT_KEY, icon: LogoutOutlined, title: t('logout') },
     ],
     [t],
-  );
-
-  const systemKeys = useMemo(() => new Set(['/settings', '/xray', '/api-docs', LOGOUT_KEY]), []);
-  const navItems = useMemo(
-    () => tabs.filter((tab) => !systemKeys.has(tab.key)),
-    [tabs, systemKeys],
-  );
-  const utilItems = useMemo(
-    () => tabs.filter((tab) => systemKeys.has(tab.key)),
-    [tabs, systemKeys],
   );
 
   const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
@@ -306,16 +296,35 @@ export default function AppSidebar() {
     [settingsChildren, xrayChildren],
   );
 
+  const menuItems = useMemo(() => {
+    const groups = PANEL_NAV_GROUPS.map((group) => ({
+      type: 'group' as const,
+      key: group.key,
+      label: t(group.titleKey),
+      children:
+        toMenuItems(
+          [...group.paths, ...(group.key === 'operations' ? [LOGOUT_KEY] : [])].flatMap((path) =>
+            tabs.filter((tab) => tab.key === path),
+          ),
+        ) ?? [],
+    }));
+    return { expanded: groups, compact: groups.flatMap((group) => group.children) };
+  }, [t, tabs, toMenuItems]);
+
   const openLink = useCallback(
     async (key: string) => {
       if (key === LOGOUT_KEY) {
+        if (onLogout) {
+          onLogout();
+          return;
+        }
         await HttpUtil.post('/logout');
         window.location.href = window.X_UI_BASE_PATH || '/';
         return;
       }
       navigate(key);
     },
-    [navigate],
+    [navigate, onLogout],
   );
 
   const onMenuClick = useCallback<NonNullable<MenuProps['onClick']>>(
@@ -407,32 +416,14 @@ export default function AppSidebar() {
           </button>
         </Tooltip>
         <div className="sidebar-scroll">
-          {!railCollapsed && (
-            <div className="sidebar-section-label">{t('appearance.workspace')}</div>
-          )}
           <Menu
             theme={currentTheme}
             mode="inline"
             selectedKeys={[selectedKey]}
             openKeys={railCollapsed ? undefined : openKeys}
             onOpenChange={(keys) => setOpenKeys(keys as string[])}
-            className="sider-nav"
-            items={toMenuItems(navItems)}
-            onClick={onMenuClick}
-          />
-          {!railCollapsed && (
-            <div className="sidebar-section-label sidebar-section-system">
-              {t('appearance.system')}
-            </div>
-          )}
-          <Menu
-            theme={currentTheme}
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            openKeys={railCollapsed ? undefined : openKeys}
-            onOpenChange={(keys) => setOpenKeys(keys as string[])}
-            className="sider-utility"
-            items={toMenuItems(utilItems)}
+            className="sider-nav panel-grouped-menu"
+            items={railCollapsed ? menuItems.compact : menuItems.expanded}
             onClick={onMenuClick}
           />
         </div>
@@ -503,21 +494,8 @@ export default function AppSidebar() {
             selectedKeys={[selectedKey]}
             openKeys={openKeys}
             onOpenChange={(keys) => setOpenKeys(keys as string[])}
-            className="drawer-menu drawer-nav"
-            items={toMenuItems(navItems)}
-            onClick={(info) => {
-              onMenuClick(info);
-              setDrawerOpen(false);
-            }}
-          />
-          <Menu
-            theme={currentTheme}
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            openKeys={openKeys}
-            onOpenChange={(keys) => setOpenKeys(keys as string[])}
-            className="drawer-menu drawer-utility"
-            items={toMenuItems(utilItems)}
+            className="drawer-menu drawer-nav panel-grouped-menu"
+            items={menuItems.expanded}
             onClick={(info) => {
               onMenuClick(info);
               setDrawerOpen(false);

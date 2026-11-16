@@ -15,6 +15,9 @@ from urllib.parse import urlencode, urlsplit
 from urllib.request import build_opener, HTTPRedirectHandler, ProxyHandler, Request
 
 
+STATUS_PATH = Path("/var/lib/xx-ui/nat-sync/status.json")
+
+
 def public_ipv4(value):
     ip = ipaddress.IPv4Address(value)
     if not ip.is_global or ip.is_multicast:
@@ -22,20 +25,24 @@ def public_ipv4(value):
     return str(ip)
 
 
-def report(path):
-    connection = os.environ.get("SSH_CONNECTION", "").split()
-    if len(connection) != 4:
-        raise ValueError("missing SSH peer address")
-    address = public_ipv4(connection[0])
+def write_json_atomic(path, data):
     with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as tmp:
         tmp_path = Path(tmp.name)
         try:
-            json.dump({"address": address, "seen_at": time.time()}, tmp)
+            json.dump(data, tmp)
             tmp.close()
             tmp_path.replace(path)
         finally:
             if tmp_path.exists():
                 tmp_path.unlink()
+
+
+def report(path):
+    connection = os.environ.get("SSH_CONNECTION", "").split()
+    if len(connection) != 4:
+        raise ValueError("missing SSH peer address")
+    address = public_ipv4(connection[0])
+    write_json_atomic(path, {"address": address, "seen_at": time.time()})
 
 
 def read_report(path, max_age):
@@ -114,13 +121,39 @@ def relay_address(relay):
 
 
 def sync(config):
+    status = {}
+    publish = STATUS_PATH.parent.is_dir()
+    if publish:
+        try:
+            previous = json.loads(STATUS_PATH.read_text())
+            if isinstance(previous, dict):
+                for key in ("currentIp", "candidateIp", "probeIp", "probeResult", "probeAt", "appliedAt"):
+                    if key in previous:
+                        status[key] = previous[key]
+        except (OSError, ValueError):
+            pass
+    try:
+        sync_outbound(config, status)
+    finally:
+        if publish:
+            status["updatedAt"] = int(time.time())
+            try:
+                write_json_atomic(STATUS_PATH, status)
+            except OSError:
+                print("NAT sync could not write its status file", file=sys.stderr)
+
+
+def sync_outbound(config, status):
+    status["state"] = "config_error"
     base = config["panel_url"].rstrip("/")
     parsed = urlsplit(base)
     if (parsed.scheme not in ("http", "https") or parsed.hostname not in ("127.0.0.1", "::1")
             or parsed.username or parsed.password or parsed.query or parsed.fragment):
         raise ValueError("panel_url must use a loopback address")
     relay = config["ssh_alias"]
+    status["state"] = "relay_error"
     address = relay_address(relay)
+    status.update(candidateIp=address, state="config_error")
     token = Path(config["token_file"]).read_text().strip()
     payload, revision = panel_request(base, token, "")
     if not revision:
@@ -136,17 +169,27 @@ def sync(config):
     if type(port) is not int or not 1 <= port <= 65535:
         raise ValueError("invalid fixed port")
     targets = [select_outbound(outbounds, tag) for tag in tags]
+    live_addresses = [
+        endpoint(select_outbound(live, tag), port).get("address") for tag in tags
+    ]
+    status.pop("currentIp", None)
+    if all(ip == live_addresses[0] for ip in live_addresses):
+        try:
+            status["currentIp"] = public_ipv4(live_addresses[0])
+        except ValueError:
+            pass
     changed = False
-    for target in targets:
+    for target, live_address in zip(targets, live_addresses):
         server = endpoint(target, port)
-        live_target = select_outbound(live, target["tag"])
-        if server.get("address") != address or endpoint(live_target, port).get("address") != address:
+        if server.get("address") != address or live_address != address:
             changed = True
         server["address"] = address
     if not changed:
+        status["state"] = "in_sync"
         return
     if urlsplit(panel["outboundTestUrl"]).scheme != "https":
         raise ValueError("configure an HTTPS outbound test URL")
+    status.update(state="probe_error", probeIp=address, probeAt=int(time.time()), probeResult="failed")
     for target in targets:
         chain = probe_context(target, outbounds, live)
         results, _ = panel_request(base, token, "testOutbounds", {
@@ -159,8 +202,11 @@ def sync(config):
                 or results[0].get("success") is not True
                 or not 200 <= results[0].get("httpStatus", 0) < 400):
             raise ValueError("candidate chain probe failed")
+    status.update(state="relay_error", probeAt=int(time.time()), probeResult="passed")
     if relay_address(relay) != address:
+        status["state"] = "candidate_changed"
         raise ValueError("NAT address changed during probe")
+    status["state"] = "apply_error"
     panel_request(base, token, "update", {
         "xraySetting": json.dumps(template),
         "outboundTestUrl": panel["outboundTestUrl"],
@@ -168,6 +214,7 @@ def sync(config):
     applied = json.loads(Path(config["live_config"]).read_text())["outbounds"]
     if any(endpoint(select_outbound(applied, tag), port).get("address") != address for tag in tags):
         raise ValueError("running config has not applied the new address")
+    status.update(state="in_sync", currentIp=address, appliedAt=int(time.time()))
     print("NAT outbound address applied")
 
 

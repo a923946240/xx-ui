@@ -49,6 +49,17 @@ export const PANEL_ROUTES: PanelRoute[] = [
 
 export const PANEL_ROUTE_PATHS = PANEL_ROUTES.map((route) => route.path);
 
+export const PANEL_NAV_GROUPS = [
+  { key: 'workspace', titleKey: 'appearance.workspace', paths: ['/'] },
+  { key: 'access', titleKey: 'appearance.access', paths: ['/inbounds', '/clients', '/groups'] },
+  {
+    key: 'network',
+    titleKey: 'appearance.network',
+    paths: ['/outbound', '/routing', '/hosts', '/nodes'],
+  },
+  { key: 'operations', titleKey: 'appearance.system', paths: ['/settings', '/xray', '/api-docs'] },
+];
+
 export const PANEL_TITLE_KEYS: Record<string, string> = Object.fromEntries(
   PANEL_ROUTES.map((route) => [route.path, route.titleKey]),
 );

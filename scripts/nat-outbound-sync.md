@@ -79,4 +79,20 @@ systemctl start nat-outbound-sync.service
 systemctl enable --now nat-outbound-sync.timer
 ```
 
+## 在面板查看同步状态
+
+在前置创建仅同步任务账号可写的状态目录，然后运行一次新版同步任务。
+以下示例中任务账号为 `nat-sync`，面板进程需要能读取该目录。默认以
+root 运行的 Linux 面板可以直接读取。
+
+```sh
+install -d -m 700 -o nat-sync -g nat-sync /var/lib/xx-ui/nat-sync
+systemctl start nat-outbound-sync.service
+```
+
+任务结束时会更新该目录中的 `status.json`。在 **组网 → 出站 → NAT SSH 同步**
+查看当前 IP、最近上报的候选 IP、最近的 HTTPS 探测结果和应用时间。刷新只读取
+状态。实际探测和切换仍由前置上的定时任务执行。如果在容器中运行面板，需要将
+该状态目录挂到容器中的同一路径。
+
 结束同步时停止两端定时任务，再撤销两把同步公钥和前置 token。线路是否会在失联时直连或转入其他节点，仍取决于现有路由规则。

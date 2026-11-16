@@ -341,3 +341,91 @@
   font-size: 12px;
   opacity: 0.7;
 }
+.line-wizard-path {
+  display: grid;
+  gap: 8px;
+  margin-block-start: 8px;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.line-wizard-form .ant-form-item {
+  margin-block-end: 16px;
+}
+
+.line-wizard-steps {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  flex: 1;
+  min-height: 32px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.line-wizard-topology {
+  margin-block-end: 16px;
+}
+
+.line-wizard-lane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 10px;
+}
+
+.line-wizard-step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.line-wizard-step-number {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+.line-wizard-step-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-wizard-destination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-start: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.line-wizard-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .line-wizard-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+.line-wizard-hop {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}

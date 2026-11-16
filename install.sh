@@ -2033,6 +2033,25 @@ install_x-ui() {
 └───────────────────────────────────────────────────────┘"
 }
 
+if [[ "${1:-}" == "--migrate-3x-ui" ]]; then
+    shift
+    if ! command -v python3 >/dev/null || ! command -v curl >/dev/null; then
+        echo "Migration requires python3 and curl." >&2
+        exit 1
+    fi
+    migration_helper="$(dirname -- "${BASH_SOURCE[0]}")/scripts/migrate-3x-ui.py"
+    if [[ -f "${BASH_SOURCE[0]:-}" && -f "$migration_helper" ]]; then
+        exec python3 "$migration_helper" "$@"
+    fi
+    migration_helper="$(mktemp)" || exit 1
+    trap 'rm -f -- "$migration_helper"' EXIT
+    curl -fsSL --retry 3 --connect-timeout 10 --max-time 60 \
+        https://raw.githubusercontent.com/a923946240/xx-ui/main/scripts/migrate-3x-ui.py \
+        -o "$migration_helper" || exit 1
+    python3 "$migration_helper" "$@"
+    exit $?
+fi
+
 echo -e "${green}Running...${plain}"
 install_base
 install_x-ui "$@"

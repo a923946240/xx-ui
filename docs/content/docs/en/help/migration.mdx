@@ -46,6 +46,39 @@ Importing an older x-ui panel's database directly into xx-ui is **not
 supported** — the schemas differ. Install xx-ui fresh and recreate
 inbounds/clients, exporting share links from the old panel as you go.
 
+### Prepare a 3x-ui migration
+
+The installer has a separate preparation path for the default systemd and
+SQLite installation of 3x-ui v3.10.2 on Linux amd64 or arm64. It supports one
+enabled VLESS/REALITY inbound, one bcrypt administrator, and direct or blocked
+Xray template outbounds. Instances with custom database paths, traffic quotas,
+LDAP, two-factor authentication or additional template listeners require manual review.
+It requires Python 3.11 with the tar extraction safety filters, curl, OpenSSL,
+and systemd.
+
+```bash
+# Read-only compatibility check
+bash <(curl -fsSL https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh) --migrate-3x-ui check
+
+# Backup, isolate, import, and verify
+bash <(curl -fsSL https://raw.githubusercontent.com/a923946240/xx-ui/main/install.sh) --migrate-3x-ui prepare
+```
+
+Use `backup` to create the backup without downloading or starting xx-ui.
+`prepare` verifies the release archive, tests the original client identity and
+subscription path on loopback, and writes a candidate database to the private
+backup directory printed by the command. It retains known panel and
+subscription settings and certificate paths. Historical traffic counters,
+existing web sessions, third-party tokens, and other unlisted settings require
+separate review. Keep the backup private because it contains the old database
+and keys.
+
+Preparation leaves the old service running. Before a separate production
+cutover, check for changes since the snapshot, verify certificate renewal and
+reverse-proxy configuration, choose a service unit and data directories for
+xx-ui, and arrange rollback to the old unit. Verify the old administrator
+login, proxy address and HTTPS subscription URL after taking over the ports.
+
 <Callout type="warn">
   Always take a backup before any migration, and keep the old server running
   until you've verified the new one.

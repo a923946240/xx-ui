@@ -18,6 +18,12 @@ export type Protocol = z.infer<typeof ProtocolSchema>;
 export const addrFamilySchema = z.number().int();
 export type addrFamily = z.infer<typeof addrFamilySchema>;
 
+export const natSyncOutboundSchema = z.record(z.string(), z.unknown());
+export type natSyncOutbound = z.infer<typeof natSyncOutboundSchema>;
+
+export const natSyncStatusSchema = z.lazy(() => NATSyncStatusSchema);
+export type natSyncStatus = z.infer<typeof natSyncStatusSchema>;
+
 export const staticEgressResolverSchema = z.string();
 export type staticEgressResolver = z.infer<typeof staticEgressResolverSchema>;
 
@@ -943,6 +949,42 @@ export const MsgSchema = z.object({
   success: z.boolean(),
 });
 export type Msg = z.infer<typeof MsgSchema>;
+
+export const NATSyncConfigSchema = z.object({
+  enabled: z.boolean(),
+  hostKeyFingerprint: z.string(),
+  outboundTags: z.array(z.string()),
+  relayHost: z.string(),
+  relayPort: z.number().int(),
+  relayUser: z.string(),
+});
+export type NATSyncConfig = z.infer<typeof NATSyncConfigSchema>;
+
+export const NATSyncReportSchema = z.object({
+  candidateIp: z.string(),
+  seenAt: z.number().int().optional(),
+});
+export type NATSyncReport = z.infer<typeof NATSyncReportSchema>;
+
+export const NATSyncStatusSchema = z.object({
+  appliedAt: z.number().int().optional(),
+  candidateIp: z.string().optional(),
+  currentIp: z.string().optional(),
+  probeAt: z.number().int().optional(),
+  probeIp: z.string().optional(),
+  probeResult: z.string().optional(),
+  state: z.string(),
+  updatedAt: z.number().int(),
+});
+export type NATSyncStatus = z.infer<typeof NATSyncStatusSchema>;
+
+export const NATSyncViewSchema = z.object({
+  config: z.lazy(() => NATSyncConfigSchema),
+  legacyStatus: z.boolean().optional(),
+  publicKey: z.string().optional(),
+  status: z.lazy(() => NATSyncStatusSchema).nullable().optional(),
+});
+export type NATSyncView = z.infer<typeof NATSyncViewSchema>;
 
 export const NewUUIDResponseSchema = z.object({
   uuid: z.string(),

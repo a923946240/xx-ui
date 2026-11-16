@@ -55,6 +55,10 @@ func (a *XraySettingController) initRouter(g *gin.RouterGroup) {
 	g.POST("/resetOutboundsTraffic", a.resetOutboundsTraffic)
 	g.POST("/testOutbound", a.testOutbound)
 	g.POST("/testOutbounds", a.testOutbounds)
+	g.GET("/nat-sync", a.natSyncView)
+	g.POST("/nat-sync/key", a.natSyncKey)
+	g.POST("/nat-sync/config", a.natSyncSave)
+	g.POST("/nat-sync/test", a.natSyncTest)
 	g.POST("/balancerStatus", a.balancerStatus)
 	g.POST("/balancerOverride", a.balancerOverride)
 	g.POST("/routeTest", a.routeTest)
@@ -112,7 +116,9 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 	if outboundTestUrl == "" {
 		outboundTestUrl = "https://www.google.com/generate_204"
 	}
+	revision := service.XrayTemplateETag(xraySetting)
 	xrayResponse := map[string]any{
+		"templateRevision":  revision,
 		"xraySetting":       json.RawMessage(xraySetting),
 		"inboundTags":       json.RawMessage(inboundTags),
 		"clientReverseTags": json.RawMessage(clientReverseTags),
@@ -141,7 +147,7 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.getSettings"), err)
 		return
 	}
-	c.Header("ETag", service.XrayTemplateETag(xraySetting))
+	c.Header("ETag", revision)
 	jsonObj(c, string(result), nil)
 }
 

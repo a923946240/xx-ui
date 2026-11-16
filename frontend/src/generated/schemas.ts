@@ -3836,6 +3836,116 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "NATSyncConfig": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "hostKeyFingerprint": {
+        "type": "string"
+      },
+      "outboundTags": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "relayHost": {
+        "type": "string"
+      },
+      "relayPort": {
+        "type": "integer"
+      },
+      "relayUser": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "enabled",
+      "hostKeyFingerprint",
+      "outboundTags",
+      "relayHost",
+      "relayPort",
+      "relayUser"
+    ],
+    "type": "object"
+  },
+  "NATSyncReport": {
+    "properties": {
+      "candidateIp": {
+        "type": "string"
+      },
+      "seenAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "candidateIp"
+    ],
+    "type": "object"
+  },
+  "NATSyncStatus": {
+    "properties": {
+      "appliedAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "candidateIp": {
+        "type": "string"
+      },
+      "currentIp": {
+        "type": "string"
+      },
+      "probeAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "probeIp": {
+        "type": "string"
+      },
+      "probeResult": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string"
+      },
+      "updatedAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "state",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "NATSyncView": {
+    "properties": {
+      "config": {
+        "$ref": "#/components/schemas/NATSyncConfig"
+      },
+      "legacyStatus": {
+        "type": "boolean"
+      },
+      "publicKey": {
+        "type": "string"
+      },
+      "status": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NATSyncStatus"
+          }
+        ],
+        "nullable": true
+      }
+    },
+    "required": [
+      "config"
+    ],
+    "type": "object"
+  },
   "NewUUIDResponse": {
     "properties": {
       "uuid": {

@@ -3862,6 +3862,116 @@
         ],
         "type": "object"
       },
+      "NATSyncConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "hostKeyFingerprint": {
+            "type": "string"
+          },
+          "outboundTags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "relayHost": {
+            "type": "string"
+          },
+          "relayPort": {
+            "type": "integer"
+          },
+          "relayUser": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "hostKeyFingerprint",
+          "outboundTags",
+          "relayHost",
+          "relayPort",
+          "relayUser"
+        ],
+        "type": "object"
+      },
+      "NATSyncReport": {
+        "properties": {
+          "candidateIp": {
+            "type": "string"
+          },
+          "seenAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "candidateIp"
+        ],
+        "type": "object"
+      },
+      "NATSyncStatus": {
+        "properties": {
+          "appliedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "candidateIp": {
+            "type": "string"
+          },
+          "currentIp": {
+            "type": "string"
+          },
+          "probeAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "probeIp": {
+            "type": "string"
+          },
+          "probeResult": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "state",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "NATSyncView": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/NATSyncConfig"
+          },
+          "legacyStatus": {
+            "type": "boolean"
+          },
+          "publicKey": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NATSyncStatus"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "config"
+        ],
+        "type": "object"
+      },
       "NewUUIDResponse": {
         "properties": {
           "uuid": {
@@ -14428,6 +14538,7 @@
         ],
         "summary": "Return the Xray config template (JSON string), available inbound tags, client reverse tags, and the configured outbound test URL in one response.",
         "operationId": "post_panel_api_xray",
+        "description": "The obj field is a JSON-encoded string. Its templateRevision also appears in the ETag response header and can be sent in If-Match when saving.",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -14447,12 +14558,7 @@
                 },
                 "example": {
                   "success": true,
-                  "obj": {
-                    "xraySetting": "{...raw xray config...}",
-                    "inboundTags": "[\"in-443-tcp\"]",
-                    "clientReverseTags": "[]",
-                    "outboundTestUrl": "https://www.google.com/generate_204"
-                  }
+                  "obj": "{\"xraySetting\":{\"outbounds\":[]},\"inboundTags\":[\"in-443-tcp\"],\"clientReverseTags\":[],\"outboundTestUrl\":\"https://www.google.com/generate_204\",\"templateRevision\":\"\\\"example-etag\\\"\"}"
                 }
               }
             }
@@ -14557,6 +14663,17 @@
         ],
         "summary": "Save the Xray JSON config template and optionally the outbound test URL. Both are sent as form fields.",
         "operationId": "post_panel_api_xray_update",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "description": "Optional ETag or templateRevision from the Xray template response. A stale value returns HTTP 412 without saving.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -14595,6 +14712,261 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "success": false,
+                  "msg": "Xray template changed since it was read"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync": {
+      "get": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "Read the NAT SSH sync configuration and current status.",
+        "operationId": "get_panel_api_xray_nat_sync",
+        "description": "Requires an administrator session or admin API token. Includes an existing public reader key without creating one. If panel-managed sync is disabled, a legacy script status may be returned with legacyStatus set.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATSyncView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "hostKeyFingerprint": "",
+                      "outboundTags": [
+                        ""
+                      ],
+                      "relayHost": "",
+                      "relayPort": 0,
+                      "relayUser": ""
+                    },
+                    "legacyStatus": false,
+                    "publicKey": "",
+                    "status": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync/key": {
+      "post": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "Create or return the NAT SSH reader public key.",
+        "operationId": "post_panel_api_xray_nat_sync_key",
+        "description": "Requires an administrator session or admin API token. Repeated calls reuse the existing key. The private key stays on the panel server.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATSyncView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "hostKeyFingerprint": "",
+                      "outboundTags": [
+                        ""
+                      ],
+                      "relayHost": "",
+                      "relayPort": 0,
+                      "relayUser": ""
+                    },
+                    "legacyStatus": false,
+                    "publicKey": "",
+                    "status": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync/config": {
+      "post": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "Save or disable panel-managed NAT SSH sync.",
+        "operationId": "post_panel_api_xray_nat_sync_config",
+        "description": "Requires an administrator session or admin API token. Enabling validates the SSH fingerprint, saved outbound tags and HTTPS test URL, then reads a report before saving. A disabled draft can be saved without confirming relay connectivity.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATSyncConfig"
+              },
+              "example": {
+                "enabled": true,
+                "relayHost": "relay.example.net",
+                "relayPort": 22,
+                "relayUser": "nat-sync",
+                "hostKeyFingerprint": "SHA256:<verified Ed25519 fingerprint>",
+                "outboundTags": [
+                  "dynamic-nat"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATSyncView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "hostKeyFingerprint": "",
+                      "outboundTags": [
+                        ""
+                      ],
+                      "relayHost": "",
+                      "relayPort": 0,
+                      "relayUser": ""
+                    },
+                    "legacyStatus": false,
+                    "publicKey": "",
+                    "status": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync/test": {
+      "post": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "Test the SSH relay and read its reported NAT IPv4 address.",
+        "operationId": "post_panel_api_xray_nat_sync_test",
+        "description": "Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes its Unix timestamp in seconds when the relay sends a timestamp.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATSyncConfig"
+              },
+              "example": {
+                "enabled": true,
+                "relayHost": "relay.example.net",
+                "relayPort": 22,
+                "relayUser": "nat-sync",
+                "hostKeyFingerprint": "SHA256:<verified Ed25519 fingerprint>",
+                "outboundTags": [
+                  "dynamic-nat"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATSyncReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "candidateIp": "",
+                    "seenAt": 0
                   }
                 }
               }

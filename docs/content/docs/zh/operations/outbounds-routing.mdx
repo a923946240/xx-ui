@@ -28,8 +28,9 @@ Xray 默认使用 A，并通过 A 定期访问探测地址。探测失败后，�
 在「组网 → 出站」中可以导入出站 JSON，或打开「专线向导」配置多跳、
 主备线路和入站规则。核对草稿后保存 Xray 设置。
 
-前置已部署 NAT SSH 同步并启用状态文件时，点「NAT SSH 同步」查看当前
-IP、候选 IP、最近 HTTPS 探测和应用时间。详见[同步部署说明](https://github.com/a923946240/xx-ui/blob/main/scripts/nat-outbound-sync.md)。
+点「NAT SSH 同步」配置香港 SSH 中转、选择同步的出站、测试地址读取并启用自动同步。
+香港和台湾的 SSH 授权在服务器上完成。弹窗也显示当前 IP、候选 IP、最近 HTTPS 探测和应用时间。
+已使用脚本部署的旧任务仍可在弹窗查看状态。详见[同步部署说明](https://github.com/a923946240/xx-ui/blob/main/scripts/nat-outbound-sync.md)。
 
 ## 构建出站
 

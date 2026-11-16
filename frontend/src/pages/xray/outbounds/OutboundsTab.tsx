@@ -69,9 +69,42 @@ import OutboundCardList from './OutboundCardList';
 import SubscriptionOutbounds from './SubscriptionOutbounds';
 import LineWizard from './LineWizard';
 import NATSyncStatusButton from './NATSyncStatusButton';
-import { lineCopySource, updateLineCopy } from './line-plan';
+import { dialerOf, lineCopySource, updateLineCopy } from './line-plan';
 
 const defaultOutboundSubscriptionUserAgent = 'xx-ui-outbound-sub/1.0';
+const natSyncServerLists: Readonly<Record<string, string>> = {
+  shadowsocks: 'servers',
+  socks: 'servers',
+  trojan: 'servers',
+  vmess: 'vnext',
+  vless: 'vnext',
+};
+
+function eligibleNATSyncTags(outbounds: XraySettingsValue['outbounds']): string[] {
+  return (outbounds ?? []).flatMap((outbound) => {
+    const field = natSyncServerLists[outbound.protocol?.toLowerCase() ?? ''];
+    if (!field || !outbound.tag || !dialerOf(outbound)) return [];
+    const settings = outbound.settings as Record<string, unknown> | undefined;
+    const servers = settings?.[field];
+    const endpoint =
+      settings?.address != null
+        ? settings
+        : Array.isArray(servers) && servers.length === 1
+          ? (servers[0] as Record<string, unknown>)
+          : undefined;
+    const port = endpoint?.port;
+    if (
+      typeof endpoint?.address !== 'string' ||
+      !endpoint.address.trim() ||
+      typeof port !== 'number' ||
+      !Number.isInteger(port) ||
+      port < 1 ||
+      port > 65535
+    )
+      return [];
+    return [outbound.tag];
+  });
+}
 
 interface OutboundSub {
   id: number;
@@ -189,6 +222,8 @@ export default function OutboundsTab({
   );
   const rowsRef = useRef<OutboundRow[]>([]);
   rowsRef.current = rows;
+
+  const natSyncTags = eligibleNATSyncTags(templateSettings?.outbounds);
 
   const dialerProxyTags = useMemo(() => {
     const tags = new Set<string>();
@@ -608,7 +643,7 @@ export default function OutboundsTab({
               >
                 {t('pages.xray.lineWizard.title')}
               </Button>
-              <NATSyncStatusButton />
+              <NATSyncStatusButton outboundTags={natSyncTags} />
               <Dropdown
                 trigger={['click']}
                 menu={{

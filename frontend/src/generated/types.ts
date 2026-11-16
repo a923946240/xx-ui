@@ -5,6 +5,8 @@ export type OnlineAPISupport = number;
 export type ProcessState = string;
 export type Protocol = string;
 export type addrFamily = number;
+export type natSyncOutbound = Record<string, unknown>;
+export type natSyncStatus = NATSyncStatus;
 export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
@@ -882,6 +884,38 @@ export interface Msg {
   msg: string;
   obj: unknown;
   success: boolean;
+}
+
+export interface NATSyncConfig {
+  enabled: boolean;
+  hostKeyFingerprint: string;
+  outboundTags: string[];
+  relayHost: string;
+  relayPort: number;
+  relayUser: string;
+}
+
+export interface NATSyncReport {
+  candidateIp: string;
+  seenAt?: number;
+}
+
+export interface NATSyncStatus {
+  appliedAt?: number;
+  candidateIp?: string;
+  currentIp?: string;
+  probeAt?: number;
+  probeIp?: string;
+  probeResult?: string;
+  state: string;
+  updatedAt: number;
+}
+
+export interface NATSyncView {
+  config: NATSyncConfig;
+  legacyStatus?: boolean;
+  publicKey?: string;
+  status?: NATSyncStatus | null;
 }
 
 export interface NewUUIDResponse {

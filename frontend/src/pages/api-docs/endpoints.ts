@@ -69,6 +69,19 @@ export interface Section {
 const inboundBody =
   '{\n  "enable": true,\n  "remark": "VLESS-443",\n  "listen": "",\n  "port": 443,\n  "protocol": "vless",\n  "expiryTime": 0,\n  "total": 0,\n  "settings": {\n    "clients": [{ "id": "...", "email": "user1" }],\n    "decryption": "none",\n    "fallbacks": []\n  },\n  "streamSettings": {\n    "network": "tcp",\n    "security": "reality",\n    "realitySettings": { "show": false, "dest": "..." }\n  },\n  "sniffing": {\n    "enabled": true,\n    "destOverride": ["http", "tls"]\n  }\n}';
 
+const natSyncConfigExample = JSON.stringify(
+  {
+    enabled: true,
+    relayHost: 'relay.example.net',
+    relayPort: 22,
+    relayUser: 'nat-sync',
+    hostKeyFingerprint: 'SHA256:<verified Ed25519 fingerprint>',
+    outboundTags: ['dynamic-nat'],
+  },
+  null,
+  2,
+);
+
 const outboundSubscriptionBodyParams: EndpointParam[] = [
   {
     name: 'remark',
@@ -2194,8 +2207,22 @@ export const sections: readonly Section[] = [
         path: '/panel/api/xray/',
         summary:
           'Return the Xray config template (JSON string), available inbound tags, client reverse tags, and the configured outbound test URL in one response.',
-        response:
-          '{\n  "success": true,\n  "obj": {\n    "xraySetting": "{...raw xray config...}",\n    "inboundTags": "[\\"in-443-tcp\\"]",\n    "clientReverseTags": "[]",\n    "outboundTestUrl": "https://www.google.com/generate_204"\n  }\n}',
+        description:
+          'The obj field is a JSON-encoded string. Its templateRevision also appears in the ETag response header and can be sent in If-Match when saving.',
+        response: JSON.stringify(
+          {
+            success: true,
+            obj: JSON.stringify({
+              xraySetting: { outbounds: [] },
+              inboundTags: ['in-443-tcp'],
+              clientReverseTags: [],
+              outboundTestUrl: 'https://www.google.com/generate_204',
+              templateRevision: '"example-etag"',
+            }),
+          },
+          null,
+          2,
+        ),
       },
       {
         method: 'GET',
@@ -2222,6 +2249,13 @@ export const sections: readonly Section[] = [
           'Save the Xray JSON config template and optionally the outbound test URL. Both are sent as form fields.',
         params: [
           {
+            name: 'If-Match',
+            in: 'header',
+            type: 'string',
+            desc: 'Optional ETag or templateRevision from the Xray template response. A stale value returns HTTP 412 without saving.',
+            optional: true,
+          },
+          {
             name: 'xraySetting',
             in: 'body (form)',
             type: 'string',
@@ -2235,6 +2269,44 @@ export const sections: readonly Section[] = [
             optional: true,
           },
         ],
+        errorStatus: 412,
+        errorResponse: '{"success":false,"msg":"Xray template changed since it was read"}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/xray/nat-sync',
+        summary: 'Read the NAT SSH sync configuration and current status.',
+        description:
+          'Requires an administrator session or admin API token. Includes an existing public reader key without creating one. If panel-managed sync is disabled, a legacy script status may be returned with legacyStatus set.',
+        responseSchema: 'NATSyncView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/xray/nat-sync/key',
+        summary: 'Create or return the NAT SSH reader public key.',
+        description:
+          'Requires an administrator session or admin API token. Repeated calls reuse the existing key. The private key stays on the panel server.',
+        responseSchema: 'NATSyncView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/xray/nat-sync/config',
+        summary: 'Save or disable panel-managed NAT SSH sync.',
+        description:
+          'Requires an administrator session or admin API token. Enabling validates the SSH fingerprint, saved outbound tags and HTTPS test URL, then reads a report before saving. A disabled draft can be saved without confirming relay connectivity.',
+        requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
+        body: natSyncConfigExample,
+        responseSchema: 'NATSyncView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/xray/nat-sync/test',
+        summary: 'Test the SSH relay and read its reported NAT IPv4 address.',
+        description:
+          'Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes its Unix timestamp in seconds when the relay sends a timestamp.',
+        requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
+        body: natSyncConfigExample,
+        responseSchema: 'NATSyncReport',
       },
       {
         method: 'POST',

@@ -150,6 +150,7 @@ export function useXraySetting(): UseXraySettingResult {
   const [templateSettings, setTemplateSettingsState] = useState<XraySettingsValue | null>(null);
   const [outboundTestUrl, setOutboundTestUrlState] = useState(DEFAULT_TEST_URL);
   const [savedXraySetting, setSavedXraySetting] = useState('');
+  const [savedRevision, setSavedRevision] = useState<string>();
   const [savedOutboundTestUrl, setSavedOutboundTestUrl] = useState(DEFAULT_TEST_URL);
   const config = configQuery.data;
   const inboundTags = useMemo(() => config?.inboundTags || [], [config]);
@@ -175,6 +176,7 @@ export function useXraySetting(): UseXraySettingResult {
   const syncingRef = useRef(false);
   const xraySettingRef = useRef('');
   const outboundTestUrlRef = useRef(outboundTestUrl);
+  const savedRevisionRef = useRef(savedRevision);
   const savedXraySettingRef = useRef(savedXraySetting);
   const savedOutboundTestUrlRef = useRef(savedOutboundTestUrl);
   const templateSettingsRef = useRef<XraySettingsValue | null>(null);
@@ -186,6 +188,7 @@ export function useXraySetting(): UseXraySettingResult {
     xraySettingRef.current = xraySetting;
     outboundTestUrlRef.current = outboundTestUrl;
     savedXraySettingRef.current = savedXraySetting;
+    savedRevisionRef.current = savedRevision;
     savedOutboundTestUrlRef.current = savedOutboundTestUrl;
     templateSettingsRef.current = templateSettings;
     subscriptionOutboundsRef.current = subscriptionOutbounds;
@@ -204,6 +207,7 @@ export function useXraySetting(): UseXraySettingResult {
       setXraySettingState(pretty);
       setTemplateSettingsState(config.xraySetting);
       setSavedXraySetting(pretty);
+      setSavedRevision(config.templateRevision);
       setOutboundTestUrlState(nextUrl);
       setSavedOutboundTestUrl(nextUrl);
     }
@@ -256,18 +260,20 @@ export function useXraySetting(): UseXraySettingResult {
   const saveMut = useMutation({
     mutationFn: async () => {
       const sentXraySetting = xraySettingRef.current;
+      const revision = savedRevisionRef.current;
       const sentTestUrl = normalizeOutboundTestUrl(outboundTestUrlRef.current);
-      const msg = await HttpUtil.post('/panel/api/xray/update', {
-        xraySetting: sentXraySetting,
-        outboundTestUrl: sentTestUrl,
-      });
+      const msg = await HttpUtil.post(
+        '/panel/api/xray/update',
+        { xraySetting: sentXraySetting, outboundTestUrl: sentTestUrl },
+        revision ? { headers: { 'If-Match': revision } } : undefined,
+      );
       return { msg, sentXraySetting, sentTestUrl };
     },
-    onSuccess: ({ msg, sentXraySetting, sentTestUrl }) => {
+    onSuccess: async ({ msg, sentXraySetting, sentTestUrl }) => {
       if (!msg?.success) return;
       setSavedXraySetting(sentXraySetting);
       setSavedOutboundTestUrl(sentTestUrl);
-      queryClient.invalidateQueries({ queryKey: keys.xray.config() });
+      await queryClient.invalidateQueries({ queryKey: keys.xray.config() });
     },
   });
 

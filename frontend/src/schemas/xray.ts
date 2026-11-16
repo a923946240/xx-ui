@@ -76,6 +76,7 @@ export const XrayConfigPayloadSchema = z
     subscriptionOutbounds: z.array(z.unknown()).optional(),
     subscriptionOutboundTags: z.array(z.string()).optional(),
     externalOutboundTags: z.array(z.string()).optional(),
+    templateRevision: z.string().optional(),
     natSyncStatus: NATSyncStatusSchema.optional(),
     geodataSources: z.array(z.object({ url: z.string(), file: z.string() })).optional(),
   })

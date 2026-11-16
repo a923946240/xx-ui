@@ -5,20 +5,13 @@ import (
 	"io"
 	"net/netip"
 	"os"
+
+	"github.com/a923946240/xx-ui/v3/internal/web/service"
 )
 
 const natSyncStatusPath = "/var/lib/xx-ui/nat-sync/status.json"
 
-type natSyncStatus struct {
-	State       string `json:"state"`
-	CurrentIP   string `json:"currentIp,omitempty"`
-	CandidateIP string `json:"candidateIp,omitempty"`
-	ProbeIP     string `json:"probeIp,omitempty"`
-	ProbeResult string `json:"probeResult,omitempty"`
-	ProbeAt     int64  `json:"probeAt,omitempty"`
-	AppliedAt   int64  `json:"appliedAt,omitempty"`
-	UpdatedAt   int64  `json:"updatedAt"`
-}
+type natSyncStatus = service.NATSyncStatus
 
 func readNATSyncStatus(path string) *natSyncStatus {
 	const maxSize = 4096

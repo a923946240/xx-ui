@@ -355,6 +355,10 @@
   margin-block-end: 16px;
 }
 
+.nat-sync-form .ant-form-item {
+  margin-block-end: 12px;
+}
+
 .line-wizard-steps {
   display: grid;
   align-content: start;

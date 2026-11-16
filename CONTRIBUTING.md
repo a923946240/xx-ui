@@ -290,6 +290,9 @@ CI runs this for you nightly (and on demand) via `.github/workflows/mutation.yml
 
 ## Sending a pull request
 
+See [the architecture guide](docs/architecture.md) for module boundaries and
+[the review guide](REVIEW.md) for compatibility and rollout checks.
+
 1. Branch off `main` (e.g. `feat/short-description`).
 2. Keep the diff focused — separate refactors from feature work.
 3. Run the relevant checks before pushing:

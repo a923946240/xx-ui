@@ -14,11 +14,11 @@ Mark every finding with exactly one of these, at the start of the finding:
 | CRITICAL | Security, data loss, corruption, or a severe production failure. |
 | HIGH | A significant functional or production issue. Everything under "What HIGH means here" is at least this. |
 | MEDIUM | A real bug, or a meaningful reliability or performance problem. |
-| LOW | A minor but legitimate issue, including an ordinary `CLAUDE.md` violation the change introduces — a source comment block over two lines, a fix larger than the bug it removes, a test `CLAUDE.md` rejects outright. Never formatting or personal style. |
+| LOW | A minor but legitimate issue, including a deviation from the conventions in `CONTRIBUTING.md` that has a concrete effect. |
 
 A CRITICAL or HIGH finding this pull request introduced or made worse is
-blocking: worth fixing before it merges. Not every `CLAUDE.md` rule is LOW.
-The three listed below — the dispatch rule, the migration rule, the endpoint
+blocking: worth fixing before it merges. The three rules listed below —
+the dispatch rule, the migration rule, the endpoint
 chain — are HIGH, because each one passes every local test and breaks a real
 deployment.
 
@@ -129,8 +129,7 @@ the code already handles is not a finding at all.
   `frontend/public/openapi.json`, `docs/public/openapi.json`) or lock files.
   Those files being STALE after a source change is reportable; their style
   is not.
-- Missing tests for getters, constants, renames or pure map lookups —
-  `CLAUDE.md` rejects such tests outright.
+- Missing tests for getters, constants, renames or pure map lookups.
 - A missing or unreferenced i18n key.
   `frontend/src/test/i18n-dead-keys.test.ts` pins the 14 locale files in
   `internal/web/translation/` in both directions, so the `frontend` job is

@@ -95,6 +95,13 @@ For scripts and quick actions, `x-ui` also takes a subcommand directly:
   `dev-latest` per-commit build (not a stable release).
 - **A specific older version:** menu option **5** (Legacy Version).
 
+To update from the web panel on a Linux host with slow GitHub access, choose
+a working **Panel Outbound** in **Settings → General**, then start the update
+from the overview. The updater downloads the release, verifies its SHA-256,
+and stages the matching menu and service files before stopping the panel.
+If the selected outbound is unavailable or a release file cannot be staged,
+the update stops while the running panel is still available.
+
 Updating preserves your database and settings. Take a
 [backup](/docs/operations/backup-restore) before a major-version jump.
 

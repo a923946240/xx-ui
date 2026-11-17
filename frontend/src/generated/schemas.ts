@@ -3836,41 +3836,36 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
-  "NATSyncConfig": {
+  "NATNodeChallenge": {
     "properties": {
-      "enabled": {
-        "type": "boolean"
-      },
-      "hostKeyFingerprint": {
-        "type": "string"
-      },
-      "outboundTags": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "relayHost": {
-        "type": "string"
-      },
-      "relayPort": {
-        "type": "integer"
-      },
-      "relayUser": {
+      "challenge": {
         "type": "string"
       }
     },
     "required": [
-      "enabled",
-      "hostKeyFingerprint",
-      "outboundTags",
-      "relayHost",
-      "relayPort",
-      "relayUser"
+      "challenge"
     ],
     "type": "object"
   },
-  "NATSyncReport": {
+  "NATNodeObserveRequest": {
+    "properties": {
+      "challenge": {
+        "type": "string"
+      },
+      "pinnedCertSha256": {
+        "type": "string"
+      },
+      "relayUrl": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "challenge",
+      "relayUrl"
+    ],
+    "type": "object"
+  },
+  "NATNodeReport": {
     "properties": {
       "candidateIp": {
         "type": "string"
@@ -3881,7 +3876,34 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "candidateIp"
+      "candidateIp",
+      "seenAt"
+    ],
+    "type": "object"
+  },
+  "NATSyncConfig": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "outboundTags": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "relayNodeId": {
+        "type": "integer"
+      },
+      "reporterNodeId": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "enabled",
+      "outboundTags",
+      "relayNodeId",
+      "reporterNodeId"
     ],
     "type": "object"
   },
@@ -3925,12 +3947,6 @@ export const SCHEMAS: Record<string, unknown> = {
     "properties": {
       "config": {
         "$ref": "#/components/schemas/NATSyncConfig"
-      },
-      "legacyStatus": {
-        "type": "boolean"
-      },
-      "publicKey": {
-        "type": "string"
       },
       "status": {
         "allOf": [

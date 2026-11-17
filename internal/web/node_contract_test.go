@@ -1,7 +1,12 @@
 package web
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -55,7 +60,12 @@ func startContractNode(t *testing.T) *nodeUnderContract {
 		t.Fatalf("initRouter: %v", err)
 	}
 	n := &nodeUnderContract{}
-	n.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	n.srv = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/panel/api/nodes/nat/report" {
+			// Keep the actual TLS request and production handler; represent a
+			// public NAT peer without connecting to a non-test network.
+			r.RemoteAddr = "8.8.4.4:54321"
+		}
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		engine.ServeHTTP(rec, r)
 		if rec.status == http.StatusUnauthorized || rec.status == http.StatusForbidden {
@@ -96,9 +106,11 @@ func (n *nodeUnderContract) masterWithToken(t *testing.T, scope string) *runtime
 	}
 	u, _ := url.Parse(n.srv.URL)
 	port, _ := strconv.Atoi(u.Port())
+	pin := sha256.Sum256(n.srv.Certificate().Raw)
 	return runtime.NewRemote(&model.Node{
-		Id: 1, Name: "contract-node", Scheme: "http", Address: u.Hostname(), Port: port,
+		Id: 1, Name: "contract-node", Scheme: "https", Address: u.Hostname(), Port: port,
 		BasePath: "/", ApiToken: token, Enable: true, AllowPrivateAddress: true,
+		TlsVerifyMode: "pin", PinnedCertSha256: hex.EncodeToString(pin[:]),
 	}, nil)
 }
 
@@ -301,6 +313,45 @@ func TestMasterNodeContract(t *testing.T) {
 					_, err := master.ListRemoteTags(ctx)
 					return err
 				}, nil},
+				{"NAT node API authorizes the reporter and returns the relay observation", []string{"NATChallenge", "NATObserve", "NATResult"}, func() error {
+					challenge, err := master.NATChallenge(ctx)
+					if err != nil {
+						return err
+					}
+					// A valid observation request reaches the real reporter handler.
+					// Its direct dial must refuse localhost before contacting the relay.
+					err = master.NATObserve(ctx, runtime.NATNodeObserveRequest{
+						RelayURL: "https://localhost/panel/api/nodes/nat/report", Challenge: challenge.Challenge,
+					})
+					if err == nil || err.Error() != "remote NAT sync request was rejected" {
+						return fmt.Errorf("reporter must reject a local relay address, got %v", err)
+					}
+					body, err := json.Marshal(challenge)
+					if err != nil {
+						return err
+					}
+					req, err := http.NewRequestWithContext(ctx, http.MethodPost, node.srv.URL+"/panel/api/nodes/nat/report", bytes.NewReader(body))
+					if err != nil {
+						return err
+					}
+					req.Header.Set("Content-Type", "application/json")
+					resp, err := node.srv.Client().Do(req)
+					if err != nil {
+						return err
+					}
+					defer resp.Body.Close()
+					if resp.StatusCode != http.StatusNoContent {
+						return fmt.Errorf("relay report status = %d, want 204", resp.StatusCode)
+					}
+					report, err := master.NATResult(ctx, challenge)
+					if err != nil {
+						return err
+					}
+					if report.CandidateIP != "8.8.4.4" || report.SeenAt <= 0 {
+						return fmt.Errorf("unexpected relay observation: %+v", report)
+					}
+					return nil
+				}, nil},
 				{"RestartXray is accepted by the node", []string{"RestartXray"}, func() error {
 					// No core binary here: only the node's own restart failure may come back.
 					if err := master.RestartXray(ctx); err != nil && !strings.Contains(err.Error(), "rebooting the Xray") {
@@ -358,6 +409,7 @@ func TestMasterNodeContract(t *testing.T) {
 // Remote methods that never reach the node, or that this table must not run.
 var remoteMethodsOutsideContract = map[string]string{
 	"Name":                  "local label",
+	"NATObservationTarget":  "builds a report URL using local node metadata",
 	"RecordAdoptedInbound":  "local fingerprint bookkeeping",
 	"AdoptInboundAlias":     "local alias bookkeeping",
 	"AdoptedInboundAliases": "local alias bookkeeping",

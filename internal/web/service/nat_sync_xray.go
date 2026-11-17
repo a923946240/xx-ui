@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
 	"github.com/a923946240/xx-ui/v3/internal/web/service/outbound"
 )
 
@@ -174,7 +175,7 @@ func natSyncChain(target natSyncOutbound, template, live []natSyncOutbound) ([]n
 
 func natSyncIPv4(value string) bool {
 	ip, err := netip.ParseAddr(value)
-	return err == nil && natSyncPublicIPv4(ip)
+	return err == nil && runtime.IsPublicNATIPv4(ip)
 }
 
 func prepareNATSyncXray(template string, liveJSON []byte, tags []string, candidate string) (*natSyncPlan, error) {

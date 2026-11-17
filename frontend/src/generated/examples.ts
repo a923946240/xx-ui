@@ -969,19 +969,25 @@ export const EXAMPLES: Record<string, unknown> = {
     "obj": null,
     "success": false
   },
+  "NATNodeChallenge": {
+    "challenge": ""
+  },
+  "NATNodeObserveRequest": {
+    "challenge": "",
+    "pinnedCertSha256": "",
+    "relayUrl": ""
+  },
+  "NATNodeReport": {
+    "candidateIp": "",
+    "seenAt": 0
+  },
   "NATSyncConfig": {
     "enabled": false,
-    "hostKeyFingerprint": "",
     "outboundTags": [
       ""
     ],
-    "relayHost": "",
-    "relayPort": 0,
-    "relayUser": ""
-  },
-  "NATSyncReport": {
-    "candidateIp": "",
-    "seenAt": 0
+    "relayNodeId": 0,
+    "reporterNodeId": 0
   },
   "NATSyncStatus": {
     "appliedAt": 0,
@@ -996,16 +1002,12 @@ export const EXAMPLES: Record<string, unknown> = {
   "NATSyncView": {
     "config": {
       "enabled": false,
-      "hostKeyFingerprint": "",
       "outboundTags": [
         ""
       ],
-      "relayHost": "",
-      "relayPort": 0,
-      "relayUser": ""
+      "relayNodeId": 0,
+      "reporterNodeId": 0
     },
-    "legacyStatus": false,
-    "publicKey": "",
     "status": null
   },
   "NewUUIDResponse": {

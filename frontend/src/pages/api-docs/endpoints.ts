@@ -72,10 +72,8 @@ const inboundBody =
 const natSyncConfigExample = JSON.stringify(
   {
     enabled: true,
-    relayHost: 'relay.example.net',
-    relayPort: 22,
-    relayUser: 'nat-sync',
-    hostKeyFingerprint: 'SHA256:<verified Ed25519 fingerprint>',
+    relayNodeId: 2,
+    reporterNodeId: 3,
     outboundTags: ['dynamic-nat'],
   },
   null,
@@ -1775,6 +1773,44 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/nodes/nat/challenge',
+        summary: 'Issue a short-lived NAT observation challenge on the relay.',
+        description:
+          'Requires a node-sync or node-admin API token, node mTLS, or an administrator session.',
+        responseSchema: 'NATNodeChallenge',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/nat/observe',
+        summary: 'Ask the reporter to contact the relay directly over IPv4 HTTPS.',
+        description:
+          'Requires a node-sync or node-admin API token, node mTLS, or an administrator session. The reporter forwards only the one-time challenge.',
+        requestSchema: { $ref: '#/components/schemas/NATNodeObserveRequest' },
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/nat/result',
+        summary: 'Consume a completed NAT observation on the relay.',
+        description:
+          'Requires a node-sync or node-admin API token, node mTLS, or an administrator session.',
+        requestSchema: { $ref: '#/components/schemas/NATNodeChallenge' },
+        responseSchema: 'NATNodeReport',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/nat/report',
+        summary: 'Redeem one NAT observation challenge on the relay.',
+        description:
+          'Uses the challenge in place of panel credentials. The relay requires direct HTTPS and records the public IPv4 of the actual TCP peer.',
+        security: [],
+        requestSchema: { $ref: '#/components/schemas/NATNodeChallenge' },
+        responses: {
+          '204': { description: 'The relay recorded the observation.' },
+          '404': { description: 'The relay rejected the request or challenge.' },
+        },
+      },
+      {
+        method: 'POST',
         path: '/panel/api/nodes/mtls/ca',
         summary:
           "This panel's node-auth CA certificate (public, PEM) to paste into a node's mTLS trust setting. Lazily mints the CA and the master client cert on first call. Pair with setting tlsVerifyMode=mtls on the node.",
@@ -2275,25 +2311,17 @@ export const sections: readonly Section[] = [
       {
         method: 'GET',
         path: '/panel/api/xray/nat-sync',
-        summary: 'Read the NAT SSH sync configuration and current status.',
+        summary: 'Read the NAT sync configuration and current status.',
         description:
-          'Requires an administrator session or admin API token. Includes an existing public reader key without creating one. If panel-managed sync is disabled, a legacy script status may be returned with legacyStatus set.',
-        responseSchema: 'NATSyncView',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/nat-sync/key',
-        summary: 'Create or return the NAT SSH reader public key.',
-        description:
-          'Requires an administrator session or admin API token. Repeated calls reuse the existing key. The private key stays on the panel server.',
+          'Requires an administrator session or admin API token. Returns the selected relay and reporter nodes and the latest run status.',
         responseSchema: 'NATSyncView',
       },
       {
         method: 'POST',
         path: '/panel/api/xray/nat-sync/config',
-        summary: 'Save or disable panel-managed NAT SSH sync.',
+        summary: 'Save or disable panel-managed NAT sync.',
         description:
-          'Requires an administrator session or admin API token. Enabling validates the SSH fingerprint, saved outbound tags and HTTPS test URL, then reads a report before saving. A disabled draft can be saved without confirming relay connectivity.',
+          'Requires an administrator session or admin API token. Enabling validates the selected nodes, saved outbound tags and HTTPS test URL, then completes an observation before saving. A disabled draft can be saved without confirming relay connectivity.',
         requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
         body: natSyncConfigExample,
         responseSchema: 'NATSyncView',
@@ -2301,12 +2329,12 @@ export const sections: readonly Section[] = [
       {
         method: 'POST',
         path: '/panel/api/xray/nat-sync/test',
-        summary: 'Test the SSH relay and read its reported NAT IPv4 address.',
+        summary: 'Test NAT sync through the selected nodes.',
         description:
-          'Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes its Unix timestamp in seconds when the relay sends a timestamp.',
+          'Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes the observed public IPv4 and Unix timestamp in seconds.',
         requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
         body: natSyncConfigExample,
-        responseSchema: 'NATSyncReport',
+        responseSchema: 'NATNodeReport',
       },
       {
         method: 'POST',

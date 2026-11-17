@@ -6,6 +6,9 @@ export type BlockerCode = z.infer<typeof BlockerCodeSchema>;
 export const GeoKindSchema = z.string();
 export type GeoKind = z.infer<typeof GeoKindSchema>;
 
+export const MasterClientCertProviderSchema = z.unknown();
+export type MasterClientCertProvider = z.infer<typeof MasterClientCertProviderSchema>;
+
 export const OnlineAPISupportSchema = z.number().int();
 export type OnlineAPISupport = z.infer<typeof OnlineAPISupportSchema>;
 
@@ -20,9 +23,6 @@ export type addrFamily = z.infer<typeof addrFamilySchema>;
 
 export const natSyncOutboundSchema = z.record(z.string(), z.unknown());
 export type natSyncOutbound = z.infer<typeof natSyncOutboundSchema>;
-
-export const natSyncStatusSchema = z.lazy(() => NATSyncStatusSchema);
-export type natSyncStatus = z.infer<typeof natSyncStatusSchema>;
 
 export const staticEgressResolverSchema = z.string();
 export type staticEgressResolver = z.infer<typeof staticEgressResolverSchema>;
@@ -950,21 +950,31 @@ export const MsgSchema = z.object({
 });
 export type Msg = z.infer<typeof MsgSchema>;
 
+export const NATNodeChallengeSchema = z.object({
+  challenge: z.string(),
+});
+export type NATNodeChallenge = z.infer<typeof NATNodeChallengeSchema>;
+
+export const NATNodeObserveRequestSchema = z.object({
+  challenge: z.string(),
+  pinnedCertSha256: z.string().optional(),
+  relayUrl: z.string(),
+});
+export type NATNodeObserveRequest = z.infer<typeof NATNodeObserveRequestSchema>;
+
+export const NATNodeReportSchema = z.object({
+  candidateIp: z.string(),
+  seenAt: z.number().int(),
+});
+export type NATNodeReport = z.infer<typeof NATNodeReportSchema>;
+
 export const NATSyncConfigSchema = z.object({
   enabled: z.boolean(),
-  hostKeyFingerprint: z.string(),
   outboundTags: z.array(z.string()),
-  relayHost: z.string(),
-  relayPort: z.number().int(),
-  relayUser: z.string(),
+  relayNodeId: z.number().int(),
+  reporterNodeId: z.number().int(),
 });
 export type NATSyncConfig = z.infer<typeof NATSyncConfigSchema>;
-
-export const NATSyncReportSchema = z.object({
-  candidateIp: z.string(),
-  seenAt: z.number().int().optional(),
-});
-export type NATSyncReport = z.infer<typeof NATSyncReportSchema>;
 
 export const NATSyncStatusSchema = z.object({
   appliedAt: z.number().int().optional(),
@@ -980,8 +990,6 @@ export type NATSyncStatus = z.infer<typeof NATSyncStatusSchema>;
 
 export const NATSyncViewSchema = z.object({
   config: z.lazy(() => NATSyncConfigSchema),
-  legacyStatus: z.boolean().optional(),
-  publicKey: z.string().optional(),
   status: z.lazy(() => NATSyncStatusSchema).nullable().optional(),
 });
 export type NATSyncView = z.infer<typeof NATSyncViewSchema>;

@@ -3862,41 +3862,36 @@
         ],
         "type": "object"
       },
-      "NATSyncConfig": {
+      "NATNodeChallenge": {
         "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "hostKeyFingerprint": {
-            "type": "string"
-          },
-          "outboundTags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "relayHost": {
-            "type": "string"
-          },
-          "relayPort": {
-            "type": "integer"
-          },
-          "relayUser": {
+          "challenge": {
             "type": "string"
           }
         },
         "required": [
-          "enabled",
-          "hostKeyFingerprint",
-          "outboundTags",
-          "relayHost",
-          "relayPort",
-          "relayUser"
+          "challenge"
         ],
         "type": "object"
       },
-      "NATSyncReport": {
+      "NATNodeObserveRequest": {
+        "properties": {
+          "challenge": {
+            "type": "string"
+          },
+          "pinnedCertSha256": {
+            "type": "string"
+          },
+          "relayUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge",
+          "relayUrl"
+        ],
+        "type": "object"
+      },
+      "NATNodeReport": {
         "properties": {
           "candidateIp": {
             "type": "string"
@@ -3907,7 +3902,34 @@
           }
         },
         "required": [
-          "candidateIp"
+          "candidateIp",
+          "seenAt"
+        ],
+        "type": "object"
+      },
+      "NATSyncConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "outboundTags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "relayNodeId": {
+            "type": "integer"
+          },
+          "reporterNodeId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "outboundTags",
+          "relayNodeId",
+          "reporterNodeId"
         ],
         "type": "object"
       },
@@ -3951,12 +3973,6 @@
         "properties": {
           "config": {
             "$ref": "#/components/schemas/NATSyncConfig"
-          },
-          "legacyStatus": {
-            "type": "boolean"
-          },
-          "publicKey": {
-            "type": "string"
           },
           "status": {
             "allOf": [
@@ -11892,6 +11908,165 @@
         }
       }
     },
+    "/panel/api/nodes/nat/challenge": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Issue a short-lived NAT observation challenge on the relay.",
+        "operationId": "post_panel_api_nodes_nat_challenge",
+        "description": "Requires a node-sync or node-admin API token, node mTLS, or an administrator session.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATNodeChallenge"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "challenge": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/nat/observe": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Ask the reporter to contact the relay directly over IPv4 HTTPS.",
+        "operationId": "post_panel_api_nodes_nat_observe",
+        "description": "Requires a node-sync or node-admin API token, node mTLS, or an administrator session. The reporter forwards only the one-time challenge.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATNodeObserveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/nat/result": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Consume a completed NAT observation on the relay.",
+        "operationId": "post_panel_api_nodes_nat_result",
+        "description": "Requires a node-sync or node-admin API token, node mTLS, or an administrator session.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATNodeChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATNodeReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "candidateIp": "",
+                    "seenAt": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/nat/report": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Redeem one NAT observation challenge on the relay.",
+        "operationId": "post_panel_api_nodes_nat_report",
+        "description": "Uses the challenge in place of panel credentials. The relay requires direct HTTPS and records the public IPv4 of the actual TCP peer.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATNodeChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The relay recorded the observation."
+          },
+          "404": {
+            "description": "The relay rejected the request or challenge."
+          }
+        },
+        "security": []
+      }
+    },
     "/panel/api/nodes/mtls/ca": {
       "post": {
         "tags": [
@@ -14747,9 +14922,9 @@
         "tags": [
           "Xray Settings"
         ],
-        "summary": "Read the NAT SSH sync configuration and current status.",
+        "summary": "Read the NAT sync configuration and current status.",
         "operationId": "get_panel_api_xray_nat_sync",
-        "description": "Requires an administrator session or admin API token. Includes an existing public reader key without creating one. If panel-managed sync is disabled, a legacy script status may be returned with legacyStatus set.",
+        "description": "Requires an administrator session or admin API token. Returns the selected relay and reporter nodes and the latest run status.",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -14774,67 +14949,12 @@
                   "obj": {
                     "config": {
                       "enabled": false,
-                      "hostKeyFingerprint": "",
                       "outboundTags": [
                         ""
                       ],
-                      "relayHost": "",
-                      "relayPort": 0,
-                      "relayUser": ""
+                      "relayNodeId": 0,
+                      "reporterNodeId": 0
                     },
-                    "legacyStatus": false,
-                    "publicKey": "",
-                    "status": null
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/xray/nat-sync/key": {
-      "post": {
-        "tags": [
-          "Xray Settings"
-        ],
-        "summary": "Create or return the NAT SSH reader public key.",
-        "operationId": "post_panel_api_xray_nat_sync_key",
-        "description": "Requires an administrator session or admin API token. Repeated calls reuse the existing key. The private key stays on the panel server.",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/NATSyncView"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "config": {
-                      "enabled": false,
-                      "hostKeyFingerprint": "",
-                      "outboundTags": [
-                        ""
-                      ],
-                      "relayHost": "",
-                      "relayPort": 0,
-                      "relayUser": ""
-                    },
-                    "legacyStatus": false,
-                    "publicKey": "",
                     "status": null
                   }
                 }
@@ -14849,9 +14969,9 @@
         "tags": [
           "Xray Settings"
         ],
-        "summary": "Save or disable panel-managed NAT SSH sync.",
+        "summary": "Save or disable panel-managed NAT sync.",
         "operationId": "post_panel_api_xray_nat_sync_config",
-        "description": "Requires an administrator session or admin API token. Enabling validates the SSH fingerprint, saved outbound tags and HTTPS test URL, then reads a report before saving. A disabled draft can be saved without confirming relay connectivity.",
+        "description": "Requires an administrator session or admin API token. Enabling validates the selected nodes, saved outbound tags and HTTPS test URL, then completes an observation before saving. A disabled draft can be saved without confirming relay connectivity.",
         "requestBody": {
           "required": true,
           "content": {
@@ -14861,10 +14981,8 @@
               },
               "example": {
                 "enabled": true,
-                "relayHost": "relay.example.net",
-                "relayPort": 22,
-                "relayUser": "nat-sync",
-                "hostKeyFingerprint": "SHA256:<verified Ed25519 fingerprint>",
+                "relayNodeId": 2,
+                "reporterNodeId": 3,
                 "outboundTags": [
                   "dynamic-nat"
                 ]
@@ -14896,16 +15014,12 @@
                   "obj": {
                     "config": {
                       "enabled": false,
-                      "hostKeyFingerprint": "",
                       "outboundTags": [
                         ""
                       ],
-                      "relayHost": "",
-                      "relayPort": 0,
-                      "relayUser": ""
+                      "relayNodeId": 0,
+                      "reporterNodeId": 0
                     },
-                    "legacyStatus": false,
-                    "publicKey": "",
                     "status": null
                   }
                 }
@@ -14920,9 +15034,9 @@
         "tags": [
           "Xray Settings"
         ],
-        "summary": "Test the SSH relay and read its reported NAT IPv4 address.",
+        "summary": "Test NAT sync through the selected nodes.",
         "operationId": "post_panel_api_xray_nat_sync_test",
-        "description": "Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes its Unix timestamp in seconds when the relay sends a timestamp.",
+        "description": "Requires an administrator session or admin API token. Does not save configuration or change Xray. The report includes the observed public IPv4 and Unix timestamp in seconds.",
         "requestBody": {
           "required": true,
           "content": {
@@ -14932,10 +15046,8 @@
               },
               "example": {
                 "enabled": true,
-                "relayHost": "relay.example.net",
-                "relayPort": 22,
-                "relayUser": "nat-sync",
-                "hostKeyFingerprint": "SHA256:<verified Ed25519 fingerprint>",
+                "relayNodeId": 2,
+                "reporterNodeId": 3,
                 "outboundTags": [
                   "dynamic-nat"
                 ]
@@ -14958,7 +15070,7 @@
                       "type": "string"
                     },
                     "obj": {
-                      "$ref": "#/components/schemas/NATSyncReport"
+                      "$ref": "#/components/schemas/NATNodeReport"
                     }
                   }
                 },

@@ -97,6 +97,9 @@ var monitorScopeAllow = map[string]struct{}{
 // nodeSyncScopeAllow is the node-sync route/method allowlist relative to
 // /panel/api; Gin patterns prevent concrete parameters broadening authority.
 var nodeSyncScopeAllow = map[string]map[string]struct{}{
+	"/nodes/nat/challenge":         {http.MethodPost: {}},
+	"/nodes/nat/observe":           {http.MethodPost: {}},
+	"/nodes/nat/result":            {http.MethodPost: {}},
 	"/server/status":               {http.MethodGet: {}},
 	"/inbounds/list":               {http.MethodGet: {}},
 	"/inbounds/add":                {http.MethodPost: {}},
@@ -191,6 +194,9 @@ func relAPIPath(fullPath string) string {
 
 // initRouter sets up the API routes for inbounds, server, and other endpoints.
 func (a *APIController) initRouter(g *gin.RouterGroup) {
+	// The report accepts only a one-time challenge, never panel credentials.
+	g.POST("/panel/api/nodes/nat/report", natNodeReport)
+
 	// Main API group
 	api := g.Group("/panel/api")
 	api.Use(a.checkAPIAuth)
@@ -217,6 +223,9 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Nodes API — multi-panel management
 	nodes := api.Group("/nodes")
 	a.nodeController = NewNodeController(nodes)
+	nodes.POST("/nat/challenge", natNodeChallenge)
+	nodes.POST("/nat/observe", natNodeObserve)
+	nodes.POST("/nat/result", natNodeResult)
 
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")

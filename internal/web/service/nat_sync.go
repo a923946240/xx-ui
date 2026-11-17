@@ -13,7 +13,10 @@ import (
 	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
 )
 
-const natSyncSettingKey = "natNodeSync"
+const (
+	natSyncSettingKey    = "natNodeSync"
+	natSyncWizardTimeout = 25 * time.Second
+)
 
 type NATSyncConfig struct {
 	Enabled        bool     `json:"enabled"`
@@ -229,15 +232,18 @@ func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return s.saveConfig(cfg)
+	return s.saveConfig(ctx, cfg)
 }
 
-func (s *NATSyncService) saveConfig(cfg NATSyncConfig) error {
+func (s *NATSyncService) saveConfig(ctx context.Context, cfg NATSyncConfig) error {
 	data, err := json.Marshal(cfg)
 	if err != nil {
 		return err
 	}
-	if err := (&SettingService{}).saveSetting(natSyncSettingKey, string(data)); err != nil {
+	db := database.GetDB().WithContext(ctx)
+	err = db.Where(model.Setting{Key: natSyncSettingKey}).
+		Assign(map[string]any{"value": string(data)}).FirstOrCreate(&model.Setting{}).Error
+	if err != nil {
 		return errors.New("could not save NAT sync settings")
 	}
 
@@ -248,9 +254,13 @@ func (s *NATSyncService) saveConfig(cfg NATSyncConfig) error {
 }
 
 func (s *NATSyncService) Wizard(ctx context.Context, cfg NATSyncConfig) (NATSyncWizardResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, natSyncWizardTimeout)
+	defer cancel()
 	result := NATSyncWizardResult{Checks: []NATSyncOutboundCheck{}}
 	if cfg.Enabled {
-		s.runMu.Lock()
+		if !s.runMu.TryLock() {
+			return result, errors.New("another NAT sync operation is running; retry shortly")
+		}
 		defer s.runMu.Unlock()
 	}
 	if err := ctx.Err(); err != nil {
@@ -282,11 +292,15 @@ func (s *NATSyncService) Wizard(ctx context.Context, cfg NATSyncConfig) (NATSync
 		check := NATSyncOutboundCheck{
 			Tag: probe.tag, Port: probe.port, CurrentAddress: probe.currentAddress, State: "passed",
 		}
-		if err := probeNATSyncOutbound(probe, testURL); err != nil {
+		if err := waitForNATSyncProbe(ctx, func() error { return probeNATSyncOutbound(probe, testURL) }); err != nil {
 			check.State = "failed"
 			result.State = "probe_error"
 		}
 		result.Checks = append(result.Checks, check)
+		if ctx.Err() != nil {
+			result.Message = "NAT outbound verification timed out; retry the check"
+			return result, nil
+		}
 	}
 	if result.State != "ready" || !cfg.Enabled {
 		return result, nil
@@ -310,7 +324,7 @@ func (s *NATSyncService) Wizard(ctx context.Context, cfg NATSyncConfig) (NATSync
 	if err := ctx.Err(); err != nil {
 		return result, err
 	}
-	if err := s.saveConfig(cfg); err != nil {
+	if err := s.saveConfig(ctx, cfg); err != nil {
 		return result, err
 	}
 	result.Enabled = true

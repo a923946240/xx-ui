@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/netip"
@@ -226,6 +227,14 @@ func prepareNATSyncXray(template string, liveJSON []byte, tags []string, candida
 		if err != nil {
 			return nil, err
 		}
+		for _, hop := range chain {
+			tag, _ := hop["tag"].(string)
+			active, err := findNATSyncOutbound(live, tag)
+			if err != nil || active == nil || active["protocol"] != hop["protocol"] ||
+				natSyncDialer(active) != natSyncDialer(hop) {
+				return nil, errors.New("saved and running dialer chains differ; apply the Xray configuration first")
+			}
+		}
 		plan.probes[i].chain = chain
 	}
 	if !plan.changed {
@@ -292,6 +301,20 @@ func probeNATSyncOutbound(probe natSyncProbe, testURL string) error {
 		return errors.New("candidate outbound chain did not pass the HTTPS probe")
 	}
 	return nil
+}
+
+func waitForNATSyncProbe(ctx context.Context, probe func() error) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	done := make(chan error, 1)
+	go func() { done <- probe() }()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
+		return err
+	}
 }
 
 func runNATSyncXray(tags []string, candidate string, reread func() (string, error), status *NATSyncStatus) error {

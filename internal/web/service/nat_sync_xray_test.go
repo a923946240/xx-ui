@@ -1,9 +1,30 @@
 package service
 
 import (
+	"context"
+	"errors"
 	"strings"
 	"testing"
 )
+
+func TestWaitForNATSyncProbeReturnsWhenTheRequestIsCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	started, release := make(chan struct{}), make(chan struct{})
+	defer close(release)
+	go func() {
+		<-started
+		cancel()
+	}()
+	err := waitForNATSyncProbe(ctx, func() error {
+		close(started)
+		<-release
+		return nil
+	})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled probe returned %v", err)
+	}
+}
 
 const (
 	natSyncTestTarget = `{"tag":"tw","protocol":"shadowsocks","settings":{"servers":[{"address":"8.8.8.8","port":35974,"extra":9007199254740993}]},"streamSettings":{"sockopt":{"dialerProxy":"hk"}}}`
@@ -38,6 +59,8 @@ func TestPrepareNATSyncRejectsUnsafeOrChangedChain(t *testing.T) {
 	cases := []struct{ name, template, live string }{
 		{"ambiguous target", `{"outbounds":[` + natSyncTestTarget + "," + natSyncTestTarget + `]}`, `[` + natSyncTestTarget + `]`},
 		{"port drift", validTemplate, `[` + strings.Replace(natSyncTestTarget, "35974", "1080", 1) + "," + natSyncTestRelay + `]`},
+		{"target dialer drift", validTemplate, `[` + strings.Replace(natSyncTestTarget, "hk", "other", 1) + "," + natSyncTestRelay + `]`},
+		{"upstream dialer drift", `{"outbounds":[` + natSyncTestTarget + "," + natSyncTestRelay + `]}`, `[` + natSyncTestTarget + `,{"tag":"hk","protocol":"socks","streamSettings":{"sockopt":{"dialerProxy":"other"}}}]`},
 		{"direct relay", validTemplate, `[` + natSyncTestTarget + `,{"tag":"hk","protocol":"freedom"}]`},
 		{"missing relay", validTemplate, `[` + natSyncTestTarget + `]`},
 		{"relay cycle", validTemplate, `[` + natSyncTestTarget + `,{"tag":"hk","protocol":"socks","streamSettings":{"sockopt":{"dialerProxy":"tw"}}}]`},

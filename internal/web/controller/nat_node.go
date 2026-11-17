@@ -52,27 +52,30 @@ func natNodeReport(c *gin.Context) {
 	c.Header("Cache-Control", "no-store")
 	// The value being synchronized is the directly connected TCP peer, so
 	// neither reverse-proxy headers nor an address in the body can supply it.
-	peer, err := netip.ParseAddrPort(c.Request.RemoteAddr)
-	if err != nil || c.Request.TLS == nil {
+	peer, ok := directNATPeer(c)
+	var request runtime.NATNodeChallenge
+	if !ok || !decodeNATNodeBody(c, &request) || !service.RecordNATNodeReport(request.Challenge, peer) {
 		c.Status(http.StatusNotFound)
 		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func directNATPeer(c *gin.Context) (netip.Addr, bool) {
+	peer, err := netip.ParseAddrPort(c.Request.RemoteAddr)
+	if err != nil || c.Request.TLS == nil {
+		return netip.Addr{}, false
 	}
 	for _, name := range [...]string{
 		"Forwarded", "X-Forwarded-For", "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port",
 		"X-Real-IP", "Via", "CF-Connecting-IP", "True-Client-IP",
 	} {
 		if len(c.Request.Header.Values(name)) != 0 {
-			c.Status(http.StatusNotFound)
-			return
+			return netip.Addr{}, false
 		}
 	}
 
-	var request runtime.NATNodeChallenge
-	if !decodeNATNodeBody(c, &request) || !service.RecordNATNodeReport(request.Challenge, peer.Addr()) {
-		c.Status(http.StatusNotFound)
-		return
-	}
-	c.Status(http.StatusNoContent)
+	return peer.Addr(), true
 }
 
 func decodeNATNodeBody(c *gin.Context, payload any) bool {

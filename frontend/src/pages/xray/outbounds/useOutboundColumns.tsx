@@ -11,6 +11,7 @@ import {
   LoadingOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  SyncOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
@@ -53,6 +54,8 @@ interface OutboundColumnsParams {
   confirmDelete: (idx: number) => void;
   onResetTraffic: (tag: string) => void;
   onTest: (index: number, mode: string) => void;
+  natSyncTags: string[];
+  onOpenNATWizard: (tag: string) => void;
 }
 
 export function useOutboundColumns({
@@ -67,6 +70,8 @@ export function useOutboundColumns({
   confirmDelete,
   onResetTraffic,
   onTest,
+  natSyncTags,
+  onOpenNATWizard,
 }: OutboundColumnsParams): ColumnsType<OutboundRow> {
   const { t, i18n } = useTranslation();
   const [showEgressIp, setShowEgressIp] = useState(false);
@@ -77,7 +82,7 @@ export function useOutboundColumns({
         key: 'action',
         align: 'center',
         width: 100,
-        render: (_v, _record, index) => (
+        render: (_v, record, index) => (
           <div className="action-cell">
             <span className="row-index">{index + 1}</span>
             <div className="action-buttons">
@@ -92,6 +97,16 @@ export function useOutboundColumns({
                 trigger={['click']}
                 menu={{
                   items: [
+                    ...(record.tag && natSyncTags.includes(record.tag)
+                      ? [
+                          {
+                            key: 'nat-sync',
+                            icon: <SyncOutlined aria-hidden />,
+                            label: t('pages.xray.natSync.wizard.title'),
+                            onClick: () => onOpenNATWizard(record.tag!),
+                          },
+                        ]
+                      : []),
                     ...(index > 0
                       ? [
                           {
@@ -348,6 +363,16 @@ export function useOutboundColumns({
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, i18n.language, testMode, rows, outboundTestStates, outboundsTraffic, showEgressIp],
+    [
+      t,
+      i18n.language,
+      testMode,
+      rows,
+      outboundTestStates,
+      outboundsTraffic,
+      showEgressIp,
+      natSyncTags,
+      onOpenNATWizard,
+    ],
   );
 }

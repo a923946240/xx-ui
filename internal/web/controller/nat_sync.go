@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -32,6 +33,26 @@ func (a *XraySettingController) natSyncTest(c *gin.Context) {
 	}
 	report, err := service.PanelNATSync.Test(c.Request.Context(), cfg)
 	jsonObj(c, report, err)
+}
+
+func (a *XraySettingController) natSyncWizard(c *gin.Context) {
+	cfg, ok := bindNATSyncConfig(c)
+	if !ok {
+		return
+	}
+	result, err := service.PanelNATSync.Wizard(c.Request.Context(), cfg)
+	jsonObj(c, result, err)
+}
+
+func (a *XraySettingController) natSyncPool(c *gin.Context) {
+	c.Header("Cache-Control", "no-store")
+	id, err := strconv.Atoi(c.Query("relayNodeId"))
+	if err != nil || id <= 0 {
+		jsonObj(c, nil, errors.New("select a receiving node"))
+		return
+	}
+	rows, err := service.ReadRemoteNATPool(c.Request.Context(), id)
+	jsonObj(c, rows, err)
 }
 
 func bindNATSyncConfig(c *gin.Context) (service.NATSyncConfig, bool) {

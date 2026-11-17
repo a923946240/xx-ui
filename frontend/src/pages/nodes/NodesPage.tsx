@@ -34,6 +34,7 @@ import AppSidebar from '@/layouts/AppSidebar';
 import PanelPageHeading from '@/layouts/PanelPageHeading';
 import NodeList from './NodeList';
 import NodeFormModal from './NodeFormModal';
+import NATReportingModal from './NATReportingModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil } from '@/utils';
 import type { PanelUpdateInfo } from '../index/PanelUpdateModal';
@@ -105,6 +106,7 @@ export default function NodesPage() {
   const [formNode, setFormNode] = useState<NodeRecord | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [mtlsOpen, setMtlsOpen] = useState(false);
+  const [natPoolOpen, setNATPoolOpen] = useState(false);
   const [trustCa, setTrustCa] = useState('');
   const [copyingCa, setCopyingCa] = useState(false);
   const [savingTrustCa, setSavingTrustCa] = useState(false);
@@ -363,6 +365,7 @@ export default function NodesPage() {
                       onSelectionChange={setSelectedIds}
                       onAdd={onAdd}
                       onMtls={() => setMtlsOpen(true)}
+                      onNATPool={() => setNATPoolOpen(true)}
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onProbe={onProbe}
@@ -387,6 +390,17 @@ export default function NodesPage() {
           save={onSave}
           onOpenChange={setFormOpen}
         />
+
+        {natPoolOpen && (
+          <NATReportingModal
+            nodes={nodes}
+            onClose={() => setNATPoolOpen(false)}
+            onAddNode={() => {
+              setNATPoolOpen(false);
+              onAdd();
+            }}
+          />
+        )}
 
         <Modal
           open={mtlsOpen}

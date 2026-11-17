@@ -3881,6 +3881,87 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "NATPoolEntry": {
+    "properties": {
+      "candidateIp": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "seenAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "candidateIp",
+      "id",
+      "name",
+      "seenAt"
+    ],
+    "type": "object"
+  },
+  "NATPoolReport": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "reporterId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "reporterId"
+    ],
+    "type": "object"
+  },
+  "NATReportingConfig": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      },
+      "relayNodeId": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "enabled",
+      "name",
+      "relayNodeId"
+    ],
+    "type": "object"
+  },
+  "NATReportingView": {
+    "properties": {
+      "config": {
+        "$ref": "#/components/schemas/NATReportingConfig"
+      },
+      "failed": {
+        "type": "boolean"
+      },
+      "lastReport": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NATPoolEntry"
+          }
+        ],
+        "nullable": true
+      }
+    },
+    "required": [
+      "config",
+      "failed"
+    ],
+    "type": "object"
+  },
   "NATSyncConfig": {
     "properties": {
       "enabled": {
@@ -3891,6 +3972,9 @@ export const SCHEMAS: Record<string, unknown> = {
           "type": "string"
         },
         "type": "array"
+      },
+      "poolEntryId": {
+        "type": "string"
       },
       "relayNodeId": {
         "type": "integer"
@@ -3904,6 +3988,30 @@ export const SCHEMAS: Record<string, unknown> = {
       "outboundTags",
       "relayNodeId",
       "reporterNodeId"
+    ],
+    "type": "object"
+  },
+  "NATSyncOutboundCheck": {
+    "properties": {
+      "currentAddress": {
+        "type": "string"
+      },
+      "port": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "state": {
+        "type": "string"
+      },
+      "tag": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "currentAddress",
+      "port",
+      "state",
+      "tag"
     ],
     "type": "object"
   },
@@ -3959,6 +4067,38 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "config"
+    ],
+    "type": "object"
+  },
+  "NATSyncWizardResult": {
+    "properties": {
+      "candidateIp": {
+        "type": "string"
+      },
+      "checks": {
+        "items": {
+          "$ref": "#/components/schemas/NATSyncOutboundCheck"
+        },
+        "type": "array"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "message": {
+        "type": "string"
+      },
+      "seenAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "state": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "checks",
+      "enabled",
+      "state"
     ],
     "type": "object"
   },

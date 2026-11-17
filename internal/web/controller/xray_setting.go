@@ -58,6 +58,8 @@ func (a *XraySettingController) initRouter(g *gin.RouterGroup) {
 	g.GET("/nat-sync", a.natSyncView)
 	g.POST("/nat-sync/config", a.natSyncSave)
 	g.POST("/nat-sync/test", a.natSyncTest)
+	g.POST("/nat-sync/wizard", a.natSyncWizard)
+	g.GET("/nat-sync/pool", a.natSyncPool)
 	g.POST("/balancerStatus", a.balancerStatus)
 	g.POST("/balancerOverride", a.balancerOverride)
 	g.POST("/routeTest", a.routeTest)

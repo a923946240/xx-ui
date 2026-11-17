@@ -981,13 +981,44 @@ export const EXAMPLES: Record<string, unknown> = {
     "candidateIp": "",
     "seenAt": 0
   },
+  "NATPoolEntry": {
+    "candidateIp": "",
+    "id": "",
+    "name": "",
+    "seenAt": 0
+  },
+  "NATPoolReport": {
+    "name": "",
+    "reporterId": ""
+  },
+  "NATReportingConfig": {
+    "enabled": false,
+    "name": "",
+    "relayNodeId": 0
+  },
+  "NATReportingView": {
+    "config": {
+      "enabled": false,
+      "name": "",
+      "relayNodeId": 0
+    },
+    "failed": false,
+    "lastReport": null
+  },
   "NATSyncConfig": {
     "enabled": false,
     "outboundTags": [
       ""
     ],
+    "poolEntryId": "",
     "relayNodeId": 0,
     "reporterNodeId": 0
+  },
+  "NATSyncOutboundCheck": {
+    "currentAddress": "",
+    "port": 0,
+    "state": "",
+    "tag": ""
   },
   "NATSyncStatus": {
     "appliedAt": 0,
@@ -1005,10 +1036,26 @@ export const EXAMPLES: Record<string, unknown> = {
       "outboundTags": [
         ""
       ],
+      "poolEntryId": "",
       "relayNodeId": 0,
       "reporterNodeId": 0
     },
     "status": null
+  },
+  "NATSyncWizardResult": {
+    "candidateIp": "",
+    "checks": [
+      {
+        "currentAddress": "",
+        "port": 0,
+        "state": "",
+        "tag": ""
+      }
+    ],
+    "enabled": false,
+    "message": "",
+    "seenAt": 0,
+    "state": ""
   },
   "NewUUIDResponse": {
     "uuid": "550e8400-e29b-41d4-a716-446655440000"

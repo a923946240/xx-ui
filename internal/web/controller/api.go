@@ -46,6 +46,7 @@ func (a *APIController) checkAPIAuth(c *gin.Context) {
 	if after, ok := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer "); ok {
 		if row, matched := a.apiTokenService.MatchToken(after); matched {
 			matchedScope = row.Scope
+			c.Set(natPoolTokenKey, row)
 		}
 	}
 	// Verified mTLS keeps its historical node-sync identity. Only an explicit
@@ -100,6 +101,8 @@ var nodeSyncScopeAllow = map[string]map[string]struct{}{
 	"/nodes/nat/challenge":         {http.MethodPost: {}},
 	"/nodes/nat/observe":           {http.MethodPost: {}},
 	"/nodes/nat/result":            {http.MethodPost: {}},
+	"/nodes/nat/pool":              {http.MethodGet: {}},
+	"/nodes/nat/pool/report":       {http.MethodPost: {}},
 	"/server/status":               {http.MethodGet: {}},
 	"/inbounds/list":               {http.MethodGet: {}},
 	"/inbounds/add":                {http.MethodPost: {}},
@@ -226,6 +229,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	nodes.POST("/nat/challenge", natNodeChallenge)
 	nodes.POST("/nat/observe", natNodeObserve)
 	nodes.POST("/nat/result", natNodeResult)
+	nodes.GET("/nat/pool", natPoolList)
+	nodes.POST("/nat/pool/report", natPoolReport)
+	nodes.GET("/nat/reporting", natReportingView)
+	nodes.POST("/nat/reporting", natReportingSave)
 
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")

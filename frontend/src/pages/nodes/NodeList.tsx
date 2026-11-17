@@ -36,6 +36,7 @@ interface NodeListProps {
   onSelectionChange: (ids: number[]) => void;
   onAdd: () => void;
   onMtls: () => void;
+  onNATPool?: () => void;
   onEdit: (node: NodeRecord) => void;
   onDelete: (node: NodeRecord) => void;
   onProbe: (node: NodeRecord) => void;
@@ -174,6 +175,7 @@ export default function NodeList({
   onSelectionChange,
   onAdd,
   onMtls,
+  onNATPool,
   onEdit,
   onDelete,
   onProbe,
@@ -590,6 +592,7 @@ export default function NodeList({
         <Button icon={<SafetyCertificateOutlined aria-hidden />} onClick={onMtls}>
           {t('pages.nodes.mtls.title')}
         </Button>
+        {onNATPool && <Button onClick={onNATPool}>{t('pages.xray.natSync.pool.title')}</Button>}
         {selectedIds.length > 0 && (
           <Button icon={<CloudDownloadOutlined aria-hidden />} onClick={onUpdateSelected}>
             {t('pages.nodes.updateSelected', { count: selectedIds.length })}

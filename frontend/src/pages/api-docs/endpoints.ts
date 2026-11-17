@@ -80,6 +80,18 @@ const natSyncConfigExample = JSON.stringify(
   2,
 );
 
+const natPoolSyncExample = JSON.stringify(
+  {
+    enabled: true,
+    relayNodeId: 2,
+    reporterNodeId: 0,
+    poolEntryId: 'a'.repeat(64),
+    outboundTags: ['dynamic-nat'],
+  },
+  null,
+  2,
+);
+
 const outboundSubscriptionBodyParams: EndpointParam[] = [
   {
     name: 'remark',
@@ -1818,6 +1830,39 @@ export const sections: readonly Section[] = [
           '{\n  "success": true,\n  "obj": {\n    "caCert": "-----BEGIN CERTIFICATE-----\\n...\\n-----END CERTIFICATE-----\\n"\n  }\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/nodes/nat/pool',
+        summary: 'List this panel’s fresh NAT address reports.',
+        description:
+          'Available to administrators, node-sync and node-admin tokens, and verified node mTLS. Entries expire two minutes after the last report.',
+        responseSchema: 'NATPoolEntry',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/nat/pool/report',
+        summary: 'Report a NAT address to the receiving panel.',
+        description:
+          'Requires a node-sync, node-admin or admin bearer token, or verified node mTLS. The receiver records the public IPv4 of the direct HTTPS connection. Each reporting credential is associated with one panel identity.',
+        requestSchema: { $ref: '#/components/schemas/NATPoolReport' },
+        responseSchema: 'NATPoolEntry',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/nat/reporting',
+        summary: 'Read this panel’s automatic NAT reporting settings.',
+        responseSchema: 'NATReportingView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/nat/reporting',
+        summary: 'Start or stop reporting this panel’s public IPv4.',
+        description:
+          'Requires an administrator session or admin API token. Starting sends one authenticated direct HTTPS report to the configured node before enabling periodic reports.',
+        requestSchema: { $ref: '#/components/schemas/NATReportingConfig' },
+        responseSchema: 'NATReportingView',
+      },
+      {
         method: 'POST',
         path: '/panel/api/nodes/mtls/trustCA',
         summary:
@@ -2321,7 +2366,7 @@ export const sections: readonly Section[] = [
         path: '/panel/api/xray/nat-sync/config',
         summary: 'Save or disable panel-managed NAT sync.',
         description:
-          'Requires an administrator session or admin API token. Enabling validates the selected nodes, saved outbound tags and HTTPS test URL, then completes an observation before saving. A disabled draft can be saved without confirming relay connectivity.',
+          'Requires an administrator session or admin API token. When an address-pool entry is selected, enabling requires a fresh report and successful proxy checks. The older two-node configuration is also accepted. Disabling needs no remote check.',
         requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
         body: natSyncConfigExample,
         responseSchema: 'NATSyncView',
@@ -2335,6 +2380,26 @@ export const sections: readonly Section[] = [
         requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
         body: natSyncConfigExample,
         responseSchema: 'NATNodeReport',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/xray/nat-sync/wizard',
+        summary: 'Check the reported IP against saved proxy outbounds and optionally enable sync.',
+        description:
+          'Requires an administrator session or admin API token. Returns the observed IPv4 and per-outbound HTTPS checks using each existing port and dialer chain. With enabled=true, saves the schedule only after the checks and a fresh observation agree. Expected check failures are returned in the result state without changing the schedule or outbound address.',
+        requestSchema: { $ref: '#/components/schemas/NATSyncConfig' },
+        body: natPoolSyncExample,
+        responseSchema: 'NATSyncWizardResult',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/xray/nat-sync/pool',
+        summary: 'List fresh reports from a configured receiving node.',
+        description:
+          'Requires an administrator session or admin API token. Select an entry ID as poolEntryId with reporterNodeId set to zero when configuring pool-based sync.',
+        params: [{ name: 'relayNodeId', type: 'integer', in: 'query', desc: 'Receiving node ID.' }],
+        responseSchema: 'NATPoolEntry',
+        responseSchemaArray: true,
       },
       {
         method: 'POST',

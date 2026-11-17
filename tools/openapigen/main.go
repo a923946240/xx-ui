@@ -120,13 +120,17 @@ func run(root, outDir string) error {
 				"NATSyncConfig",
 				"NATSyncStatus",
 				"NATSyncView",
+				"NATSyncOutboundCheck",
+				"NATSyncWizardResult",
+				"NATReportingConfig",
+				"NATReportingView",
 				"ExternalClientRequest",
 				"ExternalClientView",
 			),
 		},
 		{
 			Path:        resolveRel(root, "internal/web/runtime"),
-			StructAllow: setOf("NATNodeChallenge", "NATNodeObserveRequest", "NATNodeReport"),
+			StructAllow: setOf("NATNodeChallenge", "NATNodeObserveRequest", "NATNodeReport", "NATPoolEntry", "NATPoolReport"),
 		},
 		{
 			Path:        resolveRel(root, "internal/web/service/panel"),

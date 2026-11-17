@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -28,13 +27,8 @@ func TestPrepareNATSyncUsesRunningManagedRelayAndPreservesTemplate(t *testing.T)
 		strings.Contains(plan.template, `"tag":"hk"`) {
 		t.Fatalf("candidate template lost unrelated settings or persisted a managed relay: %s", plan.template)
 	}
-	var chain []struct {
-		Tag string `json:"tag"`
-	}
-	if err := json.Unmarshal(plan.probes[0].chain, &chain); err != nil {
-		t.Fatal(err)
-	}
-	if len(chain) != 2 || chain[0].Tag != "tw" || chain[1].Tag != "hk" {
+	chain := plan.probes[0].chain
+	if len(chain) != 2 || chain[0]["tag"] != "tw" || chain[1]["tag"] != "hk" {
 		t.Fatalf("wrong probe chain: %+v", chain)
 	}
 }
@@ -59,6 +53,19 @@ func TestPrepareNATSyncRejectsUnsafeOrChangedChain(t *testing.T) {
 				t.Fatal("unsafe candidate accepted")
 			}
 		})
+	}
+}
+
+func TestPrepareNATSyncCanProbeTheAlreadyReportedAddress(t *testing.T) {
+	template := `{"outbounds":[` + natSyncTestTarget + `]}`
+	live := []byte(`[` + natSyncTestTarget + "," + natSyncTestRelay + `]`)
+	plan, err := prepareNATSyncXray(template, live, []string{"tw"}, "8.8.8.8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	check := plan.probes[0]
+	if plan.changed || check.currentAddress != "8.8.8.8" || check.port != 35974 || len(check.chain) != 2 {
+		t.Fatalf("an unchanged outbound must still be testable in the wizard: %+v", check)
 	}
 }
 

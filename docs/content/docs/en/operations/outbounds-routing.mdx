@@ -23,7 +23,14 @@ On **Networking → Outbounds**, import outbound JSON or open the line wizard
 to configure intermediate hops, a backup line, and an inbound routing rule.
 Review the draft and save the Xray settings to apply it.
 
-Add a relay and reporter under **Nodes**, then open **NAT Sync** to select them and the outbounds to update. Test the observed IPv4 before enabling automatic sync. See the [node setup guide](https://github.com/a923946240/xx-ui/blob/main/scripts/nat-outbound-sync.md).
+On both the reporting panel and the front panel, add the same receiving panel
+under **Nodes**. On the reporting panel, open **Nodes → NAT address pool → IP
+reporting**, select the receiving node, and start reporting.
+
+On the front panel, open **Networking → Outbounds → NAT sync wizard**. Choose
+the receiver as the **Address pool node**, then open **Reported address** to
+view the reported IPv4. To sync an outbound, select the address and outbound,
+then click **Check and enable**. See the [NAT address pool guide](https://github.com/a923946240/xx-ui/blob/main/scripts/nat-outbound-sync.md).
 
 ## Build an outbound
 

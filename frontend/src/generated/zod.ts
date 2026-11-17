@@ -968,13 +968,50 @@ export const NATNodeReportSchema = z.object({
 });
 export type NATNodeReport = z.infer<typeof NATNodeReportSchema>;
 
+export const NATPoolEntrySchema = z.object({
+  candidateIp: z.string(),
+  id: z.string(),
+  name: z.string(),
+  seenAt: z.number().int(),
+});
+export type NATPoolEntry = z.infer<typeof NATPoolEntrySchema>;
+
+export const NATPoolReportSchema = z.object({
+  name: z.string(),
+  reporterId: z.string(),
+});
+export type NATPoolReport = z.infer<typeof NATPoolReportSchema>;
+
+export const NATReportingConfigSchema = z.object({
+  enabled: z.boolean(),
+  name: z.string(),
+  relayNodeId: z.number().int(),
+});
+export type NATReportingConfig = z.infer<typeof NATReportingConfigSchema>;
+
+export const NATReportingViewSchema = z.object({
+  config: z.lazy(() => NATReportingConfigSchema),
+  failed: z.boolean(),
+  lastReport: z.lazy(() => NATPoolEntrySchema).nullable().optional(),
+});
+export type NATReportingView = z.infer<typeof NATReportingViewSchema>;
+
 export const NATSyncConfigSchema = z.object({
   enabled: z.boolean(),
   outboundTags: z.array(z.string()),
+  poolEntryId: z.string().optional(),
   relayNodeId: z.number().int(),
   reporterNodeId: z.number().int(),
 });
 export type NATSyncConfig = z.infer<typeof NATSyncConfigSchema>;
+
+export const NATSyncOutboundCheckSchema = z.object({
+  currentAddress: z.string(),
+  port: z.number().int(),
+  state: z.string(),
+  tag: z.string(),
+});
+export type NATSyncOutboundCheck = z.infer<typeof NATSyncOutboundCheckSchema>;
 
 export const NATSyncStatusSchema = z.object({
   appliedAt: z.number().int().optional(),
@@ -993,6 +1030,16 @@ export const NATSyncViewSchema = z.object({
   status: z.lazy(() => NATSyncStatusSchema).nullable().optional(),
 });
 export type NATSyncView = z.infer<typeof NATSyncViewSchema>;
+
+export const NATSyncWizardResultSchema = z.object({
+  candidateIp: z.string().optional(),
+  checks: z.array(z.lazy(() => NATSyncOutboundCheckSchema)),
+  enabled: z.boolean(),
+  message: z.string().optional(),
+  seenAt: z.number().int().optional(),
+  state: z.string(),
+});
+export type NATSyncWizardResult = z.infer<typeof NATSyncWizardResultSchema>;
 
 export const NewUUIDResponseSchema = z.object({
   uuid: z.string(),

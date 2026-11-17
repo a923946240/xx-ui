@@ -300,6 +300,9 @@ func (r *Remote) doRequest(ctx context.Context, method, path string, body any, s
 		clientCopy.CheckRedirect = stopNodeRedirect
 		client = &clientCopy
 		responseLimit = 16 << 10
+		if path == natPoolPath {
+			responseLimit = 96 << 10
+		}
 	}
 	resp, err := client.Do(req)
 	if err != nil {

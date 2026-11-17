@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,12 +13,16 @@ import (
 	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
 )
 
-const natSyncSettingKey = "natNodeSync"
+const (
+	natSyncSettingKey    = "natNodeSync"
+	natSyncWizardTimeout = 25 * time.Second
+)
 
 type NATSyncConfig struct {
 	Enabled        bool     `json:"enabled"`
 	RelayNodeID    int      `json:"relayNodeId"`
 	ReporterNodeID int      `json:"reporterNodeId"`
+	PoolEntryID    string   `json:"poolEntryId,omitempty"`
 	OutboundTags   []string `json:"outboundTags"`
 }
 
@@ -35,6 +40,22 @@ type NATSyncStatus struct {
 type NATSyncView struct {
 	Config NATSyncConfig  `json:"config"`
 	Status *NATSyncStatus `json:"status,omitempty"`
+}
+
+type NATSyncOutboundCheck struct {
+	Tag            string `json:"tag"`
+	Port           int64  `json:"port"`
+	CurrentAddress string `json:"currentAddress"`
+	State          string `json:"state"`
+}
+
+type NATSyncWizardResult struct {
+	State       string                 `json:"state"`
+	Enabled     bool                   `json:"enabled"`
+	CandidateIP string                 `json:"candidateIp,omitempty"`
+	SeenAt      int64                  `json:"seenAt,omitempty"`
+	Checks      []NATSyncOutboundCheck `json:"checks"`
+	Message     string                 `json:"message,omitempty"`
 }
 
 // NATSyncService coordinates the single panel-managed job and its settings.
@@ -84,6 +105,12 @@ func (s *NATSyncService) View() (NATSyncView, error) {
 }
 
 func validateNATNodeSelection(cfg NATSyncConfig) error {
+	if cfg.PoolEntryID != "" {
+		if cfg.RelayNodeID <= 0 || cfg.ReporterNodeID != 0 || !runtime.ValidNATPoolEntryID(cfg.PoolEntryID) {
+			return errors.New("select an entry from the receiving node's NAT address pool")
+		}
+		return nil
+	}
 	if cfg.RelayNodeID <= 0 || cfg.ReporterNodeID <= 0 || cfg.RelayNodeID == cfg.ReporterNodeID {
 		return errors.New("select two distinct NAT sync nodes")
 	}
@@ -110,6 +137,18 @@ func (s *NATSyncService) Test(ctx context.Context, cfg NATSyncConfig) (runtime.N
 	var report runtime.NATNodeReport
 	if err := validateNATNodeSelection(cfg); err != nil {
 		return report, err
+	}
+	if cfg.PoolEntryID != "" {
+		entries, err := ReadRemoteNATPool(ctx, cfg.RelayNodeID)
+		if err != nil {
+			return report, err
+		}
+		for _, entry := range entries {
+			if entry.ID == cfg.PoolEntryID && freshNATPoolEntry(entry, time.Now()) {
+				return runtime.NATNodeReport{CandidateIP: entry.CandidateIP, SeenAt: entry.SeenAt}, nil
+			}
+		}
+		return report, errors.New("the selected NAT report is unavailable or has expired")
 	}
 	relayNode, err := natSyncNode(cfg.RelayNodeID)
 	if err != nil {
@@ -157,6 +196,16 @@ func (s *NATSyncService) Test(ctx context.Context, cfg NATSyncConfig) (runtime.N
 }
 
 func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
+	if cfg.Enabled && cfg.PoolEntryID != "" {
+		result, err := s.Wizard(ctx, cfg)
+		if err != nil {
+			return err
+		}
+		if !result.Enabled {
+			return errors.New("NAT address pool check failed: " + result.State)
+		}
+		return nil
+	}
 	if cfg.OutboundTags == nil {
 		cfg.OutboundTags = []string{}
 	}
@@ -183,11 +232,18 @@ func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	return s.saveConfig(ctx, cfg)
+}
+
+func (s *NATSyncService) saveConfig(ctx context.Context, cfg NATSyncConfig) error {
 	data, err := json.Marshal(cfg)
 	if err != nil {
 		return err
 	}
-	if err := (&SettingService{}).saveSetting(natSyncSettingKey, string(data)); err != nil {
+	db := database.GetDB().WithContext(ctx)
+	err = db.Where(model.Setting{Key: natSyncSettingKey}).
+		Assign(map[string]any{"value": string(data)}).FirstOrCreate(&model.Setting{}).Error
+	if err != nil {
 		return errors.New("could not save NAT sync settings")
 	}
 
@@ -195,6 +251,84 @@ func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
 	s.status = nil
 	s.statusMu.Unlock()
 	return nil
+}
+
+func (s *NATSyncService) Wizard(ctx context.Context, cfg NATSyncConfig) (NATSyncWizardResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, natSyncWizardTimeout)
+	defer cancel()
+	result := NATSyncWizardResult{Checks: []NATSyncOutboundCheck{}}
+	if cfg.Enabled {
+		if !s.runMu.TryLock() {
+			return result, errors.New("another NAT sync operation is running; retry shortly")
+		}
+		defer s.runMu.Unlock()
+	}
+	if err := ctx.Err(); err != nil {
+		return result, err
+	}
+
+	report, err := s.Test(ctx, cfg)
+	if err != nil {
+		result.State, result.Message = "report_error", err.Error()
+		return result, nil
+	}
+	result.CandidateIP, result.SeenAt = report.CandidateIP, report.SeenAt
+	template, live, plan, err := loadNATSyncPlan(cfg.OutboundTags, report.CandidateIP)
+	if err != nil {
+		result.State, result.Message = "config_error", err.Error()
+		return result, nil
+	}
+	testURL, err := natSyncTestURL()
+	if err != nil {
+		result.State, result.Message = "config_error", err.Error()
+		return result, nil
+	}
+
+	result.State = "ready"
+	for _, probe := range plan.probes {
+		if err := ctx.Err(); err != nil {
+			return result, err
+		}
+		check := NATSyncOutboundCheck{
+			Tag: probe.tag, Port: probe.port, CurrentAddress: probe.currentAddress, State: "passed",
+		}
+		if err := waitForNATSyncProbe(ctx, func() error { return probeNATSyncOutbound(probe, testURL) }); err != nil {
+			check.State = "failed"
+			result.State = "probe_error"
+		}
+		result.Checks = append(result.Checks, check)
+		if ctx.Err() != nil {
+			result.Message = "NAT outbound verification timed out; retry the check"
+			return result, nil
+		}
+	}
+	if result.State != "ready" || !cfg.Enabled {
+		return result, nil
+	}
+
+	latest, err := s.Test(ctx, cfg)
+	if err != nil {
+		result.State, result.Message = "report_error", err.Error()
+		return result, nil
+	}
+	if latest.CandidateIP != report.CandidateIP {
+		result.State = "candidate_changed"
+		return result, nil
+	}
+	currentTemplate, err := (&XraySettingService{}).GetXrayConfigTemplate()
+	currentLive, liveErr := runningNATSyncOutbounds()
+	if err != nil || liveErr != nil || template != currentTemplate || !bytes.Equal(live, currentLive) {
+		result.State = "config_changed"
+		return result, nil
+	}
+	if err := ctx.Err(); err != nil {
+		return result, err
+	}
+	if err := s.saveConfig(ctx, cfg); err != nil {
+		return result, err
+	}
+	result.Enabled = true
+	return result, nil
 }
 
 // Run is scheduled by the panel. If the previous check is still running, skip this tick.

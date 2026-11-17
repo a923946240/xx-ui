@@ -19,11 +19,25 @@ import (
 type natSyncTestResponse struct {
 	Success bool
 	Obj     struct {
+		State  string
 		Config struct {
 			Enabled        bool
 			RelayNodeID    *int
 			ReporterNodeID *int
 		}
+	}
+}
+
+func TestNATSyncWizardLeavesSettingsUntouchedWhenNoReportIsAvailable(t *testing.T) {
+	request := natSyncTestAPI(t)
+	const body = `{"enabled":true,"relayNodeId":27,"reporterNodeId":31,"outboundTags":["tw"]}`
+	got := request(http.MethodPost, "/wizard", body)
+	if !got.Success || got.Obj.State != "report_error" {
+		t.Fatalf("missing report was not diagnosed: %+v", got)
+	}
+	view := request(http.MethodGet, "", "")
+	if !view.Success || view.Obj.Config.Enabled || *view.Obj.Config.RelayNodeID != 0 {
+		t.Fatalf("failed setup changed configuration: %+v", view)
 	}
 }
 

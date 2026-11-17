@@ -901,11 +901,43 @@ export interface NATNodeReport {
   seenAt: number;
 }
 
+export interface NATPoolEntry {
+  candidateIp: string;
+  id: string;
+  name: string;
+  seenAt: number;
+}
+
+export interface NATPoolReport {
+  name: string;
+  reporterId: string;
+}
+
+export interface NATReportingConfig {
+  enabled: boolean;
+  name: string;
+  relayNodeId: number;
+}
+
+export interface NATReportingView {
+  config: NATReportingConfig;
+  failed: boolean;
+  lastReport?: NATPoolEntry | null;
+}
+
 export interface NATSyncConfig {
   enabled: boolean;
   outboundTags: string[];
+  poolEntryId?: string;
   relayNodeId: number;
   reporterNodeId: number;
+}
+
+export interface NATSyncOutboundCheck {
+  currentAddress: string;
+  port: number;
+  state: string;
+  tag: string;
 }
 
 export interface NATSyncStatus {
@@ -922,6 +954,15 @@ export interface NATSyncStatus {
 export interface NATSyncView {
   config: NATSyncConfig;
   status?: NATSyncStatus | null;
+}
+
+export interface NATSyncWizardResult {
+  candidateIp?: string;
+  checks: NATSyncOutboundCheck[];
+  enabled: boolean;
+  message?: string;
+  seenAt?: number;
+  state: string;
 }
 
 export interface NewUUIDResponse {

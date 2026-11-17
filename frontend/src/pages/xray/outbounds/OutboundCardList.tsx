@@ -10,6 +10,7 @@ import {
   ThunderboltOutlined,
   LoadingOutlined,
   ExportOutlined,
+  SyncOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
@@ -47,6 +48,8 @@ interface OutboundCardListProps {
   onResetTraffic: (tag: string) => void;
   confirmDelete: (idx: number) => void;
   onTest: (index: number, mode: string) => void;
+  natSyncTags: string[];
+  onOpenNATWizard: (tag: string) => void;
 }
 
 export default function OutboundCardList({
@@ -59,6 +62,8 @@ export default function OutboundCardList({
   onResetTraffic,
   confirmDelete,
   onTest,
+  natSyncTags,
+  onOpenNATWizard,
 }: OutboundCardListProps) {
   const { t, i18n } = useTranslation();
   const [showEgressIp, setShowEgressIp] = useState<Record<string, boolean>>({});
@@ -163,6 +168,16 @@ export default function OutboundCardList({
               trigger={['click']}
               menu={{
                 items: [
+                  ...(record.tag && natSyncTags.includes(record.tag)
+                    ? [
+                        {
+                          key: 'nat-sync',
+                          icon: <SyncOutlined aria-hidden />,
+                          label: t('pages.xray.natSync.wizard.title'),
+                          onClick: () => onOpenNATWizard(record.tag!),
+                        },
+                      ]
+                    : []),
                   ...(index > 0
                     ? [
                         {

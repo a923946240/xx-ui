@@ -68,7 +68,7 @@ import { useOutboundColumns } from './useOutboundColumns';
 import OutboundCardList from './OutboundCardList';
 import SubscriptionOutbounds from './SubscriptionOutbounds';
 import LineWizard from './LineWizard';
-import NATSyncStatusButton from './NATSyncStatusButton';
+import NATSyncStatusButton, { NATSyncWizard } from './NATSyncStatusButton';
 import { dialerOf, lineCopySource, updateLineCopy } from './line-plan';
 
 const defaultOutboundSubscriptionUserAgent = 'xx-ui-outbound-sub/1.0';
@@ -171,6 +171,7 @@ export default function OutboundsTab({
   const [testMode, setTestMode] = useState<OutboundTestMode>('tcp');
   const [modalOpen, setModalOpen] = useState(false);
   const [lineWizardOpen, setLineWizardOpen] = useState(false);
+  const [natWizardTag, setNATWizardTag] = useState<string>();
   const [editingOutbound, setEditingOutbound] = useState<Record<string, unknown> | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [existingTags, setExistingTags] = useState<string[]>([]);
@@ -223,7 +224,10 @@ export default function OutboundsTab({
   const rowsRef = useRef<OutboundRow[]>([]);
   rowsRef.current = rows;
 
-  const natSyncTags = eligibleNATSyncTags(templateSettings?.outbounds);
+  const natSyncTags = useMemo(
+    () => eligibleNATSyncTags(templateSettings?.outbounds),
+    [templateSettings?.outbounds],
+  );
 
   const dialerProxyTags = useMemo(() => {
     const tags = new Set<string>();
@@ -617,6 +621,8 @@ export default function OutboundsTab({
     confirmDelete,
     onResetTraffic,
     onTest,
+    natSyncTags,
+    onOpenNATWizard: setNATWizardTag,
   });
 
   return (
@@ -730,6 +736,8 @@ export default function OutboundsTab({
             onResetTraffic={onResetTraffic}
             confirmDelete={confirmDelete}
             onTest={onTest}
+            natSyncTags={natSyncTags}
+            onOpenNATWizard={setNATWizardTag}
           />
         ) : (
           <Table
@@ -749,6 +757,13 @@ export default function OutboundsTab({
           />
         )}
 
+        {natWizardTag && (
+          <NATSyncWizard
+            outboundTags={natSyncTags}
+            initialTag={natWizardTag}
+            onClose={() => setNATWizardTag(undefined)}
+          />
+        )}
         {lineWizardOpen && templateSettings && (
           <LineWizard
             config={templateSettings}

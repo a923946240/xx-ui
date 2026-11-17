@@ -62,7 +62,7 @@ func startContractNode(t *testing.T) *nodeUnderContract {
 	}
 	n := &nodeUnderContract{}
 	n.srv = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/panel/api/nodes/nat/report" {
+		if r.URL.Path == "/panel/api/nodes/nat/report" || r.URL.Path == "/panel/api/nodes/nat/pool/report" {
 			// Keep the actual TLS request and production handler; represent a
 			// public NAT peer without connecting to a non-test network.
 			r.RemoteAddr = "8.8.4.4:54321"
@@ -353,6 +353,37 @@ func TestMasterNodeContract(t *testing.T) {
 					}
 					if report.CandidateIP != "8.8.4.4" || report.SeenAt <= 0 {
 						return fmt.Errorf("unexpected relay observation: %+v", report)
+					}
+					return nil
+				}, nil},
+				{"NAT address pool returns the direct peer reported by an authenticated node", []string{"NATPool"}, func() error {
+					body, err := json.Marshal(runtime.NATPoolReport{
+						ReporterID: "0cbdb040-4896-4c84-9047-baca1f432875",
+						Name:       "contract reporter",
+					})
+					if err != nil {
+						return err
+					}
+					req, err := http.NewRequestWithContext(ctx, http.MethodPost, node.srv.URL+"/panel/api/nodes/nat/pool/report", bytes.NewReader(body))
+					if err != nil {
+						return err
+					}
+					req.Header.Set("Authorization", "Bearer contract-"+scope)
+					req.Header.Set("Content-Type", "application/json")
+					resp, err := node.srv.Client().Do(req)
+					if err != nil {
+						return err
+					}
+					defer resp.Body.Close()
+					if resp.StatusCode != http.StatusOK {
+						return fmt.Errorf("NAT pool report status = %d, want 200", resp.StatusCode)
+					}
+					entries, err := master.NATPool(ctx)
+					if err != nil {
+						return err
+					}
+					if len(entries) != 1 || entries[0].CandidateIP != "8.8.4.4" || entries[0].Name != "contract reporter" {
+						return fmt.Errorf("unexpected NAT pool entries: %+v", entries)
 					}
 					return nil
 				}, nil},

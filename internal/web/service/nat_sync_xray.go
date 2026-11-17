@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/netip"
@@ -16,10 +17,10 @@ import (
 type natSyncOutbound = map[string]any
 
 type natSyncProbe struct {
-	tag    string
-	port   int64
-	target []byte
-	chain  []byte
+	tag            string
+	port           int64
+	currentAddress string
+	chain          []natSyncOutbound
 }
 
 type natSyncPlan struct {
@@ -217,7 +218,7 @@ func prepareNATSyncXray(template string, liveJSON []byte, tags []string, candida
 			plan.changed = true
 		}
 		nextEndpoint["address"] = candidate
-		plan.probes[i] = natSyncProbe{tag: tag, port: fixedPort}
+		plan.probes[i] = natSyncProbe{tag: tag, port: fixedPort, currentAddress: activeIP}
 	}
 	// Resolve all chains after substituting every selected address. A selected
 	// outbound may also appear upstream of another selected outbound.
@@ -226,15 +227,15 @@ func prepareNATSyncXray(template string, liveJSON []byte, tags []string, candida
 		if err != nil {
 			return nil, err
 		}
-		if !plan.changed {
-			continue
+		for _, hop := range chain {
+			tag, _ := hop["tag"].(string)
+			active, err := findNATSyncOutbound(live, tag)
+			if err != nil || active == nil || active["protocol"] != hop["protocol"] ||
+				natSyncDialer(active) != natSyncDialer(hop) {
+				return nil, errors.New("saved and running dialer chains differ; apply the Xray configuration first")
+			}
 		}
-		if plan.probes[i].target, err = json.Marshal([]natSyncOutbound{target}); err != nil {
-			return nil, errors.New("cannot encode candidate outbound")
-		}
-		if plan.probes[i].chain, err = json.Marshal(chain); err != nil {
-			return nil, errors.New("cannot encode candidate dialer chain")
-		}
+		plan.probes[i].chain = chain
 	}
 	if !plan.changed {
 		return plan, nil
@@ -272,19 +273,54 @@ func natSyncTestURL() (string, error) {
 	return testURL, nil
 }
 
-func runNATSyncXray(tags []string, candidate string, reread func() (string, error), status *NATSyncStatus) error {
-	status.State = "config_error"
-	status.CurrentIP = ""
-	settings := &XraySettingService{}
-	template, err := settings.GetXrayConfigTemplate()
+func loadNATSyncPlan(tags []string, candidate string) (string, []byte, *natSyncPlan, error) {
+	template, err := (&XraySettingService{}).GetXrayConfigTemplate()
 	if err != nil {
-		return errors.New("cannot load the saved Xray template")
+		return "", nil, nil, errors.New("cannot load the saved Xray template")
 	}
 	live, err := runningNATSyncOutbounds()
 	if err != nil {
-		return err
+		return "", nil, nil, err
 	}
 	plan, err := prepareNATSyncXray(template, live, tags, candidate)
+	return template, live, plan, err
+}
+
+func probeNATSyncOutbound(probe natSyncProbe, testURL string) error {
+	target, err := json.Marshal(probe.chain[:1])
+	if err != nil {
+		return errors.New("cannot encode candidate outbound")
+	}
+	chain, err := json.Marshal(probe.chain)
+	if err != nil {
+		return errors.New("cannot encode candidate dialer chain")
+	}
+	result, err := (&outbound.OutboundService{}).TestOutbounds(string(target), testURL, string(chain), "http")
+	if err != nil || len(result) != 1 || result[0] == nil || result[0].Tag != probe.tag ||
+		!result[0].Success || result[0].HTTPStatus < 200 || result[0].HTTPStatus >= 400 {
+		return errors.New("candidate outbound chain did not pass the HTTPS probe")
+	}
+	return nil
+}
+
+func waitForNATSyncProbe(ctx context.Context, probe func() error) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	done := make(chan error, 1)
+	go func() { done <- probe() }()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
+		return err
+	}
+}
+
+func runNATSyncXray(tags []string, candidate string, reread func() (string, error), status *NATSyncStatus) error {
+	status.State = "config_error"
+	status.CurrentIP = ""
+	template, live, plan, err := loadNATSyncPlan(tags, candidate)
 	if err != nil {
 		return err
 	}
@@ -302,13 +338,11 @@ func runNATSyncXray(tags []string, candidate string, reread func() (string, erro
 	status.ProbeIP = candidate
 	status.ProbeAt = time.Now().Unix()
 	status.ProbeResult = "failed"
-	tester := &outbound.OutboundService{}
 	for _, probe := range plan.probes {
-		result, err := tester.TestOutbounds(string(probe.target), testURL, string(probe.chain), "http")
+		err := probeNATSyncOutbound(probe, testURL)
 		status.ProbeAt = time.Now().Unix()
-		if err != nil || len(result) != 1 || result[0] == nil || result[0].Tag != probe.tag ||
-			!result[0].Success || result[0].HTTPStatus < 200 || result[0].HTTPStatus >= 400 {
-			return errors.New("candidate outbound chain did not pass the HTTPS probe")
+		if err != nil {
+			return err
 		}
 	}
 	status.ProbeResult = "passed"
@@ -331,6 +365,7 @@ func runNATSyncXray(tags []string, candidate string, reread func() (string, erro
 		return errors.New("running Xray outbounds changed during the probe")
 	}
 	core := &XrayService{}
+	settings := &XraySettingService{}
 	if err := settings.SaveXraySettingIfMatch(plan.template, XrayTemplateETag(template)); err != nil {
 		if errors.Is(err, ErrXrayTemplateChanged) {
 			return ErrXrayTemplateChanged

@@ -3907,6 +3907,87 @@
         ],
         "type": "object"
       },
+      "NATPoolEntry": {
+        "properties": {
+          "candidateIp": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "seenAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "candidateIp",
+          "id",
+          "name",
+          "seenAt"
+        ],
+        "type": "object"
+      },
+      "NATPoolReport": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reporterId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "reporterId"
+        ],
+        "type": "object"
+      },
+      "NATReportingConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "relayNodeId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "name",
+          "relayNodeId"
+        ],
+        "type": "object"
+      },
+      "NATReportingView": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/NATReportingConfig"
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "lastReport": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NATPoolEntry"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "config",
+          "failed"
+        ],
+        "type": "object"
+      },
       "NATSyncConfig": {
         "properties": {
           "enabled": {
@@ -3917,6 +3998,9 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "poolEntryId": {
+            "type": "string"
           },
           "relayNodeId": {
             "type": "integer"
@@ -3930,6 +4014,30 @@
           "outboundTags",
           "relayNodeId",
           "reporterNodeId"
+        ],
+        "type": "object"
+      },
+      "NATSyncOutboundCheck": {
+        "properties": {
+          "currentAddress": {
+            "type": "string"
+          },
+          "port": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentAddress",
+          "port",
+          "state",
+          "tag"
         ],
         "type": "object"
       },
@@ -3985,6 +4093,38 @@
         },
         "required": [
           "config"
+        ],
+        "type": "object"
+      },
+      "NATSyncWizardResult": {
+        "properties": {
+          "candidateIp": {
+            "type": "string"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/NATSyncOutboundCheck"
+            },
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "seenAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checks",
+          "enabled",
+          "state"
         ],
         "type": "object"
       },
@@ -12103,6 +12243,202 @@
         }
       }
     },
+    "/panel/api/nodes/nat/pool": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "List this panel’s fresh NAT address reports.",
+        "operationId": "get_panel_api_nodes_nat_pool",
+        "description": "Available to administrators, node-sync and node-admin tokens, and verified node mTLS. Entries expire two minutes after the last report.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NATPoolEntry"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "candidateIp": "",
+                      "id": "",
+                      "name": "",
+                      "seenAt": 0
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/nat/pool/report": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Report a NAT address to the receiving panel.",
+        "operationId": "post_panel_api_nodes_nat_pool_report",
+        "description": "Requires a node-sync, node-admin or admin bearer token, or verified node mTLS. The receiver records the public IPv4 of the direct HTTPS connection. Each reporting credential is associated with one panel identity.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATPoolReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATPoolEntry"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "candidateIp": "",
+                    "id": "",
+                    "name": "",
+                    "seenAt": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/nat/reporting": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Read this panel’s automatic NAT reporting settings.",
+        "operationId": "get_panel_api_nodes_nat_reporting",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATReportingView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "name": "",
+                      "relayNodeId": 0
+                    },
+                    "failed": false,
+                    "lastReport": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Start or stop reporting this panel’s public IPv4.",
+        "operationId": "post_panel_api_nodes_nat_reporting",
+        "description": "Requires an administrator session or admin API token. Starting sends one authenticated direct HTTPS report to the configured node before enabling periodic reports.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATReportingConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATReportingView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "name": "",
+                      "relayNodeId": 0
+                    },
+                    "failed": false,
+                    "lastReport": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/nodes/mtls/trustCA": {
       "post": {
         "tags": [
@@ -14952,6 +15288,7 @@
                       "outboundTags": [
                         ""
                       ],
+                      "poolEntryId": "",
                       "relayNodeId": 0,
                       "reporterNodeId": 0
                     },
@@ -14971,7 +15308,7 @@
         ],
         "summary": "Save or disable panel-managed NAT sync.",
         "operationId": "post_panel_api_xray_nat_sync_config",
-        "description": "Requires an administrator session or admin API token. Enabling validates the selected nodes, saved outbound tags and HTTPS test URL, then completes an observation before saving. A disabled draft can be saved without confirming relay connectivity.",
+        "description": "Requires an administrator session or admin API token. When an address-pool entry is selected, enabling requires a fresh report and successful proxy checks. The older two-node configuration is also accepted. Disabling needs no remote check.",
         "requestBody": {
           "required": true,
           "content": {
@@ -15017,6 +15354,7 @@
                       "outboundTags": [
                         ""
                       ],
+                      "poolEntryId": "",
                       "relayNodeId": 0,
                       "reporterNodeId": 0
                     },
@@ -15080,6 +15418,134 @@
                     "candidateIp": "",
                     "seenAt": 0
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync/wizard": {
+      "post": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "Check the reported IP against saved proxy outbounds and optionally enable sync.",
+        "operationId": "post_panel_api_xray_nat_sync_wizard",
+        "description": "Requires an administrator session or admin API token. Returns the observed IPv4 and per-outbound HTTPS checks using each existing port and dialer chain. With enabled=true, saves the schedule only after the checks and a fresh observation agree. Expected check failures are returned in the result state without changing the schedule or outbound address.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NATSyncConfig"
+              },
+              "example": {
+                "enabled": true,
+                "relayNodeId": 2,
+                "reporterNodeId": 0,
+                "poolEntryId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "outboundTags": [
+                  "dynamic-nat"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NATSyncWizardResult"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "candidateIp": "",
+                    "checks": [
+                      {
+                        "currentAddress": "",
+                        "port": 0,
+                        "state": "",
+                        "tag": ""
+                      }
+                    ],
+                    "enabled": false,
+                    "message": "",
+                    "seenAt": 0,
+                    "state": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/nat-sync/pool": {
+      "get": {
+        "tags": [
+          "Xray Settings"
+        ],
+        "summary": "List fresh reports from a configured receiving node.",
+        "operationId": "get_panel_api_xray_nat_sync_pool",
+        "description": "Requires an administrator session or admin API token. Select an entry ID as poolEntryId with reporterNodeId set to zero when configuring pool-based sync.",
+        "parameters": [
+          {
+            "name": "relayNodeId",
+            "in": "query",
+            "required": true,
+            "description": "Receiving node ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NATPoolEntry"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "candidateIp": "",
+                      "id": "",
+                      "name": "",
+                      "seenAt": 0
+                    }
+                  ]
                 }
               }
             }

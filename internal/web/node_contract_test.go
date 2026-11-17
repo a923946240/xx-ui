@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -323,8 +324,11 @@ func TestMasterNodeContract(t *testing.T) {
 					err = master.NATObserve(ctx, runtime.NATNodeObserveRequest{
 						RelayURL: "https://localhost/panel/api/nodes/nat/report", Challenge: challenge.Challenge,
 					})
-					if err == nil || err.Error() != "remote NAT sync request was rejected" {
-						return fmt.Errorf("reporter must reject a local relay address, got %v", err)
+					if err == nil {
+						return errors.New("reporter accepted a local relay address")
+					}
+					if err.Error() != "remote NAT sync request was rejected" {
+						return fmt.Errorf("reporter returned an unexpected rejection: %w", err)
 					}
 					body, err := json.Marshal(challenge)
 					if err != nil {

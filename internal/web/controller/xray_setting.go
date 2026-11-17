@@ -56,7 +56,6 @@ func (a *XraySettingController) initRouter(g *gin.RouterGroup) {
 	g.POST("/testOutbound", a.testOutbound)
 	g.POST("/testOutbounds", a.testOutbounds)
 	g.GET("/nat-sync", a.natSyncView)
-	g.POST("/nat-sync/key", a.natSyncKey)
 	g.POST("/nat-sync/config", a.natSyncSave)
 	g.POST("/nat-sync/test", a.natSyncTest)
 	g.POST("/balancerStatus", a.balancerStatus)
@@ -125,7 +124,7 @@ func (a *XraySettingController) getXraySetting(c *gin.Context) {
 		"outboundTestUrl":   outboundTestUrl,
 		"geodataSources":    service.StandardGeodataSources(),
 	}
-	if status := readNATSyncStatus(natSyncStatusPath); status != nil {
+	if status := service.PanelNATSync.Status(); status != nil {
 		xrayResponse["natSyncStatus"] = status
 	}
 	if tags, err := (&service.ExternalOutboundService{}).Tags(); err == nil {

@@ -10,7 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/a923946240/xx-ui/v3/internal/database"
 	"github.com/a923946240/xx-ui/v3/internal/database/dbtest"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
 	"github.com/a923946240/xx-ui/v3/internal/web/locale"
 )
 
@@ -18,11 +20,10 @@ type natSyncTestResponse struct {
 	Success bool
 	Obj     struct {
 		Config struct {
-			Enabled   bool
-			RelayHost string
-			RelayPort int
+			Enabled        bool
+			RelayNodeID    *int
+			ReporterNodeID *int
 		}
-		PublicKey string
 	}
 }
 
@@ -47,9 +48,6 @@ func natSyncTestAPI(t *testing.T) func(method, path, body string) natSyncTestRes
 		if response.Code != http.StatusOK {
 			t.Fatalf("NAT sync %s %s status = %d", method, path, response.Code)
 		}
-		if strings.Contains(response.Body.String(), "PRIVATE KEY") {
-			t.Fatal("NAT sync response exposed a private key")
-		}
 		var got natSyncTestResponse
 		if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 			t.Fatal(err)
@@ -58,36 +56,36 @@ func natSyncTestAPI(t *testing.T) func(method, path, body string) natSyncTestRes
 	}
 }
 
-func TestNATSyncStartsDisabledWithoutGeneratingKeys(t *testing.T) {
+func TestNATSyncDoesNotActivateOldSSHConfiguration(t *testing.T) {
 	request := natSyncTestAPI(t)
+	legacy := model.Setting{
+		Key: "natSSHSync", Value: `{"enabled":true,"relayHost":"example.com","outboundTags":["tw"]}`,
+	}
+	if err := database.GetDB().Create(&legacy).Error; err != nil {
+		t.Fatal(err)
+	}
 	got := request(http.MethodGet, "", "")
-	if !got.Success || got.Obj.Config.Enabled || got.Obj.Config.RelayPort != 22 || got.Obj.PublicKey != "" {
-		t.Fatalf("unexpected initial NAT sync view: %+v", got)
+	cfg := got.Obj.Config
+	if !got.Success || cfg.Enabled || cfg.RelayNodeID == nil || cfg.ReporterNodeID == nil ||
+		*cfg.RelayNodeID != 0 || *cfg.ReporterNodeID != 0 {
+		t.Fatalf("unexpected initial NAT node sync view: %+v", got)
 	}
 }
 
-func TestNATSyncSavesDisabledDraftAndRejectsInvalidEnable(t *testing.T) {
+func TestNATSyncSavesDisabledDraftAndRejectsDuplicateNodes(t *testing.T) {
 	request := natSyncTestAPI(t)
-	saved := request(http.MethodPost, "/config", `{"relayHost":"relay.example","relayPort":2222}`)
-	if !saved.Success || saved.Obj.Config.Enabled || saved.Obj.Config.RelayHost != "relay.example" {
+	saved := request(http.MethodPost, "/config", `{"relayNodeId":27,"reporterNodeId":31}`)
+	if !saved.Success || saved.Obj.Config.Enabled || saved.Obj.Config.RelayNodeID == nil ||
+		*saved.Obj.Config.RelayNodeID != 27 || saved.Obj.Config.ReporterNodeID == nil ||
+		*saved.Obj.Config.ReporterNodeID != 31 {
 		t.Fatalf("disabled configuration failed: %+v", saved)
 	}
-	enabled := request(http.MethodPost, "/config", `{"enabled":true,"relayHost":"another.example","relayPort":2222}`)
+	enabled := request(http.MethodPost, "/config", `{"enabled":true,"relayNodeId":27,"reporterNodeId":27}`)
 	if enabled.Success {
-		t.Fatal("configuration was enabled without SSH host verification or outbound tags")
+		t.Fatal("configuration was enabled with equal relay and reporter")
 	}
 	got := request(http.MethodGet, "", "")
-	if !got.Success || got.Obj.Config != saved.Obj.Config {
+	if !got.Success || got.Obj.Config.Enabled || *got.Obj.Config.ReporterNodeID != 31 {
 		t.Fatalf("failed enable changed existing configuration: %+v", got)
-	}
-}
-
-func TestNATSyncKeyGenerationIsIdempotent(t *testing.T) {
-	request := natSyncTestAPI(t)
-	first := request(http.MethodPost, "/key", "")
-	second := request(http.MethodPost, "/key", "")
-	if !first.Success || !second.Success || !strings.HasPrefix(first.Obj.PublicKey, "ssh-ed25519 ") ||
-		first.Obj.PublicKey != second.Obj.PublicKey {
-		t.Fatal("NAT sync did not return the same Ed25519 public key")
 	}
 }

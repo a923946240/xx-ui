@@ -211,6 +211,12 @@ func (r *Remote) baseURL() (string, error) {
 }
 
 func (r *Remote) do(ctx context.Context, method, path string, body any) (*envelope, error) {
+	return r.doRequest(ctx, method, path, body, false)
+}
+
+func stopNodeRedirect(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }
+
+func (r *Remote) doRequest(ctx context.Context, method, path string, body any, strict bool) (*envelope, error) {
 	// mtls nodes authenticate via the client certificate, so a bearer token is
 	// optional for them; every other mode still requires one.
 	if r.node.ApiToken == "" && r.node.TlsVerifyMode != "mtls" {
@@ -287,6 +293,14 @@ func (r *Remote) do(ctx context.Context, method, path string, body any) (*envelo
 	if err != nil {
 		return nil, err
 	}
+	responseLimit := int64(maxRemoteResponseBytes)
+	if strict {
+		// The NAT RPCs carry one-time credentials and tiny envelopes.
+		clientCopy := *client
+		clientCopy.CheckRedirect = stopNodeRedirect
+		client = &clientCopy
+		responseLimit = 16 << 10
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("%s %s: %w", method, path, err)
@@ -298,6 +312,9 @@ func (r *Remote) do(ctx context.Context, method, path string, body any) (*envelo
 	// body is never used beyond a short diagnostic, so don't let a node force us
 	// to buffer a large body just to return an HTTP error.
 	if resp.StatusCode != http.StatusOK {
+		if strict {
+			return nil, fmt.Errorf("%s %s: HTTP %d", method, path, resp.StatusCode)
+		}
 		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, errBodyDiagBytes))
 		if msg := bytes.TrimSpace(snippet); len(msg) > 0 {
 			// %q quotes/escapes the untrusted node body so control characters or
@@ -310,14 +327,14 @@ func (r *Remote) do(ctx context.Context, method, path string, body any) (*envelo
 	// Fast-fail on an honestly-declared oversize body; the LimitReader below is
 	// the real guard since Content-Length is untrusted, may be absent, or is -1
 	// under transparent decompression.
-	if resp.ContentLength > maxRemoteResponseBytes {
-		return nil, fmt.Errorf("%s %s: %w (content-length %d, cap %d)", method, path, errRemoteResponseTooLarge, resp.ContentLength, maxRemoteResponseBytes)
+	if resp.ContentLength > responseLimit {
+		return nil, fmt.Errorf("%s %s: %w (content-length %d, cap %d)", method, path, errRemoteResponseTooLarge, resp.ContentLength, responseLimit)
 	}
 
-	raw, err := readCappedBody(resp.Body, maxRemoteResponseBytes)
+	raw, err := readCappedBody(resp.Body, responseLimit)
 	if err != nil {
 		if errors.Is(err, errRemoteResponseTooLarge) {
-			return nil, fmt.Errorf("%s %s: %w (cap %d bytes)", method, path, err, maxRemoteResponseBytes)
+			return nil, fmt.Errorf("%s %s: %w (cap %d bytes)", method, path, err, responseLimit)
 		}
 		return nil, fmt.Errorf("read body: %w", err)
 	}
@@ -327,6 +344,9 @@ func (r *Remote) do(ctx context.Context, method, path string, body any) (*envelo
 		return nil, fmt.Errorf("decode envelope: %w", err)
 	}
 	if !env.Success {
+		if strict {
+			return nil, errors.New("remote NAT sync request was rejected")
+		}
 		return &env, &remoteAPIError{msg: env.Msg}
 	}
 	return &env, nil

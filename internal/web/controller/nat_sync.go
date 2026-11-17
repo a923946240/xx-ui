@@ -10,11 +10,7 @@ import (
 )
 
 func (a *XraySettingController) natSyncView(c *gin.Context) {
-	writeNATSyncView(c, false)
-}
-
-func (a *XraySettingController) natSyncKey(c *gin.Context) {
-	writeNATSyncView(c, true)
+	writeNATSyncView(c)
 }
 
 func (a *XraySettingController) natSyncSave(c *gin.Context) {
@@ -26,7 +22,7 @@ func (a *XraySettingController) natSyncSave(c *gin.Context) {
 		jsonObj(c, nil, err)
 		return
 	}
-	writeNATSyncView(c, false)
+	writeNATSyncView(c)
 }
 
 func (a *XraySettingController) natSyncTest(c *gin.Context) {
@@ -48,11 +44,7 @@ func bindNATSyncConfig(c *gin.Context) (service.NATSyncConfig, bool) {
 	return cfg, true
 }
 
-func writeNATSyncView(c *gin.Context, createKey bool) {
-	view, err := service.PanelNATSync.View(createKey)
-	if err == nil && !view.Config.Enabled {
-		view.Status = readNATSyncStatus(natSyncStatusPath)
-		view.LegacyStatus = view.Status != nil
-	}
+func writeNATSyncView(c *gin.Context) {
+	view, err := service.PanelNATSync.View()
 	jsonObj(c, view, err)
 }

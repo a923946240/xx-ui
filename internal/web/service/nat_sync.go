@@ -4,27 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/a923946240/xx-ui/v3/internal/database"
+	"github.com/a923946240/xx-ui/v3/internal/database/model"
+	"github.com/a923946240/xx-ui/v3/internal/web/runtime"
 )
 
-const natSyncSettingKey = "natSSHSync"
+const natSyncSettingKey = "natNodeSync"
 
 type NATSyncConfig struct {
-	Enabled            bool     `json:"enabled"`
-	RelayHost          string   `json:"relayHost"`
-	RelayPort          int      `json:"relayPort"`
-	RelayUser          string   `json:"relayUser"`
-	HostKeyFingerprint string   `json:"hostKeyFingerprint"`
-	OutboundTags       []string `json:"outboundTags"`
-}
-
-type NATSyncReport struct {
-	CandidateIP string `json:"candidateIp"`
-	SeenAt      int64  `json:"seenAt,omitempty"`
+	Enabled        bool     `json:"enabled"`
+	RelayNodeID    int      `json:"relayNodeId"`
+	ReporterNodeID int      `json:"reporterNodeId"`
+	OutboundTags   []string `json:"outboundTags"`
 }
 
 type NATSyncStatus struct {
@@ -39,10 +33,8 @@ type NATSyncStatus struct {
 }
 
 type NATSyncView struct {
-	Config       NATSyncConfig  `json:"config"`
-	PublicKey    string         `json:"publicKey,omitempty"`
-	Status       *NATSyncStatus `json:"status,omitempty"`
-	LegacyStatus bool           `json:"legacyStatus,omitempty"`
+	Config NATSyncConfig  `json:"config"`
+	Status *NATSyncStatus `json:"status,omitempty"`
 }
 
 // NATSyncService coordinates the single panel-managed job and its settings.
@@ -55,7 +47,7 @@ type NATSyncService struct {
 var PanelNATSync NATSyncService
 
 func loadNATSyncConfig() (NATSyncConfig, error) {
-	cfg := NATSyncConfig{RelayPort: 22, RelayUser: "nat-sync", OutboundTags: []string{}}
+	cfg := NATSyncConfig{OutboundTags: []string{}}
 	setting, err := (&SettingService{}).getSetting(natSyncSettingKey)
 	if database.IsNotFound(err) {
 		return cfg, nil
@@ -69,41 +61,105 @@ func loadNATSyncConfig() (NATSyncConfig, error) {
 	return cfg, nil
 }
 
-func (s *NATSyncService) View(createKey bool) (NATSyncView, error) {
+func (s *NATSyncService) Status() *NATSyncStatus {
+	s.statusMu.Lock()
+	defer s.statusMu.Unlock()
+	if s.status == nil {
+		return nil
+	}
+	status := *s.status
+	return &status
+}
+
+func (s *NATSyncService) View() (NATSyncView, error) {
 	cfg, err := loadNATSyncConfig()
 	if err != nil {
 		return NATSyncView{}, err
 	}
-	key, err := natSyncPublicKey(createKey)
-	if err != nil {
-		return NATSyncView{}, err
-	}
-	s.statusMu.Lock()
-	defer s.statusMu.Unlock()
-	view := NATSyncView{Config: cfg, PublicKey: key}
-	if cfg.Enabled && s.status != nil {
-		status := *s.status
-		view.Status = &status
+	view := NATSyncView{Config: cfg}
+	if cfg.Enabled {
+		view.Status = s.Status()
 	}
 	return view, nil
 }
 
-func (s *NATSyncService) Test(ctx context.Context, cfg NATSyncConfig) (NATSyncReport, error) {
-	return readNATSyncRelay(ctx, normalizeNATSyncConfig(cfg))
+func validateNATNodeSelection(cfg NATSyncConfig) error {
+	if cfg.RelayNodeID <= 0 || cfg.ReporterNodeID <= 0 || cfg.RelayNodeID == cfg.ReporterNodeID {
+		return errors.New("select two distinct NAT sync nodes")
+	}
+	return nil
 }
 
-func normalizeNATSyncConfig(cfg NATSyncConfig) NATSyncConfig {
-	cfg.RelayHost = strings.TrimSpace(cfg.RelayHost)
-	cfg.RelayUser = strings.TrimSpace(cfg.RelayUser)
-	cfg.HostKeyFingerprint = strings.TrimSpace(cfg.HostKeyFingerprint)
-	if cfg.OutboundTags == nil {
-		cfg.OutboundTags = []string{}
+func natSyncNode(id int) (*model.Node, error) {
+	node, err := (&NodeService{}).GetById(id)
+	if err != nil || !node.Enable {
+		return nil, errors.New("select an enabled NAT sync node")
 	}
-	return cfg
+	if node.Scheme != "" && node.Scheme != "https" {
+		return nil, errors.New("NAT sync nodes require HTTPS with certificate verification")
+	}
+	switch node.TlsVerifyMode {
+	case "", "verify", "pin", "mtls":
+		return node, nil
+	default:
+		return nil, errors.New("invalid NAT sync node certificate verification mode")
+	}
+}
+
+func (s *NATSyncService) Test(ctx context.Context, cfg NATSyncConfig) (runtime.NATNodeReport, error) {
+	var report runtime.NATNodeReport
+	if err := validateNATNodeSelection(cfg); err != nil {
+		return report, err
+	}
+	relayNode, err := natSyncNode(cfg.RelayNodeID)
+	if err != nil {
+		return report, err
+	}
+	reporterNode, err := natSyncNode(cfg.ReporterNodeID)
+	if err != nil {
+		return report, err
+	}
+	if relayNode.Guid != "" && relayNode.Guid == reporterNode.Guid {
+		return report, errors.New("the relay and reporter resolve to the same xx-ui node")
+	}
+
+	manager := runtime.GetManager()
+	if manager == nil {
+		return report, errors.New("the node connection manager is unavailable")
+	}
+	relay, err := manager.RemoteFor(relayNode)
+	if err != nil {
+		return report, errors.New("cannot load the NAT relay node connection")
+	}
+	reporter, err := manager.RemoteFor(reporterNode)
+	if err != nil {
+		return report, errors.New("cannot load the NAT reporter node connection")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	challenge, err := relay.NATChallenge(ctx)
+	if err != nil {
+		return report, errors.New("NAT relay node could not issue a challenge; check its panel version and node permissions")
+	}
+	target, err := relay.NATObservationTarget(challenge.Challenge)
+	if err != nil {
+		return report, errors.New("NAT relay requires a public HTTPS endpoint with a trusted certificate")
+	}
+	if err := reporter.NATObserve(ctx, target); err != nil {
+		return report, errors.New("NAT reporter could not reach the relay directly over IPv4 HTTPS; check both node versions and permissions")
+	}
+	report, err = relay.NATResult(ctx, challenge)
+	if err != nil || !natSyncIPv4(report.CandidateIP) || report.SeenAt <= 0 {
+		return runtime.NATNodeReport{}, errors.New("NAT relay did not confirm a public IPv4 report")
+	}
+	return report, nil
 }
 
 func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
-	cfg = normalizeNATSyncConfig(cfg)
+	if cfg.OutboundTags == nil {
+		cfg.OutboundTags = []string{}
+	}
 	s.runMu.Lock()
 	defer s.runMu.Unlock()
 	if err := ctx.Err(); err != nil {
@@ -111,7 +167,7 @@ func (s *NATSyncService) Save(ctx context.Context, cfg NATSyncConfig) error {
 	}
 
 	if cfg.Enabled {
-		if err := validateNATSyncRelay(cfg); err != nil {
+		if err := validateNATNodeSelection(cfg); err != nil {
 			return err
 		}
 		if err := validateNATSyncTags(cfg.OutboundTags); err != nil {
@@ -151,12 +207,10 @@ func (s *NATSyncService) Run(ctx context.Context) {
 	if err != nil || !cfg.Enabled || ctx.Err() != nil {
 		return
 	}
-	s.statusMu.Lock()
 	var status NATSyncStatus
-	if s.status != nil {
-		status = *s.status
+	if previous := s.Status(); previous != nil {
+		status = *previous
 	}
-	s.statusMu.Unlock()
 	defer func() {
 		status.UpdatedAt = time.Now().Unix()
 		s.statusMu.Lock()
@@ -164,14 +218,14 @@ func (s *NATSyncService) Run(ctx context.Context) {
 		s.statusMu.Unlock()
 	}()
 
-	report, err := readNATSyncRelay(ctx, cfg)
+	report, err := s.Test(ctx, cfg)
 	if err != nil {
 		status.State = "relay_error"
 		return
 	}
 	status.CandidateIP = report.CandidateIP
 	_ = runNATSyncXray(cfg.OutboundTags, report.CandidateIP, func() (string, error) {
-		report, err := readNATSyncRelay(ctx, cfg)
+		report, err := s.Test(ctx, cfg)
 		return report.CandidateIP, err
 	}, &status)
 }
